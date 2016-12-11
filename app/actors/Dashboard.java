@@ -1,0 +1,41 @@
+package actors;
+
+/**
+ * Created by vasek on 11. 12. 2016.
+ */
+public class Dashboard {
+
+    private String name;
+
+    public Dashboard(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public static final class IncrementItem {
+        public String item;
+
+        public IncrementItem(String item) {
+            this.item = item;
+        }
+    }
+
+    public static final class DecrementItem {
+        public String item;
+
+        public DecrementItem(String item) {
+            this.item = item;
+        }
+    }
+
+    public static final class AddItem {
+        public String item;
+
+        public AddItem(String item) {
+            this.item = item;
+        }
+    }
+}

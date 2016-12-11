@@ -31,10 +31,12 @@ public class UserActor extends UntypedActor {
     private ActorRef out;
     private Configuration configuration;
     private ActorRef stocksActor;
+    private ActorRef dashboardActor;
 
     @Inject
     public UserActor(@Assisted ActorRef out,
                      @Named("stocksActor") ActorRef stocksActor,
+                     @Named("dashboardActor") ActorRef dashboardActor,
                      Configuration configuration) {
         this.out = out;
         this.stocksActor = stocksActor;
