@@ -93,6 +93,37 @@ public class UserActor extends UntypedActor {
             out.tell(message, self());
         }
 
+        if (msg instanceof Dashboard.AddItem) {
+            Dashboard.AddItem addItem = (Dashboard.AddItem) msg;
+            ObjectNode message =
+                    Json.newObject()
+                        .put("type", "additem")
+                        .put("item", addItem.item);
+            out.tell(message, self());
+        }
+
+        if (msg instanceof Dashboard.DecrementItem) {
+            Dashboard.DecrementItem decrementItem = (Dashboard.DecrementItem) msg;
+            ObjectNode message =
+                    Json.newObject()
+                            .put("type", "decrementitem")
+                            .put("item", decrementItem.item);
+            out.tell(message, self());
+        }
+
+        if (msg instanceof Dashboard.IncrementItem) {
+            Dashboard.IncrementItem incrementItem = (Dashboard.IncrementItem) msg;
+            ObjectNode message =
+                    Json.newObject()
+                            .put("type", "incrementitem")
+                            .put("item", incrementItem.item);
+            out.tell(message, self());
+        }
+
+
+
+
+
         if (msg instanceof JsonNode) {
             // When the user types in a stock in the upper right corner, this is triggered
             JsonNode json = (JsonNode) msg;
