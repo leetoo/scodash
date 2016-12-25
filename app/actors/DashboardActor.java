@@ -1,8 +1,10 @@
 package actors;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
+import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 
 /**
@@ -10,7 +12,8 @@ import akka.actor.UntypedActor;
  */
 public class DashboardActor extends UntypedActor {
 
-    private Map<String, Item> items = new HashMap<>();
+    private final Map<String, Item> items = new HashMap<>();
+    private final HashSet<ActorRef> watchers = new HashSet<ActorRef>();
 
     @Override
     public void onReceive(Object message) throws Throwable {
@@ -34,6 +37,15 @@ public class DashboardActor extends UntypedActor {
             if (item != null) {
                 item.decrement();
             }
+        }
+
+        if (message instanceof Dashboard.Watch) {
+            self().tell(items, self());
+            watchers.add(sender());
+        }
+
+        if (message instanceof Dashboard.Unwatch) {
+            watchers.remove(sender());
         }
 
 

@@ -4,21 +4,20 @@ package actors;
  * Created by vasek on 19. 11. 2016.
  */
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.inject.assistedinject.Assisted;
+
 import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.inject.assistedinject.Assisted;
 import play.Configuration;
 import play.libs.Json;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.List;
 
 /**
  * The broker between the WebSocket and the StockActor(s).  The UserActor holds the connection and sends serialized
@@ -30,16 +29,17 @@ public class UserActor extends UntypedActor {
 
     private ActorRef out;
     private Configuration configuration;
-    private ActorRef stocksActor;
+    //private ActorRef stocksActor;
     private ActorRef dashboardActor;
 
     @Inject
     public UserActor(@Assisted ActorRef out,
-                     @Named("stocksActor") ActorRef stocksActor,
+                     /*@Named("stocksActor") ActorRef stocksActor,*/
                      @Named("dashboardActor") ActorRef dashboardActor,
                      Configuration configuration) {
         this.out = out;
-        this.stocksActor = stocksActor;
+        this.dashboardActor = dashboardActor;
+//        this.stocksActor = stocksActor;
         this.configuration = configuration;
     }
 
@@ -47,51 +47,53 @@ public class UserActor extends UntypedActor {
     public void preStart() throws Exception {
         super.preStart();
 
-        configureDefaultStocks();
+//        configureDefaultStocks();
+
+        dashboardActor.tell(new Dashboard.Watch(), self());
     }
 
-    public void configureDefaultStocks() {
-        List<String> defaultStocks = configuration.getStringList("default.stocks");
-        logger.info("Creating user actor with default stocks {}", defaultStocks);
-
-        for (String stockSymbol : defaultStocks) {
-            stocksActor.tell(new Stock.Watch(stockSymbol), self());
-        }
-    }
+//    public void configureDefaultStocks() {
+//        List<String> defaultStocks = configuration.getStringList("default.stocks");
+//        logger.info("Creating user actor with default stocks {}", defaultStocks);
+//
+//        for (String stockSymbol : defaultStocks) {
+//            stocksActor.tell(new Stock.Watch(stockSymbol), self());
+//        }
+//    }
 
     public void onReceive(Object msg) throws Exception {
 
-        if (msg instanceof Stock.Update) {
-            Stock.Update stockUpdate = (Stock.Update) msg;
-            // push the stock to the client
-            JsonNode message =
-                    Json.newObject()
-                            .put("type", "stockupdate")
-                            .put("symbol", stockUpdate.symbol)
-                            .put("price", stockUpdate.price);
-
-            logger.debug("onReceive: " + message);
-
-            out.tell(message, self());
-        }
-
-        if (msg instanceof Stock.History) {
-            Stock.History stockHistory = (Stock.History) msg;
-            // push the history to the client
-            ObjectNode message =
-                    Json.newObject()
-                            .put("type", "stockhistory")
-                            .put("symbol", stockHistory.symbol);
-
-            ArrayNode historyJson = message.putArray("history");
-            for (Double price : stockHistory.history) {
-                historyJson.add(price);
-            }
-
-            logger.debug("onReceive: " + message);
-
-            out.tell(message, self());
-        }
+//        if (msg instanceof Stock.Update) {
+//            Stock.Update stockUpdate = (Stock.Update) msg;
+//            // push the stock to the client
+//            JsonNode message =
+//                    Json.newObject()
+//                            .put("type", "stockupdate")
+//                            .put("symbol", stockUpdate.symbol)
+//                            .put("price", stockUpdate.price);
+//
+//            logger.debug("onReceive: " + message);
+//
+//            out.tell(message, self());
+//        }
+//
+//        if (msg instanceof Stock.History) {
+//            Stock.History stockHistory = (Stock.History) msg;
+//            // push the history to the client
+//            ObjectNode message =
+//                    Json.newObject()
+//                            .put("type", "stockhistory")
+//                            .put("symbol", stockHistory.symbol);
+//
+//            ArrayNode historyJson = message.putArray("history");
+//            for (Double price : stockHistory.history) {
+//                historyJson.add(price);
+//            }
+//
+//            logger.debug("onReceive: " + message);
+//
+//            out.tell(message, self());
+//        }
 
         if (msg instanceof Dashboard.AddItem) {
             Dashboard.AddItem addItem = (Dashboard.AddItem) msg;
@@ -99,6 +101,7 @@ public class UserActor extends UntypedActor {
                     Json.newObject()
                         .put("type", "additem")
                         .put("item", addItem.item);
+            logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
 
@@ -108,6 +111,7 @@ public class UserActor extends UntypedActor {
                     Json.newObject()
                             .put("type", "decrementitem")
                             .put("item", decrementItem.item);
+            logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
 
@@ -117,18 +121,22 @@ public class UserActor extends UntypedActor {
                     Json.newObject()
                             .put("type", "incrementitem")
                             .put("item", incrementItem.item);
+            logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
 
-
-
-
+//        if (msg instanceof Dashboard.Data) {
+//            Dashboard.Data data = (Dashboard.Data)msg;
+//            out.tell(data, self());
+//        }
 
         if (msg instanceof JsonNode) {
+            // From browser
             // When the user types in a stock in the upper right corner, this is triggered
             JsonNode json = (JsonNode) msg;
-            final String symbol = json.get("symbol").textValue();
-            stocksActor.tell(new Stock.Watch(symbol), self());
+            logger.debug("onReceive: " + msg);
+            //final String symbol = json.get("symbol").textValue();
+            //stocksActor.tell(new Stock.Watch(symbol), self());
         }
     }
 

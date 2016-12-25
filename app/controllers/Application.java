@@ -1,5 +1,19 @@
 package controllers;
 
+import static akka.pattern.Patterns.ask;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import actors.Stock;
 import actors.UserParentActor;
 import akka.NotUsed;
@@ -10,21 +24,10 @@ import akka.japi.Pair;
 import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
 import play.libs.F;
 import play.mvc.*;
 import scala.compat.java8.FutureConverters;
 import views.html.index;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
-import static akka.pattern.Patterns.ask;
 
 
 @Singleton
@@ -32,7 +35,7 @@ public class Application extends Controller {
 
     private Logger logger = org.slf4j.LoggerFactory.getLogger("controllers.Application");
 
-    private ActorRef stocksActor;
+    private ActorRef dashboardActor;
     private ActorRef userParentActor;
     private Materializer materializer;
     private ActorSystem actorSystem;
@@ -41,9 +44,9 @@ public class Application extends Controller {
     @Inject
     public Application(ActorSystem actorSystem,
                           Materializer materializer,
-                          @Named("stocksActor") ActorRef stocksActor,
+                          @Named("dashboardActor") ActorRef dashboardActor,
                           @Named("userParentActor") ActorRef userParentActor) {
-        this.stocksActor = stocksActor;
+        this.dashboardActor = dashboardActor;
         this.userParentActor = userParentActor;
         this.materializer = materializer;
         this.actorSystem = actorSystem;
@@ -130,7 +133,7 @@ public class Application extends Controller {
         return flow.watchTermination((ignore, termination) -> {
             termination.whenComplete((done, throwable) -> {
                 logger.info("Terminating actor {}", userActor);
-                stocksActor.tell(new Stock.Unwatch(null), userActor);
+                dashboardActor.tell(new Stock.Unwatch(null), userActor);
                 actorSystem.stop(userActor);
             });
 

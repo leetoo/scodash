@@ -15,6 +15,22 @@ public class Dashboard {
         return name;
     }
 
+    public static final class Watch {
+
+    }
+
+    public static final class Unwatch {
+
+    }
+
+//    public static final class Data {
+//        public Map<String, Item> items = new HashMap<>();
+//
+//        public Data(Map<String, Item> items) {
+//            this.items = items;
+//        }
+//    }
+
     public static final class IncrementItem {
         public String item;
 
