@@ -1,5 +1,8 @@
 package actors;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by vasek on 11. 12. 2016.
  */
@@ -23,13 +26,13 @@ public class Dashboard {
 
     }
 
-//    public static final class Data {
-//        public Map<String, Item> items = new HashMap<>();
-//
-//        public Data(Map<String, Item> items) {
-//            this.items = items;
-//        }
-//    }
+    public static final class Data {
+        public Map<String, Item> items = new HashMap<>();
+
+        public Data(Map<String, Item> items) {
+            this.items = items;
+        }
+    }
 
     public static final class IncrementItem {
         public String item;

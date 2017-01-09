@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.assistedinject.Assisted;
 
@@ -125,10 +126,18 @@ public class UserActor extends UntypedActor {
             out.tell(message, self());
         }
 
-//        if (msg instanceof Dashboard.Data) {
-//            Dashboard.Data data = (Dashboard.Data)msg;
-//            out.tell(data, self());
-//        }
+        if (msg instanceof Dashboard.Data) {
+            Dashboard.Data data = (Dashboard.Data)msg;
+            ArrayNode items = Json.newArray();
+            for (Item item : data.items.values()) {
+                items.addObject().put("name", item.getName()).put("score", item.getScore());
+            }
+
+            ObjectNode message = Json.newObject();
+            message.set("type", Json.toJson("data"));
+            message.set("items", items);
+            out.tell(message, self());
+        }
 
         if (msg instanceof JsonNode) {
             // From browser

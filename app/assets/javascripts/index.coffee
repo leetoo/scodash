@@ -3,6 +3,16 @@ $ ->
   ws.onmessage = (event) ->
     message = JSON.parse event.data
     console.log message.type
+    switch message.type
+      when "data"
+        console.log('Dashboard update:' + message.items)
+        updateDashboard(message)
+
+updateDashboard = (message) ->
+  for item in message.items
+    $("#dashboard").append(($("<h4>").text(item.name)))
+
+
 #    switch message.type
 #      when "stockhistory"
 #        populateStockHistory(message)

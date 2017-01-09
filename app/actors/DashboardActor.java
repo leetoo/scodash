@@ -16,6 +16,13 @@ public class DashboardActor extends UntypedActor {
     private final HashSet<ActorRef> watchers = new HashSet<ActorRef>();
 
     @Override
+    public void preStart() throws Exception {
+        super.preStart();
+        Item item = new Item("AAA", 5);
+        items.put(item.getName(), item);
+    }
+
+    @Override
     public void onReceive(Object message) throws Throwable {
 
         if (message instanceof Dashboard.AddItem) {
@@ -40,7 +47,8 @@ public class DashboardActor extends UntypedActor {
         }
 
         if (message instanceof Dashboard.Watch) {
-            self().tell(items, self());
+            Dashboard.Data data = new Dashboard.Data(items);
+            sender().tell(data, self());
             watchers.add(sender());
         }
 
