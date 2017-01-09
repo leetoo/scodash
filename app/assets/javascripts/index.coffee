@@ -10,7 +10,12 @@ $ ->
 
 updateDashboard = (message) ->
   for item in message.items
-    $("#dashboard").append(($("<h4>").text(item.name)))
+
+    graph = ''
+    for i in [1 .. item.score]
+      graph = graph + 'I'
+    name = $("<h4>").text(item.name)
+    $("#dashboard").append((name))
 
 
 #    switch message.type
