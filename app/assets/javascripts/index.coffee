@@ -8,14 +8,25 @@ $ ->
         console.log('Dashboard update:' + message.items)
         updateDashboard(message)
 
-updateDashboard = (message) ->
-  for item in message.items
+  updateDashboard = (message) ->
+    $("#dashboard").empty()
 
-    graph = ''
-    for i in [1 .. item.score]
-      graph = graph + 'I'
-    name = $("<h4>").text(item.name)
-    $("#dashboard").append((name))
+    for item in message.items
+
+      commas = ''
+      name = $("<strong>").text(item.name)
+      for i in [1 .. item.score]
+        commas = commas + 'I'
+      $("#dashboard").append((name))
+      $("#dashboard").append(($("<span>").text(commas)))
+      button = $("<button>")
+      button.html("Add")
+      button.click (event) ->
+        event.preventDefault()
+        # send the message to increment item
+        ws.send(JSON.stringify({item: item.name}))
+      $("#dashboard").append(button)
+      $("#dashboard").append($("<br>"))
 
 
 #    switch message.type

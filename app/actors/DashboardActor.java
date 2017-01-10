@@ -18,8 +18,10 @@ public class DashboardActor extends UntypedActor {
     @Override
     public void preStart() throws Exception {
         super.preStart();
-        Item item = new Item("AAA", 5);
-        items.put(item.getName(), item);
+        Item item1 = new Item("AAA", 5);
+        items.put(item1.getName(), item1);
+        Item item2 = new Item("BBB", 10);
+        items.put(item2.getName(), item2);
     }
 
     @Override
@@ -36,6 +38,8 @@ public class DashboardActor extends UntypedActor {
             if (item != null) {
                 item.increment();
             }
+            // notify watchers
+            watchers.forEach(watcher -> watcher.tell(new Dashboard.Data(items), self()));
         }
 
         if (message instanceof Dashboard.DecrementItem) {
@@ -44,6 +48,8 @@ public class DashboardActor extends UntypedActor {
             if (item != null) {
                 item.decrement();
             }
+            // notify watchers
+            watchers.forEach(watcher -> watcher.tell(new Dashboard.Data(items), self()));
         }
 
         if (message instanceof Dashboard.Watch) {
