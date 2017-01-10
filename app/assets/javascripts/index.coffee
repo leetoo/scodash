@@ -21,10 +21,12 @@ $ ->
       $("#dashboard").append(($("<span>").text(commas)))
       button = $("<button>")
       button.html("Add")
-      button.click (event) ->
+      button.click ({name: item.name} event) ->
         event.preventDefault()
         # send the message to increment item
-        ws.send(JSON.stringify({item: item.name}))
+#        index = $("#dashboard").index(this);
+#        console.log(json.projectData[index]);
+        ws.send(JSON.stringify({item:  name}))
       $("#dashboard").append(button)
       $("#dashboard").append($("<br>"))
 
