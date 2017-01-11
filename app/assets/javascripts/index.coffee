@@ -19,15 +19,29 @@ $ ->
         commas = commas + 'I'
       $("#dashboard").append((name))
       $("#dashboard").append(($("<span>").text(commas)))
-      button = $("<button>")
-      button.html("Add")
-      button.click ({name: item.name} event) ->
-        event.preventDefault()
-        # send the message to increment item
-#        index = $("#dashboard").index(this);
-#        console.log(json.projectData[index]);
-        ws.send(JSON.stringify({item:  name}))
-      $("#dashboard").append(button)
+
+      # button Add
+      btnAdd = $("<button>")
+      btnAdd.html("Add")
+      btnAdd.click
+        data: {name: item.name}
+        handler: (event) ->
+          event.preventDefault()
+          ws.send(JSON.stringify({operation: 'increment', item:  event.data.name}))
+
+      $("#dashboard").append(btnAdd)
+
+      # button Remove
+      btnRemove = $("<button>")
+      btnRemove.html("Remove")
+      btnRemove.click
+        data: {name: item.name}
+        handler: (event) ->
+          event.preventDefault()
+          ws.send(JSON.stringify({operation: 'decrement', item:  event.data.name}))
+
+      $("#dashboard").append(btnRemove)
+
       $("#dashboard").append($("<br>"))
 
 

@@ -144,8 +144,15 @@ public class UserActor extends UntypedActor {
             // When the user types in a stock in the upper right corner, this is triggered
             JsonNode json = (JsonNode) msg;
             logger.debug("onReceive: " + msg);
+            final String operation = json.get("operation").textValue();
             final String item = json.get("item").textValue();
-            dashboardActor.tell(new Dashboard.IncrementItem(item), self());
+            if ("increment".equals(operation)) {
+                dashboardActor.tell(new Dashboard.IncrementItem(item), self());
+            } else if ("decrement".equals(operation)) {
+                dashboardActor.tell(new Dashboard.DecrementItem(item), self());
+            } else {
+                logger.error("No operation in JSON");
+            }
         }
     }
 
