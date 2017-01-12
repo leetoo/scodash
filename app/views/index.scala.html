@@ -1,24 +1,25 @@
 @(message: String)
 
-@main("Carkovani") {
+@main("Scoring dashboard") {
 
     <body data-ws-url="@routes.Application.ws.webSocketURL(request)">
-@*        <div class="navbar navbar-inverse navbar-fixed-top">
-            <div class="navbar-inner">
-                <div class="container">
-                    <a class="brand" href="#">Reactive Stocks</a>
-                    <form id="addsymbolform" class="navbar-form pull-right">
-                        <input id="addsymboltext" type="text" class="span2" placeholder="SYMBOL">
-                        <button type="submit" class="btn">Add Stock</button>
-                    </form>
-                </div>
+        <div class="container">
+            <div id="recent">
+
             </div>
-        </div>*@
-
-        <div id="dashboard" class="container">
-
         </div>
     </body>
+
+    <script>
+        var key = 'recentDashboards';
+        var recent = JSON.parse(localStorage.getItem(key)) || [];
+        for (var i = 0; i < recent.length; i++) {
+            var dashboard = recent[i];
+            $("#recent").append('<a href="' + dashboard + '">' + dashboard + '</a><br/>')
+        }
+        localStorage.setItem(key, JSON.stringify(recent))
+    </script>
+
 
 
 }

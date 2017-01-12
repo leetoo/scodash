@@ -27,6 +27,7 @@ import akka.stream.javadsl.*;
 import play.libs.F;
 import play.mvc.*;
 import scala.compat.java8.FutureConverters;
+import views.html.dashboard;
 import views.html.index;
 
 
@@ -55,6 +56,10 @@ public class Application extends Controller {
 
     public Result index() {
         return ok(index.render("Your new application is ready."));
+    }
+
+    public Result dashboard(String hash) {
+        return ok(dashboard.render("Your new application is ready.", hash));
     }
 
     public WebSocket ws() {
