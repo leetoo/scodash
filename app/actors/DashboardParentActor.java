@@ -12,9 +12,11 @@ import play.libs.akka.InjectedActorSupport;
 public class DashboardParentActor extends UntypedActor implements InjectedActorSupport {
 
     public static class Create {
+        private String name;
         private String hash;
 
-        public Create(String hash) {
+        public Create(String name, String hash) {
+            this.name = name;
             this.hash = hash;
         }
     }

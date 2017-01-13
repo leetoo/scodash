@@ -1,5 +1,6 @@
 import com.google.inject.AbstractModule;
 
+import actors.DashboardActor;
 import actors.DashboardParentActor;
 import actors.UserActor;
 import actors.UserParentActor;
@@ -11,5 +12,6 @@ public class Module extends AbstractModule implements AkkaGuiceSupport {
         bindActor(DashboardParentActor.class, "dashboardParentActor");
         bindActor(UserParentActor.class, "userParentActor");
         bindActorFactory(UserActor.class, UserActor.Factory.class);
+        bindActorFactory(DashboardActor.class, DashboardActor.Factory.class);
     }
 }

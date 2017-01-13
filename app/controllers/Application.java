@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import actors.DashboardParentActor;
-import actors.Stock;
 import actors.UserParentActor;
 import akka.NotUsed;
 import akka.actor.ActorRef;
@@ -25,6 +24,7 @@ import akka.japi.Pair;
 import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
+import play.api.libs.Crypto;
 import play.libs.F;
 import play.mvc.*;
 import scala.compat.java8.FutureConverters;
@@ -63,7 +63,7 @@ public class Application extends Controller {
         return ok(dashboard.render("Your new application is ready.", hash));
     }
 
-    public WebSocket ws() {
+    public WebSocket ws(String hash) {
         return WebSocket.Json.acceptOrResult(request -> {
             if (sameOriginCheck(request)) {
                 final CompletionStage<Flow<JsonNode, JsonNode, NotUsed>> future = wsFutureFlow(request);
@@ -116,19 +116,22 @@ public class Application extends Controller {
         return stage;
     }
 
-    public CompletionStage<ActorRef> createUserActor(String id, ActorRef webSocketOut) {
+    public CompletionStage<ActorRef> createUserActor(String id, String dashboardHash, ActorRef webSocketOut) {
         // Use guice assisted injection to instantiate and configure the child actor.
         long timeoutMillis = 100L;
         return FutureConverters.toJava(
-                ask(userParentActor, new UserParentActor.Create(id, webSocketOut), timeoutMillis)
+                ask(userParentActor, new UserParentActor.Create(id, dashboardHash, webSocketOut), timeoutMillis)
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
-    public CompletionStage<ActorRef> createDashboardActor(String hash) {
+    public CompletionStage<ActorRef> createDashboardActor(String name) {
+
+        final String hash = Crypto.crypto().generateToken();
+
         // Use guice assisted injection to instantiate and configure the child actor.
         long timeoutMillis = 100L;
         return FutureConverters.toJava(
-                ask(dashboardParentActor, new DashboardParentActor.Create(hash), timeoutMillis)
+                ask(dashboardParentActor, new DashboardParentActor.Create(name, hash), timeoutMillis)
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
@@ -147,7 +150,7 @@ public class Application extends Controller {
         return flow.watchTermination((ignore, termination) -> {
             termination.whenComplete((done, throwable) -> {
                 logger.info("Terminating actor {}", userActor);
-                dashboardActor.tell(new Stock.Unwatch(null), userActor);
+                //dashboardActor.tell(new Stock.Unwatch(null), userActor);
                 actorSystem.stop(userActor);
             });
 
@@ -190,7 +193,8 @@ public class Application extends Controller {
         return origin.contains("localhost:9000") || origin.contains("localhost:19001");
     }
 
-    public Result create() {
+    public Result create(String name) {
+        createDashboardActor(name);
         return ok(index.render("Your new application is ready."));
     }
 
