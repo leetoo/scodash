@@ -93,6 +93,6 @@ public class DashboardActor extends UntypedActor {
     }
 
     public interface Factory {
-        Actor create(ActorRef out);
+        Actor create();
     }
 }

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import actors.DashboardParentActor;
 import actors.Stock;
 import actors.UserParentActor;
 import akka.NotUsed;
@@ -36,7 +37,7 @@ public class Application extends Controller {
 
     private Logger logger = org.slf4j.LoggerFactory.getLogger("controllers.Application");
 
-    private ActorRef dashboardActor;
+    private ActorRef dashboardParentActor;
     private ActorRef userParentActor;
     private Materializer materializer;
     private ActorSystem actorSystem;
@@ -45,9 +46,9 @@ public class Application extends Controller {
     @Inject
     public Application(ActorSystem actorSystem,
                           Materializer materializer,
-                          /*@Named("dashboardActor") ActorRef dashboardActor,*/
+                          @Named("dashboardParentActor") ActorRef dashboardParentActor,
                           @Named("userParentActor") ActorRef userParentActor) {
-        //this.dashboardActor = dashboardActor;
+        this.dashboardParentActor = dashboardParentActor;
         this.userParentActor = userParentActor;
         this.materializer = materializer;
         this.actorSystem = actorSystem;
@@ -123,11 +124,11 @@ public class Application extends Controller {
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
-    public CompletionStage<ActorRef> createDashboardActor(String hash, ActorRef webSocketOut) {
+    public CompletionStage<ActorRef> createDashboardActor(String hash) {
         // Use guice assisted injection to instantiate and configure the child actor.
         long timeoutMillis = 100L;
         return FutureConverters.toJava(
-                ask(userParentActor, new UserParentActor.Create(hash, webSocketOut), timeoutMillis)
+                ask(dashboardParentActor, new DashboardParentActor.Create(hash), timeoutMillis)
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 

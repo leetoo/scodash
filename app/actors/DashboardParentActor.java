@@ -13,11 +13,9 @@ public class DashboardParentActor extends UntypedActor implements InjectedActorS
 
     public static class Create {
         private String hash;
-        private ActorRef out;
 
-        public Create(String hash, ActorRef out) {
+        public Create(String hash) {
             this.hash = hash;
-            this.out = out;
         }
     }
 
@@ -32,7 +30,7 @@ public class DashboardParentActor extends UntypedActor implements InjectedActorS
     public void onReceive(Object message) throws Exception {
         if (message instanceof DashboardParentActor.Create) {
             DashboardParentActor.Create create = (DashboardParentActor.Create) message;
-            ActorRef child = injectedChild(() -> childFactory.create(create.out), "dashboardActor-" + create.hash);
+            ActorRef child = injectedChild(() -> childFactory.create(), "dashboardActor-" + create.hash);
             sender().tell(child, self());
         }
     }
