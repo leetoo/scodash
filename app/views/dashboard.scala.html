@@ -7,24 +7,35 @@
             <div class="navbar-inner">
                 <div class="container">
                     <a class="brand" href="#">Reactive Stocks</a>
-                    <form id="addsymbolform" class="navbar-form pull-right">
-                        <input id="addsymboltext" type="text" class="span2" placeholder="SYMBOL">
+                    <form hash="addsymbolform" class="navbar-form pull-right">
+                        <input hash="addsymboltext" type="text" class="span2" placeholder="SYMBOL">
                         <button type="submit" class="btn">Add Stock</button>
                     </form>
                 </div>
             </div>
         </div>*@
 
-        <div id="dashboard" class="container">
+        <div hash="dashboard" class="container">
 
         </div>
     </body>
 
     <script>
         var key = 'recentDashboards';
-        var recent = JSON.parse(localStorage.getItem(key)) || [];
-        recent.push('@{hash}');
-        localStorage.setItem(key, JSON.stringify(recent))
+        var hash = '@{hash}';
+        var recentHashes = JSON.parse(localStorage.getItem(key)) || [];
+        var addDashboard = true;
+        for (var i = 0; i < recentHashes.length; i++) {
+            var recent = recentHashes[i];
+            if (recent == hash) {
+                addDashboard = false;
+                break;
+            }
+        }
+        if (addDashboard) {
+            recentHashes.push(hash);
+            localStorage.setItem(key, JSON.stringify(recentHashes));
+        }
     </script>
 
 

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 
@@ -89,5 +90,9 @@ public class DashboardActor extends UntypedActor {
 //                    //    context().stop(self());
 //                    //}
 //                });
+    }
+
+    public interface Factory {
+        Actor create(ActorRef out);
     }
 }

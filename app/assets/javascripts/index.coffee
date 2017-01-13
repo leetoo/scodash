@@ -5,8 +5,21 @@ $ ->
     console.log message.type
     switch message.type
       when "data"
-        console.log('Dashboard update:' + message.items)
         updateDashboard(message)
+
+
+  $("#create").click
+    handler: (event) ->
+      $.ajax
+        url: "/create/" + $("#newName").val
+        dataType: "json"
+      success: (data) ->
+      error: (jqXHR, textStatus, error) ->
+        detailsHolder = $(this).find(".details-holder")
+        detailsHolder.empty()
+        detailsHolder.append($("<h2>").text("Error: " + JSON.parse(jqXHR.responseText).error))
+
+
 
   updateDashboard = (message) ->
     $("#dashboard").empty()

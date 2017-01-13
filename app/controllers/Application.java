@@ -45,9 +45,9 @@ public class Application extends Controller {
     @Inject
     public Application(ActorSystem actorSystem,
                           Materializer materializer,
-                          @Named("dashboardActor") ActorRef dashboardActor,
+                          /*@Named("dashboardActor") ActorRef dashboardActor,*/
                           @Named("userParentActor") ActorRef userParentActor) {
-        this.dashboardActor = dashboardActor;
+        //this.dashboardActor = dashboardActor;
         this.userParentActor = userParentActor;
         this.materializer = materializer;
         this.actorSystem = actorSystem;
@@ -123,6 +123,14 @@ public class Application extends Controller {
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
+    public CompletionStage<ActorRef> createDashboardActor(String hash, ActorRef webSocketOut) {
+        // Use guice assisted injection to instantiate and configure the child actor.
+        long timeoutMillis = 100L;
+        return FutureConverters.toJava(
+                ask(userParentActor, new UserParentActor.Create(hash, webSocketOut), timeoutMillis)
+        ).thenApply(stageObj -> (ActorRef) stageObj);
+    }
+
     public Flow<JsonNode, JsonNode, NotUsed> createWebSocketFlow(Publisher<JsonNode> webSocketIn, ActorRef userActor) {
         // http://doc.akka.io/docs/akka/current/scala/stream/stream-flows-and-basics.html#stream-materialization
         // http://doc.akka.io/docs/akka/current/scala/stream/stream-integrations.html#integrating-with-actors
@@ -179,6 +187,10 @@ public class Application extends Controller {
 
     private boolean originMatches(String origin) {
         return origin.contains("localhost:9000") || origin.contains("localhost:19001");
+    }
+
+    public Result create() {
+        return ok(index.render("Your new application is ready."));
     }
 
 

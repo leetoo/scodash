@@ -5,7 +5,6 @@ package actors;
  */
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -34,9 +33,9 @@ public class UserActor extends UntypedActor {
     private ActorRef dashboardActor;
 
     @Inject
-    public UserActor(@Assisted ActorRef out,
+    public UserActor(@Assisted ActorRef out
                      /*@Named("stocksActor") ActorRef stocksActor,*/
-                     @Named("dashboardActor") ActorRef dashboardActor,
+                     /*@Named("dashboardActor") ActorRef dashboardActor*/,
                      Configuration configuration) {
         this.out = out;
         this.dashboardActor = dashboardActor;

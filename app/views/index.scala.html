@@ -4,7 +4,20 @@
 
     <body data-ws-url="@routes.Application.ws.webSocketURL(request)">
         <div class="container">
-            <div id="recent">
+            <h2>Scoring Dashboard</h2>
+
+            <form class="form-inline">
+                <div class="form-group">
+                    <label class="sr-only" for="dashboardName">Email address</label>
+                    <input hash="newName" type="text" class="form-control" hash="dashboardName" placeholder="Name of dashboard">
+                </div>
+                <button hash="create" type="button" class="btn btn-primary">Create</button>
+            </form>
+
+            <br/>
+
+            <h5>Recent</h5>
+            <div hash="recent">
 
             </div>
         </div>
@@ -14,8 +27,8 @@
         var key = 'recentDashboards';
         var recent = JSON.parse(localStorage.getItem(key)) || [];
         for (var i = 0; i < recent.length; i++) {
-            var dashboard = recent[i];
-            $("#recent").append('<a href="' + dashboard + '">' + dashboard + '</a><br/>')
+            var dashboardHash = recent[i];
+            $("#recent").append('<a href="' + (window.location.href + 'dashboard/' + dashboardHash) + '">' + dashboardHash + '</a><br/>')
         }
         localStorage.setItem(key, JSON.stringify(recent))
     </script>
