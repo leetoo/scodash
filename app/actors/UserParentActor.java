@@ -3,7 +3,6 @@ package actors;
 import javax.inject.Inject;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import akka.actor.UntypedActor;
 import play.libs.akka.InjectedActorSupport;
 
@@ -18,10 +17,10 @@ public class UserParentActor extends UntypedActor implements InjectedActorSuppor
         private DashboardActor dashboardActor;
 
         @Inject
-        public Create(ActorSystem actorSystem, String id, String dashboardHash, ActorRef out) {
+        public Create(String id, ActorRef out) {
             this.id = id;
             this.out = out;
-            dashboardActor = actorSystem.actorSelection("/dashboardActor/" + dashboardHash).anchor();
+            //dashboardActor = actorSystem.actorSelection("/dashboardActor/" + dashboardHash).anchor();
         }
     }
 

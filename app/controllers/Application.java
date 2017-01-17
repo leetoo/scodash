@@ -63,7 +63,7 @@ public class Application extends Controller {
         return ok(dashboard.render("Your new application is ready.", hash));
     }
 
-    public WebSocket ws(String hash) {
+    public WebSocket ws() {
         return WebSocket.Json.acceptOrResult(request -> {
             if (sameOriginCheck(request)) {
                 final CompletionStage<Flow<JsonNode, JsonNode, NotUsed>> future = wsFutureFlow(request);
@@ -116,11 +116,11 @@ public class Application extends Controller {
         return stage;
     }
 
-    public CompletionStage<ActorRef> createUserActor(String id, String dashboardHash, ActorRef webSocketOut) {
+    public CompletionStage<ActorRef> createUserActor(String id, ActorRef webSocketOut) {
         // Use guice assisted injection to instantiate and configure the child actor.
         long timeoutMillis = 100L;
         return FutureConverters.toJava(
-                ask(userParentActor, new UserParentActor.Create(id, dashboardHash, webSocketOut), timeoutMillis)
+                ask(userParentActor, new UserParentActor.Create(id, webSocketOut), timeoutMillis)
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 

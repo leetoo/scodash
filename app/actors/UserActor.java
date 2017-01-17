@@ -38,7 +38,7 @@ public class UserActor extends UntypedActor {
                      /*@Named("dashboardActor") ActorRef dashboardActor*/,
                      Configuration configuration) {
         this.out = out;
-        this.dashboardActor = dashboardActor;
+        //this.dashboardActor = dashboardActor;
 //        this.stocksActor = stocksActor;
         this.configuration = configuration;
     }
@@ -49,7 +49,7 @@ public class UserActor extends UntypedActor {
 
 //        configureDefaultStocks();
 
-        dashboardActor.tell(new Dashboard.Watch(), self());
+        //dashboardActor.tell(new Dashboard.Watch(), self());
     }
 
 //    public void configureDefaultStocks() {

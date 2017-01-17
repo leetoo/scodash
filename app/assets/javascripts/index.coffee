@@ -11,13 +11,15 @@ $ ->
   $("#create").click
     handler: (event) ->
       $.ajax
-        url: "/create/" + $("#newName").val
+        url: "/create/" + $("#newName").val()
         dataType: "json"
+        method: "POST"
       success: (data) ->
       error: (jqXHR, textStatus, error) ->
-        detailsHolder = $(this).find(".details-holder")
-        detailsHolder.empty()
-        detailsHolder.append($("<h2>").text("Error: " + JSON.parse(jqXHR.responseText).error))
+        alert("Error: " + JSON.parse(jqXHR.responseText).error);
+#        detailsHolder = $(this).find(".details-holder")
+#        detailsHolder.empty()
+#        detailsHolder.append($("<h2>").text("Error: " + JSON.parse(jqXHR.responseText).error))
 
 
 
