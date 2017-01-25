@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import com.google.inject.assistedinject.Assisted;
+
 import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
@@ -13,8 +17,17 @@ import akka.actor.UntypedActor;
  */
 public class DashboardActor extends UntypedActor {
 
+    private final String name;
+    private final String hash;
+
     private final Map<String, Item> items = new HashMap<>();
     private final HashSet<ActorRef> watchers = new HashSet<ActorRef>();
+
+    @Inject
+    public DashboardActor(@Assisted("name") String name, @Assisted("hash") String hash) {
+        this.name = name;
+        this.hash = hash;
+    }
 
     @Override
     public void preStart() throws Exception {
@@ -63,6 +76,10 @@ public class DashboardActor extends UntypedActor {
             watchers.remove(sender());
         }
 
+        if (message instanceof Dashboard.GetHash) {
+            //sender().tell(data, self());
+        }
+
 
 //        ReceiveBuilder
 //                .match(Dashboard.AddItem.class, latest -> {
@@ -93,6 +110,6 @@ public class DashboardActor extends UntypedActor {
     }
 
     public interface Factory {
-        Actor create();
+        Actor create(@Assisted("name") String name, @Assisted("hash") String hash);
     }
 }

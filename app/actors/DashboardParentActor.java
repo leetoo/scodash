@@ -32,7 +32,7 @@ public class DashboardParentActor extends UntypedActor implements InjectedActorS
     public void onReceive(Object message) throws Exception {
         if (message instanceof DashboardParentActor.Create) {
             DashboardParentActor.Create create = (DashboardParentActor.Create) message;
-            ActorRef child = injectedChild(() -> childFactory.create(), "dashboardActor-" + create.hash);
+            ActorRef child = injectedChild(() -> childFactory.create(create.name, create.hash), "dashboardActor-" + create.hash);
             sender().tell(child, self());
         }
     }

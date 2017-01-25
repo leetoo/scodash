@@ -57,4 +57,8 @@ public class Dashboard {
             this.item = item;
         }
     }
+
+    public static final class GetHash {
+
+    }
 }

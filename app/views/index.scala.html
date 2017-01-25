@@ -2,16 +2,16 @@
 
 @main("Scoring dashboard") {
 
-    <body data-ws-url="@routes.Application.ws.webSocketURL(request)">
+    <body>
         <div class="container">
             <h2>Scoring Dashboard</h2>
 
-            <form class="form-inline">
+            <form class="form-inline" method="post" action="@routes.Application.create">
                 <div class="form-group">
-                    <label class="sr-only" for="dashboardName">Email address</label>
-                    <input id="newName" type="text" class="form-control" placeholder="Name of dashboard" ></input>
+                    <label class="sr-only" for="dashboardName"></label>
+                    <input id="name" name="name" type="text" class="form-control" placeholder="Name of dashboard" ></input>
                 </div>
-                <button id="create" type="button" class="btn btn-primary">Create</button>
+                <button id="create" type="submit" class="btn btn-primary">Create</button>
             </form>
 
             <br/>

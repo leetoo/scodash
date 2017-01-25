@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import actors.Dashboard;
 import actors.DashboardParentActor;
 import actors.UserParentActor;
 import akka.NotUsed;
@@ -25,11 +26,14 @@ import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
 import play.api.libs.Crypto;
+import play.data.FormFactory;
 import play.libs.F;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.*;
 import scala.compat.java8.FutureConverters;
 import views.html.dashboard;
 import views.html.index;
+
 
 
 @Singleton
@@ -41,18 +45,26 @@ public class Application extends Controller {
     private ActorRef userParentActor;
     private Materializer materializer;
     private ActorSystem actorSystem;
+    private FormFactory formFactory;
+
+    @Inject
+    HttpExecutionContext ec;
 
 
     @Inject
     public Application(ActorSystem actorSystem,
                           Materializer materializer,
+                            FormFactory formFactory,
                           @Named("dashboardParentActor") ActorRef dashboardParentActor,
                           @Named("userParentActor") ActorRef userParentActor) {
         this.dashboardParentActor = dashboardParentActor;
         this.userParentActor = userParentActor;
         this.materializer = materializer;
         this.actorSystem = actorSystem;
+        this.formFactory = formFactory;
     }
+
+
 
 
     public Result index() {
@@ -119,6 +131,9 @@ public class Application extends Controller {
     public CompletionStage<ActorRef> createUserActor(String id, ActorRef webSocketOut) {
         // Use guice assisted injection to instantiate and configure the child actor.
         long timeoutMillis = 100L;
+//        return FutureConverters.toJava(
+//                ask(userParentActor, new UserParentActor.Create(id, webSocketOut), timeoutMillis)
+//        ).thenApply(stageObj -> (ActorRef) stageObj);
         return FutureConverters.toJava(
                 ask(userParentActor, new UserParentActor.Create(id, webSocketOut), timeoutMillis)
         ).thenApply(stageObj -> (ActorRef) stageObj);
@@ -193,10 +208,49 @@ public class Application extends Controller {
         return origin.contains("localhost:9000") || origin.contains("localhost:19001");
     }
 
-    public Result create(String name) {
-        createDashboardActor(name);
-        return ok(index.render("Your new application is ready."));
+    public CompletionStage<Result> create() {
+
+        //DynamicForm requestData = formFactory.form().bindFromRequest();
+
+        DashboardForm dashboardForm = formFactory.form(DashboardForm.class).bindFromRequest().get();
+
+        //return CompletableFuture.supplyAsync(() -> dashboard("Your new application is ready."));
+
+        return CompletableFuture.supplyAsync(
+                () -> createDashboardActor(dashboardForm.getName()), ec.current())
+                .thenApply(dashboardActorFuture -> dashboardActorFuture
+                        .thenApply(dashboardActor -> FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetHash(), 1000))))
+                .thenApply(hash -> dashboard("Your new application is ready."));
+
+
+        //CompletionStage<ActorRef> dashboardActorFuture = createDashboardActor(dashboardForm.getName());
+
+        //CompletableFuture.supplyAsync(createDashboardActor(dashboardForm.getName()));
+
+//        dashboardActorFuture.toCompletableFuture().supplyAsync(() -> {
+//            return dashboard("Your new application is ready.");
+//        }, ec.current());
+
+//        dashboardActorFuture.supplyAsync((dashboardActor) ->
+//                FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetName(), 1000))
+//        );
+
+
+//
+//        dashboardActorFuture.whenComplete(dashboardActor ->
+//           .thenApply(response -> dashboard(((String)response)))
+//        );
+
+        //return dashboardActorFuture.thenApply(dashboardActor -> FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetName(), 1000)));
+
     }
 
 
+
+
+//
+//    Form<Dashboard> dashboardForm = Form.form(Dashboard.class);
+
+
 }
+
