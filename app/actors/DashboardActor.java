@@ -77,7 +77,7 @@ public class DashboardActor extends UntypedActor {
         }
 
         if (message instanceof Dashboard.GetHash) {
-            //sender().tell(data, self());
+            sender().tell(this.hash, self());
         }
 
 

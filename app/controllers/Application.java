@@ -72,7 +72,7 @@ public class Application extends Controller {
     }
 
     public Result dashboard(String hash) {
-        return ok(dashboard.render("Your new application is ready.", hash));
+        return ok(dashboard.render(hash));
     }
 
     public WebSocket ws() {
@@ -210,46 +210,19 @@ public class Application extends Controller {
 
     public CompletionStage<Result> create() {
 
-        //DynamicForm requestData = formFactory.form().bindFromRequest();
-
         DashboardForm dashboardForm = formFactory.form(DashboardForm.class).bindFromRequest().get();
-
-        //return CompletableFuture.supplyAsync(() -> dashboard("Your new application is ready."));
 
         return CompletableFuture.supplyAsync(
                 () -> createDashboardActor(dashboardForm.getName()), ec.current())
-                .thenApply(dashboardActorFuture -> dashboardActorFuture
-                        .thenApply(dashboardActor -> FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetHash(), 1000))))
-                .thenApply(hash -> dashboard("Your new application is ready."));
-
-
-        //CompletionStage<ActorRef> dashboardActorFuture = createDashboardActor(dashboardForm.getName());
-
-        //CompletableFuture.supplyAsync(createDashboardActor(dashboardForm.getName()));
-
-//        dashboardActorFuture.toCompletableFuture().supplyAsync(() -> {
-//            return dashboard("Your new application is ready.");
-//        }, ec.current());
-
-//        dashboardActorFuture.supplyAsync((dashboardActor) ->
-//                FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetName(), 1000))
-//        );
-
-
-//
-//        dashboardActorFuture.whenComplete(dashboardActor ->
-//           .thenApply(response -> dashboard(((String)response)))
-//        );
-
-        //return dashboardActorFuture.thenApply(dashboardActor -> FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetName(), 1000)));
+                .thenCompose(dashboardActorFuture -> dashboardActorFuture
+                        .thenCompose(dashboardActor -> FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetHash(), 1000))
+                            .thenApply(hash -> dashboard((String) hash))));
 
     }
 
 
 
 
-//
-//    Form<Dashboard> dashboardForm = Form.form(Dashboard.class);
 
 
 }
