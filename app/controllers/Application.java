@@ -1,19 +1,5 @@
 package controllers;
 
-import static akka.pattern.Patterns.ask;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
-import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
 import actors.Dashboard;
 import actors.DashboardParentActor;
 import actors.UserParentActor;
@@ -25,6 +11,9 @@ import akka.japi.Pair;
 import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
 import play.api.libs.Crypto;
 import play.data.FormFactory;
 import play.libs.F;
@@ -33,6 +22,14 @@ import play.mvc.*;
 import scala.compat.java8.FutureConverters;
 import views.html.dashboard;
 import views.html.index;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
+import static akka.pattern.Patterns.ask;
 
 
 
@@ -214,9 +211,9 @@ public class Application extends Controller {
 
         return CompletableFuture.supplyAsync(
                 () -> createDashboardActor(dashboardForm.getName()), ec.current())
-                .thenCompose(dashboardActorFuture -> dashboardActorFuture
-                        .thenCompose(dashboardActor -> FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetHash(), 1000))
-                            .thenApply(hash -> dashboard((String) hash))));
+                .thenComposeAsync(dashboardActorFuture -> dashboardActorFuture
+                        .thenComposeAsync(dashboardActor -> FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetHash(), 1000))
+                            .thenApplyAsync(hash -> dashboard((String) hash), ec.current()), ec.current()), ec.current());
 
     }
 
