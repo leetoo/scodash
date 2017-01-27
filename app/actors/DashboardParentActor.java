@@ -1,5 +1,8 @@
 package actors;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import akka.actor.ActorRef;
@@ -21,7 +24,16 @@ public class DashboardParentActor extends UntypedActor implements InjectedActorS
         }
     }
 
+    public static class GetDashboard {
+        private String hash;
+
+        public GetDashboard(String hash) {
+            this.hash = hash;
+        }
+    }
+
     private DashboardActor.Factory childFactory;
+    private Map<String, ActorRef> dashboardActors = new HashMap<>();
 
     @Inject
     public DashboardParentActor(DashboardActor.Factory childFactory) {
@@ -33,7 +45,14 @@ public class DashboardParentActor extends UntypedActor implements InjectedActorS
         if (message instanceof DashboardParentActor.Create) {
             DashboardParentActor.Create create = (DashboardParentActor.Create) message;
             ActorRef child = injectedChild(() -> childFactory.create(create.name, create.hash), "dashboardActor-" + create.hash);
+            dashboardActors.put(create.hash, child);
             sender().tell(child, self());
+        }
+
+        if (message instanceof DashboardParentActor.GetDashboard) {
+            DashboardParentActor.GetDashboard getDashboard = (DashboardParentActor.GetDashboard) message;
+            ActorRef dashboard = dashboardActors.get(getDashboard.hash);
+            sender().tell(dashboard, self());
         }
     }
 

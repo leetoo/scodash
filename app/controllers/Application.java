@@ -1,5 +1,19 @@
 package controllers;
 
+import static akka.pattern.Patterns.ask;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import actors.Dashboard;
 import actors.DashboardParentActor;
 import actors.UserParentActor;
@@ -11,9 +25,6 @@ import akka.japi.Pair;
 import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
 import play.api.libs.Crypto;
 import play.data.FormFactory;
 import play.libs.F;
@@ -23,20 +34,15 @@ import scala.compat.java8.FutureConverters;
 import views.html.dashboard;
 import views.html.index;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
-import static akka.pattern.Patterns.ask;
-
 
 
 @Singleton
 public class Application extends Controller {
 
     private Logger logger = org.slf4j.LoggerFactory.getLogger("controllers.Application");
+
+    private static long TIMEOUT_MILLIS = 100;
+
 
     private ActorRef dashboardParentActor;
     private ActorRef userParentActor;
@@ -46,6 +52,7 @@ public class Application extends Controller {
 
     @Inject
     HttpExecutionContext ec;
+
 
 
     @Inject
@@ -68,9 +75,7 @@ public class Application extends Controller {
         return ok(index.render("Your new application is ready."));
     }
 
-    public Result dashboard(String hash) {
-        return ok(dashboard.render(hash));
-    }
+
 
     public WebSocket ws() {
         return WebSocket.Json.acceptOrResult(request -> {
@@ -127,12 +132,11 @@ public class Application extends Controller {
 
     public CompletionStage<ActorRef> createUserActor(String id, ActorRef webSocketOut) {
         // Use guice assisted injection to instantiate and configure the child actor.
-        long timeoutMillis = 100L;
 //        return FutureConverters.toJava(
 //                ask(userParentActor, new UserParentActor.Create(id, webSocketOut), timeoutMillis)
 //        ).thenApply(stageObj -> (ActorRef) stageObj);
         return FutureConverters.toJava(
-                ask(userParentActor, new UserParentActor.Create(id, webSocketOut), timeoutMillis)
+                ask(userParentActor, new UserParentActor.Create(id, webSocketOut), TIMEOUT_MILLIS)
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
@@ -141,9 +145,8 @@ public class Application extends Controller {
         final String hash = Crypto.crypto().generateToken();
 
         // Use guice assisted injection to instantiate and configure the child actor.
-        long timeoutMillis = 100L;
         return FutureConverters.toJava(
-                ask(dashboardParentActor, new DashboardParentActor.Create(name, hash), timeoutMillis)
+                ask(dashboardParentActor, new DashboardParentActor.Create(name, hash), TIMEOUT_MILLIS)
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
@@ -205,6 +208,12 @@ public class Application extends Controller {
         return origin.contains("localhost:9000") || origin.contains("localhost:19001");
     }
 
+    public Result dashboard(String hash) {
+
+        // Use guice assisted injection to instantiate and configure the child actor.
+        return ok(dashboard.render(hash));
+    }
+
     public CompletionStage<Result> create() {
 
         DashboardForm dashboardForm = formFactory.form(DashboardForm.class).bindFromRequest().get();
@@ -212,7 +221,7 @@ public class Application extends Controller {
         return CompletableFuture.supplyAsync(
                 () -> createDashboardActor(dashboardForm.getName()), ec.current())
                 .thenComposeAsync(dashboardActorFuture -> dashboardActorFuture
-                        .thenComposeAsync(dashboardActor -> FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetHash(), 1000))
+                        .thenComposeAsync(dashboardActor -> FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetHash(), TIMEOUT_MILLIS))
                             .thenApplyAsync(hash -> dashboard((String) hash), ec.current()), ec.current()), ec.current());
 
     }
