@@ -36,6 +36,7 @@ public class UserActor extends UntypedActor {
     private Configuration configuration;
     private ActorRef dashboardActor;
     private String hash;
+    private ActorRef dashboardParentActor;
 
     @Inject
     public UserActor(@Assisted("hash") String hash,
@@ -45,14 +46,16 @@ public class UserActor extends UntypedActor {
         this.out = out;
         this.configuration = configuration;
         this.hash = hash;
+        this.dashboardParentActor = dashboardParentActor;
     }
 
 
-    private void initDashboardActor(@Assisted String hash, @Named("dashboardParentActor") ActorRef dashboardParentActor) {
+    private void initDashboardActor() {
         try {
             this.dashboardActor = (ActorRef) FutureConverters.toJava(
                     ask(dashboardParentActor, new DashboardParentActor.GetDashboard(hash), Application.TIMEOUT_MILLIS)
             ).toCompletableFuture().get();
+            this.dashboardActor.tell(new Dashboard.Watch(), self() );
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -64,7 +67,7 @@ public class UserActor extends UntypedActor {
     public void preStart() throws Exception {
         super.preStart();
 
-        initDashboardActor(this.hash, this.dashboardActor);
+        initDashboardActor();
 
 //        configureDefaultStocks();
 
