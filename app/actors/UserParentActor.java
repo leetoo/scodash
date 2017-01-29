@@ -1,10 +1,10 @@
 package actors;
 
-import javax.inject.Inject;
-
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import play.libs.akka.InjectedActorSupport;
+
+import javax.inject.Inject;
 
 /**
  * Created by vasek on 19. 11. 2016.
@@ -14,12 +14,13 @@ public class UserParentActor extends UntypedActor implements InjectedActorSuppor
     public static class Create {
         private String id;
         private ActorRef out;
-        private DashboardActor dashboardActor;
+        private String hash;
 
         @Inject
-        public Create(String id, ActorRef out) {
+        public Create(String id, ActorRef out, String hash) {
             this.id = id;
             this.out = out;
+            this.hash = hash;
             //dashboardActor = actorSystem.actorSelection("/dashboardActor/" + dashboardHash).anchor();
         }
     }

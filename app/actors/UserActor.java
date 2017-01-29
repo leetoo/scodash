@@ -4,20 +4,25 @@ package actors;
  * Created by vasek on 19. 11. 2016.
  */
 
-import javax.inject.Inject;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.inject.assistedinject.Assisted;
-
 import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.inject.assistedinject.Assisted;
+import controllers.Application;
 import play.Configuration;
 import play.libs.Json;
+import scala.compat.java8.FutureConverters;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.concurrent.ExecutionException;
+
+import static akka.pattern.Patterns.ask;
 
 /**
  * The broker between the WebSocket and the StockActor(s).  The UserActor holds the connection and sends serialized
@@ -29,23 +34,37 @@ public class UserActor extends UntypedActor {
 
     private ActorRef out;
     private Configuration configuration;
-    //private ActorRef stocksActor;
     private ActorRef dashboardActor;
+    private String hash;
 
     @Inject
-    public UserActor(@Assisted ActorRef out
-                     /*@Named("stocksActor") ActorRef stocksActor,*/
-                     /*@Named("dashboardActor") ActorRef dashboardActor*/,
+    public UserActor(@Assisted String hash,
+                     @Assisted ActorRef out,
+                     @Named("dashboardParentActor") ActorRef dashboardParentActor,
                      Configuration configuration) {
         this.out = out;
-        //this.dashboardActor = dashboardActor;
-//        this.stocksActor = stocksActor;
         this.configuration = configuration;
+        this.hash = hash;
+    }
+
+
+    private void initDashboardActor(@Assisted String hash, @Named("dashboardParentActor") ActorRef dashboardParentActor) {
+        try {
+            this.dashboardActor = (ActorRef) FutureConverters.toJava(
+                    ask(dashboardParentActor, new DashboardParentActor.GetDashboard(hash), Application.TIMEOUT_MILLIS)
+            ).toCompletableFuture().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void preStart() throws Exception {
         super.preStart();
+
+        initDashboardActor(this.hash, this.dashboardActor);
 
 //        configureDefaultStocks();
 
@@ -156,7 +175,7 @@ public class UserActor extends UntypedActor {
     }
 
     public interface Factory {
-        Actor create(ActorRef out);
+        Actor create(@Assisted("hash") String hash, ActorRef out);
     }
 }
 
