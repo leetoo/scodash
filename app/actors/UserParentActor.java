@@ -36,7 +36,7 @@ public class UserParentActor extends UntypedActor implements InjectedActorSuppor
     public void onReceive(Object message) throws Exception {
         if (message instanceof UserParentActor.Create) {
             UserParentActor.Create create = (UserParentActor.Create) message;
-            ActorRef child = injectedChild(() -> childFactory.create(create.out), "userActor-" + create.id);
+            ActorRef child = injectedChild(() -> childFactory.create(create.hash, create.out), "userActor-" + create.id);
             sender().tell(child, self());
         }
     }

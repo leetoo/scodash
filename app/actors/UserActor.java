@@ -38,7 +38,7 @@ public class UserActor extends UntypedActor {
     private String hash;
 
     @Inject
-    public UserActor(@Assisted String hash,
+    public UserActor(@Assisted("hash") String hash,
                      @Assisted ActorRef out,
                      @Named("dashboardParentActor") ActorRef dashboardParentActor,
                      Configuration configuration) {
