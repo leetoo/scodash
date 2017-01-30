@@ -1,7 +1,7 @@
 @import controllers.routes
 @(hash: String)
 
-@main("Scoring dashboard") {
+@main("Scoring showDashboard") {
 
     <body data-ws-url="@routes.Application.ws(hash).webSocketURL(request)">
 @*        <div class="navbar navbar-inverse navbar-fixed-top">
@@ -16,9 +16,10 @@
             </div>
         </div>*@
 
-        <div id="dashboard" class="container">
+        <div id="showDashboard" class="container">
 
         </div>
+
     </body>
 
     <script>

@@ -1,16 +1,14 @@
 package actors;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import com.google.inject.assistedinject.Assisted;
-
 import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
+import com.google.inject.assistedinject.Assisted;
+
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Created by vasek on 11. 12. 2016.
@@ -91,7 +89,7 @@ public class DashboardActor extends UntypedActor {
 //                    // notify watchers
 //                    //watchers.forEach(watcher -> watcher.tell(new Stock.Update(symbol, newPrice), self()));
 //
-//                    // add new item on dashboard
+//                    // add new item on showDashboard
 //
 //                })
 //                .match(Stock.Watch.class, watch -> {

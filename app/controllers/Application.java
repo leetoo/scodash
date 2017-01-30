@@ -12,11 +12,13 @@ import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import play.api.libs.Crypto;
 import play.data.FormFactory;
 import play.libs.F;
+import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.*;
 import scala.compat.java8.FutureConverters;
@@ -51,13 +53,12 @@ public class Application extends Controller {
     HttpExecutionContext ec;
 
 
-
     @Inject
     public Application(ActorSystem actorSystem,
-                          Materializer materializer,
-                            FormFactory formFactory,
-                          @Named("dashboardParentActor") ActorRef dashboardParentActor,
-                          @Named("userParentActor") ActorRef userParentActor) {
+                       Materializer materializer,
+                       FormFactory formFactory,
+                       @Named("dashboardParentActor") ActorRef dashboardParentActor,
+                       @Named("userParentActor") ActorRef userParentActor) {
         this.dashboardParentActor = dashboardParentActor;
         this.userParentActor = userParentActor;
         this.materializer = materializer;
@@ -66,12 +67,9 @@ public class Application extends Controller {
     }
 
 
-
-
     public Result index() {
         return ok(index.render("Your new application is ready."));
     }
-
 
 
     public WebSocket ws(String hash) {
@@ -171,8 +169,6 @@ public class Application extends Controller {
     }
 
 
-
-
     public Pair<ActorRef, Publisher<JsonNode>> createWebSocketConnections() {
         // Creates a source to be materialized as an actor reference.
 
@@ -200,12 +196,11 @@ public class Application extends Controller {
     }
 
 
-
     private boolean originMatches(String origin) {
         return origin.contains("localhost:9000") || origin.contains("localhost:19001");
     }
 
-    public Result dashboard(String hash) {
+    public Result showDashboard(String hash) {
 
         // Use guice assisted injection to instantiate and configure the child actor.
         return ok(dashboard.render(hash));
@@ -218,14 +213,19 @@ public class Application extends Controller {
         return CompletableFuture.supplyAsync(
                 () -> createDashboardActor(dashboardForm.getName()), ec.current())
                 .thenComposeAsync(dashboardActorFuture -> dashboardActorFuture
-                        .thenComposeAsync(dashboardActor -> FutureConverters.toJava( ask(dashboardActor, new Dashboard.GetHash(), TIMEOUT_MILLIS))
-                            .thenApplyAsync(hash -> dashboard((String) hash), ec.current()), ec.current()), ec.current());
+                        .thenComposeAsync(dashboardActor -> FutureConverters.toJava(ask(dashboardActor, new Dashboard.GetHash(), TIMEOUT_MILLIS))
+                                .thenApplyAsync(hash -> showDashboard((String) hash), ec.current()), ec.current()), ec.current());
 
     }
 
-
-
-
+    public CompletionStage<Result> dashboard(String hash) {
+        return CompletableFuture.supplyAsync(
+                () -> {
+                    ObjectNode result = Json.newObject();
+                    return ok(result);
+                }
+        );
+    }
 
 
 }

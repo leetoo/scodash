@@ -1,11 +1,13 @@
 $ ->
-  ws = new WebSocket $("body").data("ws-url")
-  ws.onmessage = (event) ->
-    message = JSON.parse event.data
-    console.log message.type
-    switch message.type
-      when "data"
-        updateDashboard(message)
+  wsUrl = $("body").data("ws-url")
+  if wsUrl
+    ws = new WebSocket wsUrl
+    ws.onmessage = (event) ->
+      message = JSON.parse event.data
+      console.log message.type
+      switch message.type
+        when "data"
+          updateDashboard(message)
 
 
   $("#create").click
@@ -24,7 +26,7 @@ $ ->
 
 
   updateDashboard = (message) ->
-    $("#dashboard").empty()
+    $("#showDashboard").empty()
 
     for item in message.items
 
@@ -32,8 +34,8 @@ $ ->
       name = $("<strong>").text(item.name)
       for i in [1 .. item.score]
         commas = commas + 'I'
-      $("#dashboard").append((name))
-      $("#dashboard").append(($("<span>").text(commas)))
+      $("#showDashboard").append((name))
+      $("#showDashboard").append(($("<span>").text(commas)))
 
       # button Add
       btnAdd = $("<button>")
@@ -44,7 +46,7 @@ $ ->
           event.preventDefault()
           ws.send(JSON.stringify({operation: 'increment', item:  event.data.name}))
 
-      $("#dashboard").append(btnAdd)
+      $("#showDashboard").append(btnAdd)
 
       # button Remove
       btnRemove = $("<button>")
@@ -55,9 +57,9 @@ $ ->
           event.preventDefault()
           ws.send(JSON.stringify({operation: 'decrement', item:  event.data.name}))
 
-      $("#dashboard").append(btnRemove)
+      $("#showDashboard").append(btnRemove)
 
-      $("#dashboard").append($("<br>"))
+      $("#showDashboard").append($("<br>"))
 
 
 #    switch message.type
