@@ -26,8 +26,9 @@
         var key = 'recentDashboards';
         var recent = JSON.parse(localStorage.getItem(key)) || [];
         for (var i = 0; i < recent.length; i++) {
-            var dashboardHash = recent[i];
-            $("#recent").append('<a href="' + (window.location.href + 'showDashboard/' + dashboardHash) + '">' + dashboardHash + '</a><br/>')
+            var dashboardHash = recent[i].hash;
+            var dashboardName = recent[i].name;
+            $("#recent").append('<a href="' + (window.location.href + 'showDashboard/' + dashboardHash) + '">' + dashboardName + '</a><br/>')
         }
         recent = recent.slice(-5);
         localStorage.setItem(key, JSON.stringify(recent))

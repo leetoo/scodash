@@ -1,5 +1,5 @@
 @import controllers.routes
-@(hash: String)
+@(hash: String, name: String)
 
 @main("Scoring showDashboard") {
 
@@ -25,6 +25,7 @@
     <script>
         var key = 'recentDashboards';
         var hash = '@{hash}';
+        var name = '@{name}';
         var recentHashes = JSON.parse(localStorage.getItem(key)) || [];
         var addDashboard = true;
         for (var i = 0; i < recentHashes.length; i++) {
@@ -35,7 +36,7 @@
             }
         }
         if (addDashboard) {
-            recentHashes.push(hash);
+            recentHashes.push({hash:hash,name:name});
             localStorage.setItem(key, JSON.stringify(recentHashes));
         }
     </script>

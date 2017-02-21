@@ -30,6 +30,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 import static akka.pattern.Patterns.ask;
 
@@ -202,8 +203,22 @@ public class Application extends Controller {
 
     public Result showDashboard(String hash) {
 
+        try {
+            ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
+                    ask(dashboardParentActor, new DashboardParentActor.GetDashboard(hash), Application.TIMEOUT_MILLIS)
+            ).toCompletableFuture().get();
+            String name = (String)FutureConverters.toJava(
+                    ask(dashboardActor, new Dashboard.GetName(), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
+            return ok(dashboard.render(hash, name));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return internalServerError();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return internalServerError();
+        }
         // Use guice assisted injection to instantiate and configure the child actor.
-        return ok(dashboard.render(hash));
+
     }
 
     public CompletionStage<Result> create() {

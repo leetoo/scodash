@@ -78,6 +78,11 @@ public class DashboardActor extends UntypedActor {
             sender().tell(this.hash, self());
         }
 
+        if (message instanceof Dashboard.GetName) {
+            sender().tell(this.name, self());
+        }
+
+
 
 //        ReceiveBuilder
 //                .match(Dashboard.AddItem.class, latest -> {

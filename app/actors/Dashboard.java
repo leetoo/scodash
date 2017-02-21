@@ -61,4 +61,8 @@ public class Dashboard {
     public static final class GetHash {
 
     }
+
+    public static final class GetName {
+
+    }
 }
