@@ -32,8 +32,10 @@ $ ->
 
       commas = ''
       name = $("<strong>").text(item.name)
-      for i in [1 .. item.score]
+      console.log("SCORE:" + item.score)
+      for i in [1 .. item.score] by 1
         commas = commas + 'I'
+        console.log(i)
       tr = $("<tr>")
       tdName = $("<td>").append(name)
       tdCommas = $("<td>").append(($("<span>").text(commas)))
