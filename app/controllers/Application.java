@@ -1,5 +1,19 @@
 package controllers;
 
+import static akka.pattern.Patterns.ask;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import actors.Dashboard;
 import actors.DashboardParentActor;
 import actors.UserParentActor;
@@ -11,28 +25,14 @@ import akka.japi.Pair;
 import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
 import play.api.libs.Crypto;
 import play.data.FormFactory;
 import play.libs.F;
-import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.*;
 import scala.compat.java8.FutureConverters;
 import views.html.dashboard;
 import views.html.index;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-
-import static akka.pattern.Patterns.ask;
 
 
 
@@ -201,7 +201,7 @@ public class Application extends Controller {
         return origin.contains("localhost:9000") || origin.contains("localhost:19001");
     }
 
-    public Result showDashboard(String hash) {
+    public Result dashboard(String hash) {
 
         try {
             ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
@@ -210,14 +210,10 @@ public class Application extends Controller {
             String name = (String)FutureConverters.toJava(
                     ask(dashboardActor, new Dashboard.GetName(), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
             return ok(dashboard.render(hash, name));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return internalServerError();
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return internalServerError();
         }
-        // Use guice assisted injection to instantiate and configure the child actor.
 
     }
 
@@ -229,18 +225,27 @@ public class Application extends Controller {
                 () -> createDashboardActor(dashboardForm.getName()), ec.current())
                 .thenComposeAsync(dashboardActorFuture -> dashboardActorFuture
                         .thenComposeAsync(dashboardActor -> FutureConverters.toJava(ask(dashboardActor, new Dashboard.GetHash(), TIMEOUT_MILLIS))
-                                .thenApplyAsync(hash -> showDashboard((String) hash), ec.current()), ec.current()), ec.current());
+                                .thenApplyAsync(hash -> dashboard((String) hash), ec.current()), ec.current()), ec.current());
 
     }
 
-    public CompletionStage<Result> dashboard(String hash) {
-        return CompletableFuture.supplyAsync(
-                () -> {
-                    ObjectNode result = Json.newObject();
-                    return ok(result);
-                }
-        );
+    public Result addItem() {
+        ItemForm itemForm = formFactory.form(ItemForm.class).bindFromRequest().get();
+
+        try {
+            ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
+                    ask(dashboardParentActor, new DashboardParentActor.GetDashboard(itemForm.getHash()), Application.TIMEOUT_MILLIS)
+            ).toCompletableFuture().get();
+
+            ask(dashboardActor, new Dashboard.AddItem(itemForm.getName()), Application.TIMEOUT_MILLIS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return internalServerError();
+        }
+
+        return dashboard(itemForm.getHash());
     }
+
 
 
 }

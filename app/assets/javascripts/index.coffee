@@ -26,7 +26,7 @@ $ ->
 
 
   updateDashboard = (message) ->
-    $("#showDashboard").empty()
+    $("#dashboard").empty()
 
     for item in message.items
 
@@ -34,8 +34,11 @@ $ ->
       name = $("<strong>").text(item.name)
       for i in [1 .. item.score]
         commas = commas + 'I'
-      $("#showDashboard").append((name))
-      $("#showDashboard").append(($("<span>").text(commas)))
+      tr = $("<tr>")
+      tdName = $("<td>").append(name)
+      tdCommas = $("<td>").append(($("<span>").text(commas)))
+
+      tdButtons = $("<td>")
 
       # button Add
       btnAdd = $("<button>")
@@ -44,9 +47,9 @@ $ ->
         data: {name: item.name}
         handler: (event) ->
           event.preventDefault()
-          ws.send(JSON.stringify({operation: 'increment', item:  event.data.name}))
+          ws.send(JSON.stringify({operation: 'increment', name:  event.data.name}))
 
-      $("#showDashboard").append(btnAdd)
+      tdButtons.append(btnAdd)
 
       # button Remove
       btnRemove = $("<button>")
@@ -55,11 +58,15 @@ $ ->
         data: {name: item.name}
         handler: (event) ->
           event.preventDefault()
-          ws.send(JSON.stringify({operation: 'decrement', item:  event.data.name}))
+          ws.send(JSON.stringify({operation: 'decrement', name:  event.data.name}))
 
-      $("#showDashboard").append(btnRemove)
+      tdButtons.append(btnRemove)
 
-      $("#showDashboard").append($("<br>"))
+      tr.append(tdName, tdCommas, tdButtons)
+
+      $("#dashboard").append((tr))
+
+      $("#dashboard").append($("<br>"))
 
 
 #    switch message.type

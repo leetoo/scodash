@@ -5,9 +5,9 @@ public class Item {
     private String name;
     private int score;
 
-    public Item(String name, int score) {
+    public Item(String name) {
         this.name = name;
-        this.score = score;
+        this.score = 0;
     }
 
     public String getName() {

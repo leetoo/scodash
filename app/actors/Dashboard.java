@@ -35,26 +35,26 @@ public class Dashboard {
     }
 
     public static final class IncrementItem {
-        public String item;
+        public String name;
 
         public IncrementItem(String item) {
-            this.item = item;
+            this.name = item;
         }
     }
 
     public static final class DecrementItem {
-        public String item;
+        public String name;
 
         public DecrementItem(String item) {
-            this.item = item;
+            this.name = item;
         }
     }
 
     public static final class AddItem {
-        public String item;
+        public String name;
 
         public AddItem(String item) {
-            this.item = item;
+            this.name = item;
         }
     }
 
@@ -65,4 +65,6 @@ public class Dashboard {
     public static final class GetName {
 
     }
+
+
 }

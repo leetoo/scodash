@@ -4,25 +4,27 @@ package actors;
  * Created by vasek on 19. 11. 2016.
  */
 
+import static akka.pattern.Patterns.ask;
+
+import java.util.concurrent.ExecutionException;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.inject.assistedinject.Assisted;
+
 import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.inject.assistedinject.Assisted;
 import controllers.Application;
 import play.Configuration;
 import play.libs.Json;
 import scala.compat.java8.FutureConverters;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.concurrent.ExecutionException;
-
-import static akka.pattern.Patterns.ask;
 
 /**
  * The broker between the WebSocket and the StockActor(s).  The UserActor holds the connection and sends serialized
@@ -122,7 +124,7 @@ public class UserActor extends UntypedActor {
             ObjectNode message =
                     Json.newObject()
                         .put("type", "additem")
-                        .put("item", addItem.item);
+                        .put("name", addItem.name);
             logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
@@ -132,7 +134,7 @@ public class UserActor extends UntypedActor {
             ObjectNode message =
                     Json.newObject()
                             .put("type", "decrementitem")
-                            .put("item", decrementItem.item);
+                            .put("name", decrementItem.name);
             logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
@@ -142,7 +144,7 @@ public class UserActor extends UntypedActor {
             ObjectNode message =
                     Json.newObject()
                             .put("type", "incrementitem")
-                            .put("item", incrementItem.item);
+                            .put("name", incrementItem.name);
             logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
@@ -166,7 +168,7 @@ public class UserActor extends UntypedActor {
             JsonNode json = (JsonNode) msg;
             logger.debug("onReceive: " + msg);
             final String operation = json.get("operation").textValue();
-            final String item = json.get("item").textValue();
+            final String item = json.get("name").textValue();
             if ("increment".equals(operation)) {
                 dashboardActor.tell(new Dashboard.IncrementItem(item), self());
             } else if ("decrement".equals(operation)) {

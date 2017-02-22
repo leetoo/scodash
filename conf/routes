@@ -2,13 +2,12 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
 GET         /                           controllers.Application.index
-GET         /showDashboard/:hash        controllers.Application.showDashboard(hash)
 GET         /dashboard/:hash            controllers.Application.dashboard(hash)
 GET         /ws/:hash                   controllers.Application.ws(hash)
 GET         /sentiment/:symbol          controllers.StockSentiment.get(symbol)
 POST        /create/                    controllers.Application.create
+POST        /addItem/                   controllers.Application.addItem
 
 
 # Map static resources from the /public folder to the /assets URL path

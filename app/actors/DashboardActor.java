@@ -1,14 +1,16 @@
 package actors;
 
-import akka.actor.Actor;
-import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
-import com.google.inject.assistedinject.Assisted;
-
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import com.google.inject.assistedinject.Assisted;
+
+import akka.actor.Actor;
+import akka.actor.ActorRef;
+import akka.actor.UntypedActor;
 
 /**
  * Created by vasek on 11. 12. 2016.
@@ -30,38 +32,28 @@ public class DashboardActor extends UntypedActor {
     @Override
     public void preStart() throws Exception {
         super.preStart();
-        Item item1 = new Item("AAA", 5);
-        items.put(item1.getName(), item1);
-        Item item2 = new Item("BBB", 10);
-        items.put(item2.getName(), item2);
     }
 
     @Override
     public void onReceive(Object message) throws Throwable {
 
-        if (message instanceof Dashboard.AddItem) {
-            Dashboard.AddItem addItem = (Dashboard.AddItem)message;
-            items.put(addItem.item, new Item(addItem.item, 0));
-        }
 
         if (message instanceof Dashboard.IncrementItem) {
             Dashboard.IncrementItem incrementItem = (Dashboard.IncrementItem)message;
-            Item item = items.get(incrementItem.item);
+            Item item = items.get(incrementItem.name);
             if (item != null) {
                 item.increment();
             }
-            // notify watchers
-            watchers.forEach(watcher -> watcher.tell(new Dashboard.Data(items), self()));
+            notifyWatchers();
         }
 
         if (message instanceof Dashboard.DecrementItem) {
             Dashboard.DecrementItem decrementItem = (Dashboard.DecrementItem)message;
-            Item item = items.get(decrementItem.item);
+            Item item = items.get(decrementItem.name);
             if (item != null) {
                 item.decrement();
             }
-            // notify watchers
-            watchers.forEach(watcher -> watcher.tell(new Dashboard.Data(items), self()));
+            notifyWatchers();
         }
 
         if (message instanceof Dashboard.Watch) {
@@ -82,6 +74,14 @@ public class DashboardActor extends UntypedActor {
             sender().tell(this.name, self());
         }
 
+        if (message instanceof Dashboard.AddItem) {
+            Dashboard.AddItem addItem = (Dashboard.AddItem)message;
+            items.put(addItem.name, new Item(addItem.name));
+
+            notifyWatchers();
+
+        }
+
 
 
 //        ReceiveBuilder
@@ -94,7 +94,7 @@ public class DashboardActor extends UntypedActor {
 //                    // notify watchers
 //                    //watchers.forEach(watcher -> watcher.tell(new Stock.Update(symbol, newPrice), self()));
 //
-//                    // add new item on showDashboard
+//                    // add new name on showDashboard
 //
 //                })
 //                .match(Stock.Watch.class, watch -> {
@@ -110,6 +110,10 @@ public class DashboardActor extends UntypedActor {
 //                    //    context().stop(self());
 //                    //}
 //                });
+    }
+
+    private void notifyWatchers() {
+        watchers.forEach(watcher -> watcher.tell(new Dashboard.Data(items), self()));
     }
 
     public interface Factory {
