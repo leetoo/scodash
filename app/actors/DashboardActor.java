@@ -82,6 +82,14 @@ public class DashboardActor extends UntypedActor {
 
         }
 
+        if (message instanceof Dashboard.RemoveItem) {
+            Dashboard.RemoveItem removeItem = (Dashboard.RemoveItem)message;
+            items.remove(removeItem.name);
+
+            notifyWatchers();
+
+        }
+
 
 
 //        ReceiveBuilder

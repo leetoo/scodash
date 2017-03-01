@@ -40,19 +40,6 @@ $ ->
       tdName = $("<td>").append(name)
       tdCommas = $("<td>").append(($("<span>").text(commas)))
 
-      tdButtons = $("<td>")
-
-      # button Add
-      btnAdd = $("<button>")
-      btnAdd.html("Add")
-      btnAdd.click
-        data: {name: item.name}
-        handler: (event) ->
-          event.preventDefault()
-          ws.send(JSON.stringify({operation: 'increment', name:  event.data.name}))
-
-      tdButtons.append(btnAdd)
-
       # button Remove
       btnRemove = $("<button>")
       btnRemove.html("Remove")
@@ -60,11 +47,37 @@ $ ->
         data: {name: item.name}
         handler: (event) ->
           event.preventDefault()
+          ws.send(JSON.stringify({operation: 'remove', name:  event.data.name}))
+
+      tdRemoveButton = $("<td>")
+      td.append(btnRemove)
+
+
+      tdIncDecButtons = $("<td>")
+
+      # button Increment
+      btnInc = $("<button>")
+      btnInc.html("Inc")
+      btnInc.click
+        data: {name: item.name}
+        handler: (event) ->
+          event.preventDefault()
+          ws.send(JSON.stringify({operation: 'increment', name:  event.data.name}))
+
+      tdIncDecButtons.append(btnInc)
+
+      # button Decrement
+      btnDec = $("<button>")
+      btnDec.html("Dec")
+      btnDec.click
+        data: {name: item.name}
+        handler: (event) ->
+          event.preventDefault()
           ws.send(JSON.stringify({operation: 'decrement', name:  event.data.name}))
 
-      tdButtons.append(btnRemove)
+      tdIncDecButtons.append(btnDec)
 
-      tr.append(tdName, tdCommas, tdButtons)
+      tr.append(tdRemoveButton, tdName, tdCommas, tdIncDecButtons)
 
       $("#dashboard").append((tr))
 

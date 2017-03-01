@@ -149,6 +149,16 @@ public class UserActor extends UntypedActor {
             out.tell(message, self());
         }
 
+        if (msg instanceof Dashboard.RemoveItem) {
+            Dashboard.RemoveItem removeItem = (Dashboard.RemoveItem) msg;
+            ObjectNode message =
+                    Json.newObject()
+                            .put("type", "removeitem")
+                            .put("name", removeItem.name);
+            logger.debug("onReceive: " + message);
+            out.tell(message, self());
+        }
+
         if (msg instanceof Dashboard.Data) {
             Dashboard.Data data = (Dashboard.Data)msg;
             ArrayNode items = Json.newArray();

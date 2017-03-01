@@ -58,6 +58,14 @@ public class Dashboard {
         }
     }
 
+    public static final class RemoveItem {
+        public String name;
+
+        public RemoveItem(String item) {
+            this.name = item;
+        }
+    }
+
     public static final class GetHash {
 
     }
