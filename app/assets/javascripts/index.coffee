@@ -50,7 +50,7 @@ $ ->
           ws.send(JSON.stringify({operation: 'remove', name:  event.data.name}))
 
       tdRemoveButton = $("<td>")
-      td.append(btnRemove)
+      tdRemoveButton.append(btnRemove)
 
 
       tdIncDecButtons = $("<td>")

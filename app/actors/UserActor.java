@@ -183,6 +183,8 @@ public class UserActor extends UntypedActor {
                 dashboardActor.tell(new Dashboard.IncrementItem(item), self());
             } else if ("decrement".equals(operation)) {
                 dashboardActor.tell(new Dashboard.DecrementItem(item), self());
+            } else if ("remove".equals(operation)) {
+                dashboardActor.tell(new Dashboard.RemoveItem(item), self());
             } else {
                 logger.error("No operation in JSON");
             }
