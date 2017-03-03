@@ -37,47 +37,50 @@ $ ->
         commas = commas + 'I'
         console.log(i)
       tr = $("<tr>")
-      tdName = $("<td>").append(name)
-      tdCommas = $("<td>").append(($("<span>").text(commas)))
+      spanName = $("<span>").append(name)
+      spanCommas = $("<span>").text(commas)
 
       # button Remove
       btnRemove = $("<button>")
-      btnRemove.html("Remove")
+      btnRemove.addClass("btn btn-default").append($("<span>").addClass("glyphicon glyphicon-remove"))
       btnRemove.click
         data: {name: item.name}
         handler: (event) ->
           event.preventDefault()
           ws.send(JSON.stringify({operation: 'remove', name:  event.data.name}))
 
-      tdRemoveButton = $("<td>")
-      tdRemoveButton.append(btnRemove)
-
-
-      tdIncDecButtons = $("<td>")
-
       # button Increment
       btnInc = $("<button>")
-      btnInc.html("Inc")
+      btnInc.addClass("btn btn-default").append($("<span>").addClass("glyphicon glyphicon-menu-up"))
       btnInc.click
         data: {name: item.name}
         handler: (event) ->
           event.preventDefault()
           ws.send(JSON.stringify({operation: 'increment', name:  event.data.name}))
 
-      tdIncDecButtons.append(btnInc)
-
       # button Decrement
       btnDec = $("<button>")
-      btnDec.html("Dec")
+      btnDec.addClass("btn btn-default").append($("<span>").addClass("glyphicon glyphicon-menu-down"))
       btnDec.click
         data: {name: item.name}
         handler: (event) ->
           event.preventDefault()
           ws.send(JSON.stringify({operation: 'decrement', name:  event.data.name}))
 
-      tdIncDecButtons.append(btnDec)
+      tdBtns = $("<td>")
+      tdBtns.addClass("col-md-2")
+      btnGroup = $("<div>")
+      btnGroup.addClass("btn-group")
+      btnGroup.append(btnRemove, btnInc, btnDec)
+      tdBtns.append(btnGroup)
+      tdName = $("<td>")
+      tdName.addClass("col-md-3")
+      tdName.append(spanName)
+      tdCommas = $("<td>")
+      tdCommas.addClass("col-md-7")
+      tdCommas.append(spanCommas)
 
-      tr.append(tdRemoveButton, tdName, tdCommas, tdIncDecButtons)
+      tr.append(tdBtns, tdName, tdCommas)
 
       $("#dashboard").append((tr))
 
