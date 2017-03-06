@@ -38,11 +38,16 @@ $ ->
         console.log(i)
       tr = $("<tr>")
       spanName = $("<span>").append(name)
-      spanCommas = $("<span>").text(commas)
+#      spanCommas = $("<span>").text(commas)
+
+      spanCommas = $("<div style=\"width:150px;height:10px\">").addClass("chart-holder")
+
+      spanCommas.plot([[[0, 0], [1, 1]] ], {yaxis: { max: 1 }} ).data("plot")
+
 
       # button Remove
       btnRemove = $("<button>")
-      btnRemove.addClass("btn btn-default").append($("<span>").addClass("glyphicon glyphicon-remove"))
+      btnRemove.addClass("btn btn-default btn-xs").append($("<span>").addClass("glyphicon glyphicon-remove"))
       btnRemove.click
         data: {name: item.name}
         handler: (event) ->
@@ -51,7 +56,7 @@ $ ->
 
       # button Increment
       btnInc = $("<button>")
-      btnInc.addClass("btn btn-default").append($("<span>").addClass("glyphicon glyphicon-menu-up"))
+      btnInc.addClass("btn btn-default btn-xs").append($("<span>").addClass("glyphicon glyphicon-menu-up"))
       btnInc.click
         data: {name: item.name}
         handler: (event) ->
@@ -60,27 +65,26 @@ $ ->
 
       # button Decrement
       btnDec = $("<button>")
-      btnDec.addClass("btn btn-default").append($("<span>").addClass("glyphicon glyphicon-menu-down"))
+      btnDec.addClass("btn btn-default btn-xs").append($("<span>").addClass("glyphicon glyphicon-menu-down"))
       btnDec.click
         data: {name: item.name}
         handler: (event) ->
           event.preventDefault()
           ws.send(JSON.stringify({operation: 'decrement', name:  event.data.name}))
 
-      tdBtns = $("<td>")
-      tdBtns.addClass("col-md-2")
+      tdBtnsName = $("<td>")
+      tdBtnsName.addClass("col-md-4")
       btnGroup = $("<div>")
       btnGroup.addClass("btn-group")
       btnGroup.append(btnRemove, btnInc, btnDec)
-      tdBtns.append(btnGroup)
-      tdName = $("<td>")
-      tdName.addClass("col-md-3")
-      tdName.append(spanName)
+      tdBtnsName.append(btnGroup)
+      tdBtnsName.append($("<span>&nbsp;&nbsp;</span>"))
+      tdBtnsName.append(spanName)
       tdCommas = $("<td>")
-      tdCommas.addClass("col-md-7")
+      tdCommas.addClass("col-md-8")
       tdCommas.append(spanCommas)
 
-      tr.append(tdBtns, tdName, tdCommas)
+      tr.append(tdBtnsName, tdCommas)
 
       $("#dashboard").append((tr))
 
