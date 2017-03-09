@@ -40,9 +40,16 @@ $ ->
       spanName = $("<span>").append(name)
 #      spanCommas = $("<span>").text(commas)
 
-      spanCommas = $("<div style=\"width:150px;height:10px\">").addClass("chart-holder")
+      spanCommas = $("<div style=\"width:400px;height:50px\">").addClass("chart-holder")
 
-      spanCommas.plot([[[0, 0], [1, 1]] ], {yaxis: { max: 1 }} ).data("plot")
+      spanCommas.plot(
+        [[[0, 0], [0,0.75], [1, 1]] ],
+        {
+          yaxis: { show: false },
+          xaxis: { show: false },
+          grid: { show: false}
+        }
+        ).data("plot")
 
 
       # button Remove
