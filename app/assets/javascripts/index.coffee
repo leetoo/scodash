@@ -33,23 +33,26 @@ $ ->
       commas = ''
       name = $("<strong>").text(item.name)
       console.log("SCORE:" + item.score)
+      spanCommas = []
       for i in [1 .. item.score] by 1
         commas = commas + 'I'
         console.log(i)
+        spanComma = $("<div style=\"width:10px;height:20px\">").addClass("chart-holder")
+        spanComma.plot(
+          [[[0, 0], [1, 1]] ],
+          {
+            yaxis: { show: false },
+            xaxis: { show: false },
+            grid: { show: false}
+          }
+        ).data("plot")
+        spanCommas push spanComma
+
       tr = $("<tr>")
       spanName = $("<span>").append(name)
-#      spanCommas = $("<span>").text(commas)
 
-      spanCommas = $("<div style=\"width:400px;height:50px\">").addClass("chart-holder")
 
-      spanCommas.plot(
-        [[[0, 0], [0,0.75], [1, 1]] ],
-        {
-          yaxis: { show: false },
-          xaxis: { show: false },
-          grid: { show: false}
-        }
-        ).data("plot")
+
 
 
       # button Remove
