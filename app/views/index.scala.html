@@ -1,39 +1,13 @@
 @(message: String)
 
-@main("Scoring showDashboard") {
+@main("ScoDash") {
 
-    <body>
-        <div class="container">
-            <h2>Scoring Dashboard</h2>
+<div class="row">
+    <div class="col-md-12 text-center"><h2>Office's cofee</h2></div>
+</div>
 
-            <form class="form-inline" method="post" action="@routes.Application.create">
-                <div class="form-group">
-                    <label class="sr-only" for="dashboardName"></label>
-                    <input id="name" name="name" type="text" class="form-control" placeholder="Name of dashboard" ></input>
-                </div>
-                <button id="create" type="submit" class="btn btn-primary">Create</button>
-            </form>
-
-            <br/>
-
-            <div id="recent">
-
-            </div>
-        </div>
-    </body>
-
-    <script>
-        var key = 'recentDashboards';
-        var recent = JSON.parse(localStorage.getItem(key)) || [];
-        for (var i = 0; i < recent.length; i++) {
-            var dashboardHash = recent[i].hash;
-            var dashboardName = recent[i].name;
-            $("#recent").append('<a href="' + (window.location.href + 'dashboard/' + dashboardHash) + '">' + dashboardName + '</a><br/>')
-        }
-        recent = recent.slice(-4);
-        localStorage.setItem(key, JSON.stringify(recent))
-    </script>
-
-
+<div class="row">
+    <div class="col-md-12 text-center">What we have drunken at work so far</div>
+</div>
 
 }

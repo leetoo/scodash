@@ -1,19 +1,5 @@
 package controllers;
 
-import static akka.pattern.Patterns.ask;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
-import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
 import actors.Dashboard;
 import actors.DashboardParentActor;
 import actors.UserParentActor;
@@ -25,15 +11,25 @@ import akka.japi.Pair;
 import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
 import play.api.libs.Crypto;
 import play.data.FormFactory;
 import play.libs.F;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.*;
 import scala.compat.java8.FutureConverters;
-import views.html.dashboard;
 import views.html.index;
+import views.html.old_dashboard;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
+import static akka.pattern.Patterns.ask;
 
 
 @Singleton
@@ -209,7 +205,7 @@ public class Application extends Controller {
             ).toCompletableFuture().get();
             String name = (String)FutureConverters.toJava(
                     ask(dashboardActor, new Dashboard.GetName(), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
-            return ok(dashboard.render(hash, name));
+            return ok(old_dashboard.render(hash, name));
         } catch (Exception e) {
             e.printStackTrace();
             return internalServerError();
