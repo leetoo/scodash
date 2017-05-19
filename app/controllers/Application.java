@@ -1,5 +1,19 @@
 package controllers;
 
+import static akka.pattern.Patterns.ask;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import actors.Dashboard;
 import actors.DashboardParentActor;
 import actors.UserParentActor;
@@ -10,26 +24,23 @@ import akka.actor.Status;
 import akka.japi.Pair;
 import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
-import akka.stream.javadsl.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
+import akka.stream.javadsl.AsPublisher;
+import akka.stream.javadsl.Flow;
+import akka.stream.javadsl.Keep;
+import akka.stream.javadsl.Sink;
+import akka.stream.javadsl.Source;
 import play.api.libs.Crypto;
 import play.data.FormFactory;
 import play.libs.F;
 import play.libs.concurrent.HttpExecutionContext;
-import play.mvc.*;
+import play.mvc.Controller;
+import play.mvc.Http;
+import play.mvc.Result;
+import play.mvc.Results;
+import play.mvc.WebSocket;
 import scala.compat.java8.FutureConverters;
 import views.html.index;
 import views.html.old_dashboard;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
-import static akka.pattern.Patterns.ask;
 
 
 @Singleton
@@ -200,6 +211,7 @@ public class Application extends Controller {
     public Result dashboard(String hash) {
 
         try {
+//            String hash = "abc";
             ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
                     ask(dashboardParentActor, new DashboardParentActor.GetDashboard(hash), Application.TIMEOUT_MILLIS)
             ).toCompletableFuture().get();

@@ -46,7 +46,7 @@ $ ->
             grid: { show: false}
           }
         ).data("plot")
-        spanCommas push spanComma
+        spanCommas.push(spanComma)
 
       tr = $("<tr>")
       spanName = $("<span>").append(name)
