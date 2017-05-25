@@ -158,7 +158,6 @@ body {
 }
 .dashboard-header {
   padding-top: 7px;
-  padding-bottom: 7px;
 }
 .dashboard-comma-row {
   font-size: 150%;
@@ -183,9 +182,59 @@ body {
   background-image: linear-gradient(to top, #0069a9, #0077c0);
 
 }
-.btn-type {
-  height: 48px;
-  border-radius: 0px;
-  border-bottom: solid 2px #1574af;
 
+.btn-type-1, .btn-type-2, .btn-type-3 {
+  height: 48px;
+  width: 48px;
+  border-radius: 0px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 2px solid #d8d8d8;
+}
+
+.btn-type-1 {
+  background: no-repeat center url("../images/icon-1-dashboard.png")
+}
+
+.btn-type-2 {
+  background: no-repeat center url("../images/icon-2-pie-chart.png")
+}
+
+.btn-type-3 {
+  background: no-repeat center url("../images/icon-3-scoreboard.png")
+}
+
+
+.btn-type-1:focus,
+.btn-type-1:active:focus,
+.btn-type-1.active:focus,
+.btn-type-1.focus,
+.btn-type-1:active.focus,
+.btn-type-1.active.focus {
+  background: no-repeat center url("../images/icon-1-dashboard-aktivni.png");
+  outline: none;
+  border-bottom: solid 2px #1574af;
+}
+
+.btn-type-2:focus,
+.btn-type-2:active:focus,
+.btn-type-2.active:focus,
+.btn-type-2.focus,
+.btn-type-2:active.focus,
+.btn-type-2.active.focus {
+  background: no-repeat center url("../images/icon-2-pie-chart-aktivni.png");
+  outline: none;
+  border-bottom: solid 2px #1574af;
+}
+
+.btn-type-3:focus,
+.btn-type-3:active:focus,
+.btn-type-3.active:focus,
+.btn-type-3.focus,
+.btn-type-3:active.focus,
+.btn-type-3.active.focus {
+  background: no-repeat center url("../images/icon-3-scoreboard-aktivni.png");
+  outline: none;
+  border-bottom: solid 2px #1574af;
 }
