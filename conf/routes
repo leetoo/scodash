@@ -8,6 +8,7 @@ GET         /ws/:hash                   controllers.Application.ws(hash)
 GET         /sentiment/:symbol          controllers.StockSentiment.get(symbol)
 POST        /create/                    controllers.Application.create
 POST        /addItem/                   controllers.Application.addItem
+GET         /createDashboard1           controllers.Application.createDashboard1
 
 
 # Map static resources from the /public folder to the /assets URL path

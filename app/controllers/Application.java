@@ -39,6 +39,7 @@ import play.mvc.Result;
 import play.mvc.Results;
 import play.mvc.WebSocket;
 import scala.compat.java8.FutureConverters;
+import views.html.createDashboard1;
 import views.html.index;
 import views.html.old_dashboard;
 
@@ -72,6 +73,10 @@ public class Application extends Controller {
         this.materializer = materializer;
         this.actorSystem = actorSystem;
         this.formFactory = formFactory;
+    }
+
+    public Result createDashboard1() {
+        return ok(createDashboard1.render("Create dashboard 1"));
     }
 
 
