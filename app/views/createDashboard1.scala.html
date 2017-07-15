@@ -12,16 +12,16 @@
         </div>
     </div>
 
-    <form action="createDashboard2">
+    <form action="@routes.Application.createDashboard2()" method="post">
         <div class="form-group">
             <label for="dashboardName">Dashboard name</label>
-            <input type="text" class="form-control" id="dashboardName" placeholder="Dashboard name">
+            <input type="text" class="form-control" id="dashboardName" name="dashboardName" placeholder="Dashboard name">
         </div>
 
 
         <div class="form-group">
             <label for="dashboardDescription">Dashboard description</label>
-            <textarea class="form-control" rows="3" id="dashboardDescription" placeholder="Dashboard description"></textarea>
+            <textarea class="form-control" rows="3" id="dashboardDescription" name="dashboardDescription" placeholder="Dashboard description"></textarea>
         </div>
 
         <div class="radio">
@@ -42,7 +42,6 @@
                 Score card
             </label>
         </div>
-
 
         <button type="submit" class="btn btn-primary">Next</button>
     </form>

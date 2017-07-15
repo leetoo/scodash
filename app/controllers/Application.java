@@ -12,9 +12,11 @@ import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
 import com.fasterxml.jackson.databind.JsonNode;
+import controllers.forms.CreateDashboard1;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import play.api.libs.Crypto;
+import play.data.Form;
 import play.data.FormFactory;
 import play.libs.F;
 import play.libs.concurrent.HttpExecutionContext;
@@ -66,10 +68,15 @@ public class Application extends Controller {
     }
 
     public Result createDashboard1() {
+        Form<CreateDashboard1> createDashboard1Form = formFactory.form(CreateDashboard1.class);
+        createDashboard1Form.fill(new CreateDashboard1(session("dashboardName"), session("dashboardDescription")));
         return ok(createDashboard1.render("Create dashboard 1"));
     }
 
     public Result createDashboard2() {
+        CreateDashboard1 createDashboard1FormData = formFactory.form(CreateDashboard1.class).bindFromRequest(request()).get();
+        session("dashboardName", createDashboard1FormData.getDashboardName());
+        session("dashboardDescription", createDashboard1FormData.getDashboardDescription());
         return ok(createDashboard2.render("Create dashboard 2"));
     }
 
