@@ -12,6 +12,42 @@
         </div>
     </div>
 
+    <form>
+        <div class="form-group">
+            <label for="dashboardName">Dashboard name</label>
+            <input type="text" class="form-control" id="dashboardName" placeholder="Dashboard name">
+        </div>
+
+
+        <div class="form-group">
+            <label for="dashboardDescription">Dashboard description</label>
+            <textarea class="form-control" rows="3" id="dashboardDescription" placeholder="Dashboard description"></textarea>
+        </div>
+
+        <div class="radio">
+            <label>
+                <input type="radio" name="dashboardType" id="dashboardTypeCommna" value="dashboardTypeCommna" checked>
+                Commna dashboard
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" name="dashboardType" id="dashboardTypePie" value="dashboardTypePie">
+                Pie chart
+            </label>
+        </div>
+        <div class="radio disabled">
+            <label>
+                <input type="radio" name="dashboardType" id="dashboardTypeSport" value="dashboardTypeSport" disabled>
+                Score card
+            </label>
+        </div>
+
+
+        <button type="submit" class="btn btn-primary">Next</button>
+    </form>
+
+
 
 
 
