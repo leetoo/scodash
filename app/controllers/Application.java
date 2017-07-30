@@ -12,6 +12,8 @@ import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import controllers.forms.AddItem;
 import controllers.forms.CreateDashboard1;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -19,10 +21,10 @@ import play.api.libs.Crypto;
 import play.data.Form;
 import play.data.FormFactory;
 import play.libs.F;
+import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.*;
 import scala.compat.java8.FutureConverters;
-import views.html.createDashboard1;
 import views.html.createDashboard2;
 import views.html.index;
 import views.html.old_dashboard;
@@ -69,15 +71,26 @@ public class Application extends Controller {
 
     public Result createDashboard1() {
         Form<CreateDashboard1> createDashboard1Form = formFactory.form(CreateDashboard1.class);
-        createDashboard1Form.fill(new CreateDashboard1(session("dashboardName"), session("dashboardDescription")));
-        return ok(createDashboard1.render("Create dashboard 1"));
+        return ok(views.html.createDashboard1.render(createDashboard1Form.fill(new CreateDashboard1(session("dashboardName"), session("dashboardDescription")))));
     }
 
     public Result createDashboard2() {
         CreateDashboard1 createDashboard1FormData = formFactory.form(CreateDashboard1.class).bindFromRequest(request()).get();
         session("dashboardName", createDashboard1FormData.getDashboardName());
         session("dashboardDescription", createDashboard1FormData.getDashboardDescription());
-        return ok(createDashboard2.render("Create dashboard 2"));
+        return ok(createDashboard2.render());
+    }
+
+    public Result addItem() {
+        AddItem addItem = formFactory.form(AddItem.class).bindFromRequest(request()).get();
+        if (session("items") == null) {
+            session("items", Json.newObject().putArray("items").add(addItem.getItemName()).toString());
+        } else {
+            ArrayNode arrayNode = (ArrayNode)Json.parse(session("items"));
+            arrayNode.add(addItem.getItemName());
+            session("items", arrayNode.toString());
+        }
+        return ok(createDashboard2.render());
     }
 
 
@@ -243,22 +256,22 @@ public class Application extends Controller {
 
     }
 
-    public Result addItem() {
-        ItemForm itemForm = formFactory.form(ItemForm.class).bindFromRequest().get();
-
-        try {
-            ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
-                    ask(dashboardParentActor, new DashboardParentActor.GetDashboard(itemForm.getHash()), Application.TIMEOUT_MILLIS)
-            ).toCompletableFuture().get();
-
-            ask(dashboardActor, new Dashboard.AddItem(itemForm.getName()), Application.TIMEOUT_MILLIS);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return internalServerError();
-        }
-
-        return dashboard(itemForm.getHash());
-    }
+//    public Result addItem() {
+//        ItemForm itemForm = formFactory.form(ItemForm.class).bindFromRequest().get();
+//
+//        try {
+//            ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
+//                    ask(dashboardParentActor, new DashboardParentActor.GetDashboard(itemForm.getHash()), Application.TIMEOUT_MILLIS)
+//            ).toCompletableFuture().get();
+//
+//            ask(dashboardActor, new Dashboard.AddItem(itemForm.getName()), Application.TIMEOUT_MILLIS);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return internalServerError();
+//        }
+//
+//        return dashboard(itemForm.getHash());
+//    }
 
 
 

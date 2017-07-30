@@ -10,6 +10,7 @@ POST        /create/                    controllers.Application.create
 POST        /addItem/                   controllers.Application.addItem
 GET         /createDashboard1           controllers.Application.createDashboard1
 POST        /createDashboard2           controllers.Application.createDashboard2
+POST        /addItem                    controllers.Application.addItem
 
 
 # Map static resources from the /public folder to the /assets URL path

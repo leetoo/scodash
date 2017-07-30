@@ -3,30 +3,15 @@ package actors;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jongo.MongoCollection;
-
-import play.Play;
-import uk.co.panaxiom.playjongo.PlayJongo;
-
 /**
  * Created by vasek on 11. 12. 2016.
  */
 public class Dashboard {
 
-    public static PlayJongo jongo = Play.application().injector().instanceOf(PlayJongo.class);
-
-    public static MongoCollection dashboards() {
-        return jongo.getCollection("dashboards");
-    }
-
     private String name;
 
     public Dashboard(String name) {
         this.name = name;
-    }
-
-    public void insert() {
-        dashboards().save(this);
     }
 
     public String getName() {

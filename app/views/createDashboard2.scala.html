@@ -1,6 +1,6 @@
-@(message: String)
+@()
 
-@mainWizard("ScoDash - create dashboard 1") {
+@mainWizard("ScoDash - create dashboard 2") {
 
     <div class="breadcrumbs row vertical-align">
         <div class="col-md-12 text-center">
@@ -11,6 +11,21 @@
             <button type="button" class="btn breadcrumb-btn">3<br></button>
         </div>
     </div>
+
+    <div class="col-md-12 text-center">
+        <h3>DASHBOARD'S ITEMS</h3>
+    </div>
+
+
+    <form action="@routes.Application.addItem()" method="post" class="form-inlinse">
+    <form class="form-inline">
+        <div class="form-group">
+            <div class="input-group">
+                <input type="text" class="form-control" id="itemName" name="itemName" placeholder="Item name">
+                <span class="input-group-addon"><button type="submit" href="addItem">Add</button></span>
+            </div>
+        </div>
+    </form>
 
 
     <a href="createDashboard1" type="button" class="btn btn-default"><</a>

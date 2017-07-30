@@ -1,4 +1,4 @@
-@(message: String)
+@(form: Form[forms.CreateDashboard1])
 
 @mainWizard("ScoDash - create dashboard 1") {
 
@@ -12,9 +12,16 @@
         </div>
     </div>
 
+    <div class="col-md-12 text-center">
+        <h3>NEW DASHBOARD</h3>
+    </div>
+
     <form action="@routes.Application.createDashboard2()" method="post">
         <div class="form-group">
             <label for="dashboardName">Dashboard name</label>
+            @helper.inputText(
+                form("dashboardName")
+            )
             <input type="text" class="form-control" id="dashboardName" name="dashboardName" placeholder="Dashboard name">
         </div>
 
