@@ -71,7 +71,8 @@ public class Application extends Controller {
 
     public Result createDashboard1() {
         Form<CreateDashboard1> createDashboard1Form = formFactory.form(CreateDashboard1.class);
-        return ok(views.html.createDashboard1.render(createDashboard1Form.fill(new CreateDashboard1(session("dashboardName"), session("dashboardDescription")))));
+        Form<CreateDashboard1> filledForm = createDashboard1Form.fill(new CreateDashboard1(session("dashboardName"), session("dashboardDescription")));
+        return ok(views.html.createDashboard1.render(filledForm));
     }
 
     public Result createDashboard2() {

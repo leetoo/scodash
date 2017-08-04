@@ -1,4 +1,9 @@
-@(form: Form[forms.CreateDashboard1])
+@(dashboardForm1: play.data.Form[forms.CreateDashboard1])
+
+@import helper._
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
 
 @mainWizard("ScoDash - create dashboard 1") {
 
@@ -16,20 +21,15 @@
         <h3>NEW DASHBOARD</h3>
     </div>
 
-    <form action="@routes.Application.createDashboard2()" method="post">
-        <div class="form-group">
-            <label for="dashboardName">Dashboard name</label>
-            @helper.inputText(
-                form("dashboardName")
-            )
-            <input type="text" class="form-control" id="dashboardName" name="dashboardName" placeholder="Dashboard name">
-        </div>
+    @helper.form(action = routes.Application.createDashboard2, 'class -> "form-horizontal") {
 
+        @helper.inputText(
+            dashboardForm1("dashboardName"), '_label -> "Dashboard Name", 'class -> "form-control", 'placeholder -> "Dashboard name"
+        )
 
-        <div class="form-group">
-            <label for="dashboardDescription">Dashboard description</label>
-            <textarea class="form-control" rows="3" id="dashboardDescription" name="dashboardDescription" placeholder="Dashboard description"></textarea>
-        </div>
+        @helper.textarea(
+            dashboardForm1("dashboardDescription"), '_label -> "Dashboard Description", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Dashboard description"
+        )
 
         <div class="radio">
             <label>
@@ -51,7 +51,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Next</button>
-    </form>
+    }
 
 
 
