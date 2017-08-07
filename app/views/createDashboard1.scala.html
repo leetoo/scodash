@@ -28,25 +28,18 @@
         )
 
         @helper.textarea(
-            dashboardForm1("dashboardDescription"), '_label -> "Dashboard Description", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Dashboard description"
+            dashboardForm1("dashboardDescription"), '_label -> "Description", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Dashboard description"
         )
 
-        <div class="radio">
-            <label>
-                <input type="radio" name="dashboardType" id="dashboardTypeCommna" value="dashboardTypeCommna" checked>
-                Commna dashboard
+        <div class="btn-group" data-toggle="buttons">
+            <label class="btn btn-primary active">
+                <input type="radio" name="options" id="option1">Comma dashboard
             </label>
-        </div>
-        <div class="radio">
-            <label>
-                <input type="radio" name="dashboardType" id="dashboardTypePie" value="dashboardTypePie">
-                Pie chart
+            <label class="btn btn-primary">
+                <input type="radio" name="options" id="option2">Pie chart
             </label>
-        </div>
-        <div class="radio disabled">
-            <label>
-                <input type="radio" name="dashboardType" id="dashboardTypeSport" value="dashboardTypeSport" disabled>
-                Score card
+            <label class="btn btn-primary">
+                <input type="radio" name="options" id="option3">Score card
             </label>
         </div>
 
@@ -58,3 +51,7 @@
 
 
 }
+
+<script>
+        $('.btn').button();
+</script>
