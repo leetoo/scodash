@@ -7,14 +7,16 @@ public class CreateDashboard1 {
 
     private String dashboardName;
     private String dashboardDescription;
+    private String dashboardType;
 
 
     public CreateDashboard1() {
     }
 
-    public CreateDashboard1(String dashboardName, String dashboardDescription) {
+    public CreateDashboard1(String dashboardName, String dashboardDescription, String dashboardType) {
         this.dashboardName = dashboardName;
         this.dashboardDescription = dashboardDescription;
+        this.dashboardType = dashboardType;
     }
 
     public String getDashboardName() {
@@ -31,5 +33,13 @@ public class CreateDashboard1 {
 
     public void setDashboardDescription(String dashboardDescription) {
         this.dashboardDescription = dashboardDescription;
+    }
+
+    public String getDashboardType() {
+        return dashboardType;
+    }
+
+    public void setDashboardType(String dashboardType) {
+        this.dashboardType = dashboardType;
     }
 }

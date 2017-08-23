@@ -31,19 +31,24 @@
             dashboardForm1("dashboardDescription"), '_label -> "Description", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Dashboard description"
         )
 
-        <div class="btn-group" data-toggle="buttons">
-            <label class="btn btn-primary active">
-                <input type="radio" name="options" id="option1">Comma dashboard
-            </label>
-            <label class="btn btn-primary">
-                <input type="radio" name="options" id="option2">Pie chart
-            </label>
-            <label class="btn btn-primary">
-                <input type="radio" name="options" id="option3">Score card
-            </label>
+        <div class="form-group">
+            <label>Dashboard type</label>
+            <div data-toggle="buttons">
+                <label class="btn btn-default @{if (dashboardForm1("dashboardType").value() == "comma") "active" else ""}">
+                    <input type="radio" name="dashboardType" value="comma">Comma dashboard
+                </label>
+                <label class="btn btn-default @{if (dashboardForm1("dashboardType").value() == "pie") "active" else ""} ">
+                    <input type="radio" name="dashboardType" value="pie">Pie chart
+                </label>
+                <label class="btn btn-default @{if (dashboardForm1("dashboardType").value() == "score") "active" else ""}">
+                    <input type="radio" name="dashboardType" value="score">Score card
+                </label>
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Next</button>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Next</button>
+        </div>
     }
 
 

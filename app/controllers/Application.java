@@ -71,7 +71,12 @@ public class Application extends Controller {
 
     public Result createDashboard1() {
         Form<CreateDashboard1> createDashboard1Form = formFactory.form(CreateDashboard1.class);
-        Form<CreateDashboard1> filledForm = createDashboard1Form.fill(new CreateDashboard1(session("dashboardName"), session("dashboardDescription")));
+        Form<CreateDashboard1> filledForm = createDashboard1Form.fill(
+                new CreateDashboard1(
+                        session("dashboardName"),
+                        session("dashboardDescription"),
+                        session("dashboardType")
+                ));
         return ok(views.html.createDashboard1.render(filledForm));
     }
 
@@ -79,6 +84,7 @@ public class Application extends Controller {
         CreateDashboard1 createDashboard1FormData = formFactory.form(CreateDashboard1.class).bindFromRequest(request()).get();
         session("dashboardName", createDashboard1FormData.getDashboardName());
         session("dashboardDescription", createDashboard1FormData.getDashboardDescription());
+        session("dashboardType", createDashboard1FormData.getDashboardType());
         return ok(createDashboard2.render());
     }
 
