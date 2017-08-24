@@ -34,13 +34,13 @@
         <div class="form-group">
             <label>Dashboard type</label>
             <div data-toggle="buttons">
-                <label class="btn btn-default @{if (dashboardForm1("dashboardType").value() == "comma") "active" else ""}">
+                <button class="btn btn-default btn-checkbox btn-checkbox-comma @{if (dashboardForm1("dashboardType").value() == "comma") "active" else ""}">
                     <input type="radio" name="dashboardType" value="comma">Comma dashboard
-                </label>
-                <label class="btn btn-default @{if (dashboardForm1("dashboardType").value() == "pie") "active" else ""} ">
+                </button>
+                <label class="btn btn-default btn-checkbox btn-checkbox-pie @{if (dashboardForm1("dashboardType").value() == "pie") "active" else ""} ">
                     <input type="radio" name="dashboardType" value="pie">Pie chart
                 </label>
-                <label class="btn btn-default @{if (dashboardForm1("dashboardType").value() == "score") "active" else ""}">
+                <label class="btn btn-default btn-checkbox btn-checkbox-score @{if (dashboardForm1("dashboardType").value() == "score") "active" else ""}">
                     <input type="radio" name="dashboardType" value="score">Score card
                 </label>
             </div>
