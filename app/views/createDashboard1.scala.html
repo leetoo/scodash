@@ -7,7 +7,7 @@
 
 @mainWizard("ScoDash - create dashboard 1") {
 
-    <div class="breadcrumbs row vertical-align">
+    <div class="padding-15 row vertical-align">
         <div class="col-md-12 text-center">
             <button type="button" class="btn breadcrumb-btn active">1</button>
             <hr class="horizontal"/>
@@ -17,43 +17,43 @@
         </div>
     </div>
 
-    <div class="col-md-12 text-center">
-        <h3>NEW DASHBOARD</h3>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h3>NEW DASHBOARD</h3>
+        </div>
     </div>
 
-    @helper.form(action = routes.Application.createDashboard2, 'class -> "form-horizontal") {
 
-        @helper.inputText(
-            dashboardForm1("dashboardName"), '_label -> "Dashboard Name", 'class -> "form-control", 'placeholder -> "Dashboard name"
-        )
 
-        @helper.textarea(
-            dashboardForm1("dashboardDescription"), '_label -> "Description", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Dashboard description"
-        )
-
-        <div class="form-group">
-            <label>Dashboard type</label>
-            <div data-toggle="buttons">
-                <button class="btn btn-default btn-checkbox btn-checkbox-comma @{if (dashboardForm1("dashboardType").value() == "comma") "active" else ""}">
-                    <input type="radio" name="dashboardType" value="comma">Comma dashboard
-                </button>
-                <label class="btn btn-default btn-checkbox btn-checkbox-pie @{if (dashboardForm1("dashboardType").value() == "pie") "active" else ""} ">
-                    <input type="radio" name="dashboardType" value="pie">Pie chart
-                </label>
-                <label class="btn btn-default btn-checkbox btn-checkbox-score @{if (dashboardForm1("dashboardType").value() == "score") "active" else ""}">
-                    <input type="radio" name="dashboardType" value="score">Score card
-                </label>
-            </div>
+    <div class="padding-15 row">
+        <div class="col-md-offset-4 col-md-4">
+            @helper.form(action = routes.Application.createDashboard2, 'class -> "form-horizontal") {
+                @helper.inputText(
+                    dashboardForm1("dashboardName"), '_label -> "Dashboard Name", 'class -> "form-control", 'placeholder -> "Dashboard name"
+                )
+                @helper.textarea(
+                    dashboardForm1("dashboardDescription"), '_label -> "Description", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Dashboard description"
+                )
+                <div class="form-group">
+                    <label>Dashboard type</label>&nbsp;<span class="label-comment">(you can change it anytime later)</span>
+                    <div data-toggle="buttons">
+                        <div class="btn btn-default btn-checkbox btn-checkbox-comma @{if (dashboardForm1("dashboardType").value() == "comma") "active" else ""}">
+                            <input type="radio" name="dashboardType" value="comma">Comma dashboard
+                        </div>
+                        <label class="btn btn-default btn-checkbox btn-checkbox-pie @{if (dashboardForm1("dashboardType").value() == "pie") "active" else ""} ">
+                            <input type="radio" name="dashboardType" value="pie">Pie chart
+                        </label>
+                        <label class="btn btn-default btn-checkbox btn-checkbox-score @{if (dashboardForm1("dashboardType").value() == "score") "active" else ""}">
+                            <input type="radio" name="dashboardType" value="score">Score card
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group pull-right">
+                    <button type="submit" class="btn btn-primary">Next</button>
+                </div>
+            }
         </div>
-
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Next</button>
-        </div>
-    }
-
-
-
-
+    </div>
 
 }
 
