@@ -38,14 +38,14 @@
                     <label>Dashboard type</label>&nbsp;<span class="label-comment">(you can change it anytime later)</span>
                     <div data-toggle="buttons">
                         <div class="btn btn-default btn-checkbox btn-checkbox-comma @{if (dashboardForm1("dashboardType").value() == "comma") "active" else ""}">
-                            <input type="radio" name="dashboardType" value="comma">Comma dashboard
+                            <input type="radio" name="dashboardType" id="dashboardType" value="comma" @{if (dashboardForm1("dashboardType").value() == "comma") "checked" else ""} data-toggle="button">Comma dashboard
                         </div>
-                        <label class="btn btn-default btn-checkbox btn-checkbox-pie @{if (dashboardForm1("dashboardType").value() == "pie") "active" else ""} ">
-                            <input type="radio" name="dashboardType" value="pie">Pie chart
-                        </label>
-                        <label class="btn btn-default btn-checkbox btn-checkbox-score @{if (dashboardForm1("dashboardType").value() == "score") "active" else ""}">
-                            <input type="radio" name="dashboardType" value="score">Score card
-                        </label>
+                        <div class="btn btn-default btn-checkbox btn-checkbox-pie @{if (dashboardForm1("dashboardType").value() == "pie") "active" else ""} ">
+                            <input type="radio" name="dashboardType" id="dashboardType" value="pie" @{if (dashboardForm1("dashboardType").value() == "pie") "checked" else ""} data-toggle="button">Pie chart
+                        </div>
+                        <div class="btn btn-default btn-checkbox btn-checkbox-score @{if (dashboardForm1("dashboardType").value() == "score") "active" else ""}">
+                            <input type="radio" name="dashboardType" id="dashboardType" value="score" @{if (dashboardForm1("dashboardType").value() == "score") "checked" else ""} data-toggle="button">Score card
+                        </div>
                     </div>
                 </div>
                 <div class="form-group pull-right">
@@ -56,7 +56,3 @@
     </div>
 
 }
-
-<script>
-        $('.btn').button();
-</script>
