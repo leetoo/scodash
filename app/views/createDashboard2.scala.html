@@ -18,21 +18,31 @@
 
     <div class="padding-15 row">
         <div class="col-md-offset-4 col-md-4">
+        @helper.form(action = routes.Application.addItem, 'class -> "form-inline") {
+
+        }
+
+    <div class="padding-15 row">
+        <div class="col-md-offset-4 col-md-4">
 
             <form action="@routes.Application.addItem()" method="post" class="form-inline">
-                <div class="form-group">
-                    <div class="input-group">
+                    <div class="form-group">
                         <input type="text" class="form-control" id="itemName" name="itemName" placeholder="Item name">
-                        <span class="input-group-addon"><button type="submit" href="addItem">Add</button></span>
                     </div>
+                    <button class="btn btn-default" type="submit">Add</button>
+            </form>
+
+            <form class="form-horizontal">
+                <div class="form-group pull-right">
+                    <a href="createDashboard1" type="button" class="btn btn-default"><</a>
+                    <button type="button" class="btn btn-primary">Next</button>
                 </div>
             </form>
 
-
-            <a href="createDashboard1" type="button" class="btn btn-default"><</a>
-            <button type="submit" class="btn btn-primary">Next</button>
-
         </div>
+
+
+
     </div>
 
 
