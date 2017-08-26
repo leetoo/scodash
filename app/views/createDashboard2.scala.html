@@ -1,4 +1,6 @@
-@()
+@(dashboardForm2: play.data.Form[forms.CreateDashboard2])
+
+@import helper._
 
 @mainWizard("ScoDash - create dashboard 2") {
 
@@ -12,18 +14,25 @@
         </div>
     </div>
 
-    <div class="col-md-12 text-center">
-        <h3>DASHBOARD'S ITEMS</h3>
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h3>DASHBOARD'S ITEMS</h3>
+        </div>
     </div>
 
     <div class="padding-15 row">
         <div class="col-md-offset-4 col-md-4">
-        @helper.form(action = routes.Application.addItem, 'class -> "form-inline") {
 
-        }
+            @repeat(dashboardForm2("items")) { item =>
+                <form action="@routes.Application.removeItem()" method="post" class="form-inline">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="itemName" name="itemName" value="@{item.value}" readonly>
+                    </div>
+                    <button class="btn btn-default remove-btn" type="submit"></button>
+                </form>
+            }
 
-    <div class="padding-15 row">
-        <div class="col-md-offset-4 col-md-4">
 
             <form action="@routes.Application.addItem()" method="post" class="form-inline">
                     <div class="form-group">
@@ -40,13 +49,7 @@
             </form>
 
         </div>
-
-
-
     </div>
-
-
-
 
 
 

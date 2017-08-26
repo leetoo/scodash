@@ -1,6 +1,6 @@
 package controllers.forms;
 
-public class AddItem {
+public class Item {
 
     private String itemName;
 

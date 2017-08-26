@@ -12,9 +12,12 @@ import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.*;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import controllers.forms.AddItem;
 import controllers.forms.CreateDashboard1;
+import controllers.forms.CreateDashboard2;
+import controllers.forms.Item;
+import org.apache.commons.collections4.IteratorUtils;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import play.api.libs.Crypto;
@@ -32,8 +35,11 @@ import views.html.old_dashboard;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
 import static akka.pattern.Patterns.ask;
 
@@ -41,6 +47,7 @@ import static akka.pattern.Patterns.ask;
 @Singleton
 public class Application extends Controller {
 
+    public static final String SESSION_ITEMS = "items";
     private Logger logger = org.slf4j.LoggerFactory.getLogger("controllers.Application");
 
     public static long TIMEOUT_MILLIS = 100;
@@ -51,6 +58,8 @@ public class Application extends Controller {
     private Materializer materializer;
     private ActorSystem actorSystem;
     private FormFactory formFactory;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Inject
     HttpExecutionContext ec;
@@ -81,23 +90,51 @@ public class Application extends Controller {
     }
 
     public Result createDashboard2() {
-        CreateDashboard1 createDashboard1FormData = formFactory.form(CreateDashboard1.class).bindFromRequest(request()).get();
-        session("dashboardName", createDashboard1FormData.getDashboardName());
-        session("dashboardDescription", createDashboard1FormData.getDashboardDescription());
-        session("dashboardType", createDashboard1FormData.getDashboardType());
-        return ok(createDashboard2.render());
+        CreateDashboard1 createDashboard1Form = formFactory.form(CreateDashboard1.class).bindFromRequest(request()).get();
+        session("dashboardName", createDashboard1Form.getDashboardName());
+        session("dashboardDescription", createDashboard1Form.getDashboardDescription());
+        session("dashboardType", createDashboard1Form.getDashboardType());
+        Form<CreateDashboard2> createDashboard2Form = formFactory.form(CreateDashboard2.class).bind(Json.parse(session(SESSION_ITEMS)));
+        return ok(createDashboard2.render(createDashboard2Form));
     }
 
     public Result addItem() {
-        AddItem addItem = formFactory.form(AddItem.class).bindFromRequest(request()).get();
-        if (session("items") == null) {
-            session("items", Json.newObject().putArray("items").add(addItem.getItemName()).toString());
+        Item addItem = formFactory.form(Item.class).bindFromRequest(request()).get();
+        if (session(SESSION_ITEMS) == null) {
+            ArrayNode itemsArray = Json.newObject().putArray(SESSION_ITEMS).add(addItem.getItemName());
+            JsonNode jsonItems = Json.newObject().set(SESSION_ITEMS, itemsArray);
+            session(SESSION_ITEMS, jsonItems.toString());
         } else {
-            ArrayNode arrayNode = (ArrayNode)Json.parse(session("items"));
-            arrayNode.add(addItem.getItemName());
-            session("items", arrayNode.toString());
+            ArrayNode itemsArray = (ArrayNode)Json.parse(session(SESSION_ITEMS)).get(SESSION_ITEMS);
+            itemsArray.add(addItem.getItemName());
+            JsonNode jsonItems = Json.newObject().set(SESSION_ITEMS, itemsArray);
+            session(SESSION_ITEMS, jsonItems.toString());
         }
-        return ok(createDashboard2.render());
+
+        return showCreateDashboard2();
+    }
+
+    private Result showCreateDashboard2() {
+        Form<CreateDashboard2> createDashboard2Form = formFactory.form(CreateDashboard2.class);
+        try {
+            Form<CreateDashboard2> createDashboard2FormFilled = createDashboard2Form.fill(objectMapper.readValue(session(SESSION_ITEMS), CreateDashboard2.class));
+            return ok(createDashboard2.render(createDashboard2FormFilled));
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            return ok(createDashboard2.render(createDashboard2Form));
+        }
+    }
+
+    public Result removeItem() {
+        Item removeItem = formFactory.form(Item.class).bindFromRequest(request()).get();
+        ArrayNode itemsArray = (ArrayNode)Json.parse(session(SESSION_ITEMS)).get(SESSION_ITEMS);
+
+        Set updateItems = IteratorUtils.toList(itemsArray.elements()).stream().filter(item -> !item.equals(removeItem.getItemName())).collect(Collectors.toSet());
+        JsonNode jsonItems = Json.newObject().set(SESSION_ITEMS, Json.newArray().addAll(updateItems));
+        session(SESSION_ITEMS, jsonItems.toString());
+
+        return showCreateDashboard2();
+
     }
 
 
@@ -271,7 +308,7 @@ public class Application extends Controller {
 //                    ask(dashboardParentActor, new DashboardParentActor.GetDashboard(itemForm.getHash()), Application.TIMEOUT_MILLIS)
 //            ).toCompletableFuture().get();
 //
-//            ask(dashboardActor, new Dashboard.AddItem(itemForm.getName()), Application.TIMEOUT_MILLIS);
+//            ask(dashboardActor, new Dashboard.Item(itemForm.getName()), Application.TIMEOUT_MILLIS);
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //            return internalServerError();

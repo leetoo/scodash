@@ -16,6 +16,8 @@ libraryDependencies += "org.webjars" % "flot" % "0.8.3"
 
 libraryDependencies += "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3"
 
+libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1"
+
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"  
