@@ -97,6 +97,7 @@ public class Application extends Controller {
         session("dashboardType", createDashboard1Form.getDashboardType());
         Form<CreateDashboard2> createDashboard2Form = formFactory.form(CreateDashboard2.class).bind(Json.parse(session(SESSION_ITEMS)));
         return ok(createDashboard2.render(createDashboard2Form));
+
     }
 
     public Result addItem() {
