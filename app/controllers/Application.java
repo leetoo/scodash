@@ -18,6 +18,7 @@ import controllers.forms.CreateDashboard1;
 import controllers.forms.CreateDashboard2;
 import controllers.forms.Item;
 import org.apache.commons.collections4.IteratorUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import play.api.libs.Crypto;
@@ -36,7 +37,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
@@ -100,16 +101,19 @@ public class Application extends Controller {
 
     public Result addItem() {
         Item addItem = formFactory.form(Item.class).bindFromRequest(request()).get();
+        ArrayNode itemsArray;
+
         if (session(SESSION_ITEMS) == null) {
-            ArrayNode itemsArray = Json.newObject().putArray(SESSION_ITEMS).add(addItem.getItemName());
-            JsonNode jsonItems = Json.newObject().set(SESSION_ITEMS, itemsArray);
-            session(SESSION_ITEMS, jsonItems.toString());
+            itemsArray = Json.newObject().putArray(SESSION_ITEMS).add(addItem.getItemName());
         } else {
-            ArrayNode itemsArray = (ArrayNode)Json.parse(session(SESSION_ITEMS)).get(SESSION_ITEMS);
+            itemsArray = (ArrayNode)Json.parse(session(SESSION_ITEMS)).get(SESSION_ITEMS);
             itemsArray.add(addItem.getItemName());
-            JsonNode jsonItems = Json.newObject().set(SESSION_ITEMS, itemsArray);
-            session(SESSION_ITEMS, jsonItems.toString());
         }
+
+
+        itemsArray = Json.newArray().addAll(IteratorUtils.toList(itemsArray.elements()).stream().filter(node -> StringUtils.isNotBlank(node.asText())).distinct().collect(Collectors.toList()));
+        JsonNode jsonItems = Json.newObject().set(SESSION_ITEMS, itemsArray);
+        session(SESSION_ITEMS, jsonItems.toString());
 
         return showCreateDashboard2();
     }
@@ -129,7 +133,7 @@ public class Application extends Controller {
         Item removeItem = formFactory.form(Item.class).bindFromRequest(request()).get();
         ArrayNode itemsArray = (ArrayNode)Json.parse(session(SESSION_ITEMS)).get(SESSION_ITEMS);
 
-        Set updateItems = IteratorUtils.toList(itemsArray.elements()).stream().filter(item -> !item.equals(removeItem.getItemName())).collect(Collectors.toSet());
+        List updateItems = IteratorUtils.toList(itemsArray.elements()).stream().filter(item -> !removeItem.getItemName().equals(item.asText())).collect(Collectors.toList());
         JsonNode jsonItems = Json.newObject().set(SESSION_ITEMS, Json.newArray().addAll(updateItems));
         session(SESSION_ITEMS, jsonItems.toString());
 
