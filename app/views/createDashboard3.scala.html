@@ -1,0 +1,45 @@
+@(dashboardForm3: play.data.Form[forms.CreateDashboard3])
+
+@import helper._
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
+@mainWizard("ScoDash - create dashboard 1") {
+
+    <div class="padding-15 row vertical-align">
+        <div class="col-md-12 text-center">
+            <button type="button" class="btn breadcrumb-btn">1</button>
+            <hr class="horizontal"/>
+            <button type="button" class="btn breadcrumb-btn">2<br></button>
+            <hr class="horizontal"/>
+            <button type="button" class="btn breadcrumb-btn active">3<br></button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h3>WHO YOU ARE</h3>
+        </div>
+    </div>
+
+
+
+    <div class="padding-15 row">
+        <div class="col-md-offset-4 col-md-4">
+            @helper.form(action = routes.Application.createDashboard2, 'class -> "form-horizontal") {
+                @helper.inputText(
+                    dashboardForm3("dashboardOwnerName"), '_label -> "Name", 'class -> "form-control", 'placeholder -> "Name"
+                )
+                @helper.textarea(
+                    dashboardForm3("dashboardOwnerEmail"), '_label -> "Email", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Email"
+                )
+
+                <div class="form-group pull-right">
+                    <a href="createDashboard2" type="button" class="btn btn-default"><</a>
+                    <button type="submit" class="btn btn-primary">Next</button>
+                </div>
+            }
+        </div>
+    </div>
+
+}

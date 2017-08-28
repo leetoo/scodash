@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import controllers.forms.CreateDashboard1;
 import controllers.forms.CreateDashboard2;
+import controllers.forms.CreateDashboard3;
 import controllers.forms.Item;
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -140,6 +141,16 @@ public class Application extends Controller {
 
         return showCreateDashboard2();
 
+    }
+
+    public Result createDashboard3() {
+        Form<CreateDashboard3> createDashboard3Form = formFactory.form(CreateDashboard3.class);
+        Form<CreateDashboard3> filledForm = createDashboard3Form.fill(
+                new CreateDashboard3(
+                        session("ownerName"),
+                        session("ownerEmail")
+                ));
+        return ok(views.html.createDashboard3.render(filledForm));
     }
 
 
