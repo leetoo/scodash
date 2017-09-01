@@ -1,4 +1,5 @@
-@(dashboardForm3: play.data.Form[forms.CreateDashboard3])
+@@import controllers.forms.CreateDashboardOwner
+@(dashboardForm3: play.data.Form[CreateDashboardOwner])
 
 @import helper._
 
@@ -28,14 +29,14 @@
         <div class="col-md-offset-4 col-md-4">
             @helper.form(action = routes.Application.processDashboardOwner, 'class -> "form-horizontal") {
                 @helper.inputText(
-                    dashboardForm3("dashboardOwnerName"), '_label -> "Name", 'class -> "form-control", 'placeholder -> "Name"
+                    dashboardForm3("ownerName"), '_label -> "Name", 'class -> "form-control", 'placeholder -> "Name"
                 )
                 @helper.textarea(
-                    dashboardForm3("dashboardOwnerEmail"), '_label -> "Email", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Email"
+                    dashboardForm3("ownerEmail"), '_label -> "Email", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Email"
                 )
 
                 <div class="form-group pull-right">
-                    <a href="createDashboard2" type="button" class="btn btn-default"><</a>
+                    <a href="showDashboardItems" type="button" class="btn btn-default"><</a>
                     <button type="submit" class="btn btn-primary">Next</button>
                 </div>
             }

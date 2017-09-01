@@ -1,15 +1,15 @@
 package controllers.forms;
 
-public class CreateDashboard3 {
+public class CreateDashboardOwner {
 
     private String ownerName;
 
     private String ownerEmail;
 
-    public CreateDashboard3() {
+    public CreateDashboardOwner() {
     }
 
-    public CreateDashboard3(String ownerName, String ownerEmail) {
+    public CreateDashboardOwner(String ownerName, String ownerEmail) {
         this.ownerName = ownerName;
         this.ownerEmail = ownerEmail;
     }

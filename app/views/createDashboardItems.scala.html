@@ -1,4 +1,5 @@
-@(dashboardForm2: play.data.Form[forms.CreateDashboard2])
+@@import controllers.forms.CreateDashboardItems
+@(dashboardForm2: play.data.Form[CreateDashboardItems])
 
 @import helper._
 
@@ -41,12 +42,10 @@
                     <button class="btn btn-default" type="submit">Add</button>
             </form>
 
-            <form action="@routes.Application.showDashboardOwner()" method="get" class="form-horizontal">
-                <div class="form-group pull-right padding-15">
-                    <a href="showNewDashboard" type="button" class="btn btn-default"><</a>
-                    <button type="submit" class="btn btn-primary">Next</button>
-                </div>
-            </form>
+            <div class="form-group pull-right padding-15">
+                <a href="showNewDashboard" type="button" class="btn btn-default"><</a>
+                <a href="showDashboardOwner" type="button" class="btn btn-primary">Next</a>
+            </div>
 
         </div>
     </div>

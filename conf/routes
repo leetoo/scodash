@@ -7,13 +7,13 @@ GET         /dashboard/:hash            controllers.Application.dashboard(hash)
 GET         /ws/:hash                   controllers.Application.ws(hash)
 GET         /sentiment/:symbol          controllers.StockSentiment.get(symbol)
 POST        /create/                    controllers.Application.create
-POST        /addItem/                   controllers.Application.addItem
 GET         /showNewDashboard           controllers.Application.showNewDashboard
 POST        /processNewDashboard        controllers.Application.processNewDashboard
-GET         /showNewDashboard           controllers.Application.showDashboardOwner
-POST        /processDashboardOwner      controllers.Application.processDashboardOwner
+GET         /showDashboardItems         controllers.Application.showDashboardItems
 POST        /addItem                    controllers.Application.addItem
 POST        /removeItem                 controllers.Application.removeItem
+GET         /showDashboardOwner         controllers.Application.showDashboardOwner
+POST        /processDashboardOwner      controllers.Application.processDashboardOwner
 
 
 # Map static resources from the /public folder to the /assets URL path

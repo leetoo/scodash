@@ -3,7 +3,7 @@ package controllers.forms;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateDashboard2 {
+public class CreateDashboardItems {
 
     List<String> items = new ArrayList<>();
 
