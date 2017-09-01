@@ -8,9 +8,10 @@ GET         /ws/:hash                   controllers.Application.ws(hash)
 GET         /sentiment/:symbol          controllers.StockSentiment.get(symbol)
 POST        /create/                    controllers.Application.create
 POST        /addItem/                   controllers.Application.addItem
-GET         /createDashboard1           controllers.Application.createDashboard1
-POST        /createDashboard2           controllers.Application.createDashboard2
-POST        /createDashboard3           controllers.Application.createDashboard3
+GET         /showNewDashboard           controllers.Application.showNewDashboard
+POST        /processNewDashboard        controllers.Application.processNewDashboard
+GET         /showNewDashboard           controllers.Application.showDashboardOwner
+POST        /processDashboardOwner      controllers.Application.processDashboardOwner
 POST        /addItem                    controllers.Application.addItem
 POST        /removeItem                 controllers.Application.removeItem
 

@@ -1,5 +1,26 @@
 package controllers;
 
+import static akka.pattern.Patterns.ask;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import org.apache.commons.collections4.IteratorUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import actors.Dashboard;
 import actors.DashboardParentActor;
 import actors.UserParentActor;
@@ -10,40 +31,30 @@ import akka.actor.Status;
 import akka.japi.Pair;
 import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
-import akka.stream.javadsl.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import akka.stream.javadsl.AsPublisher;
+import akka.stream.javadsl.Flow;
+import akka.stream.javadsl.Keep;
+import akka.stream.javadsl.Sink;
+import akka.stream.javadsl.Source;
 import controllers.forms.CreateDashboard1;
 import controllers.forms.CreateDashboard2;
 import controllers.forms.CreateDashboard3;
 import controllers.forms.Item;
-import org.apache.commons.collections4.IteratorUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
 import play.api.libs.Crypto;
 import play.data.Form;
 import play.data.FormFactory;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
-import play.mvc.*;
+import play.mvc.Controller;
+import play.mvc.Http;
+import play.mvc.Result;
+import play.mvc.Results;
+import play.mvc.WebSocket;
 import scala.compat.java8.FutureConverters;
 import views.html.createDashboard2;
 import views.html.index;
 import views.html.old_dashboard;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
-
-import static akka.pattern.Patterns.ask;
 
 
 @Singleton
@@ -80,7 +91,7 @@ public class Application extends Controller {
         this.formFactory = formFactory;
     }
 
-    public Result createDashboard1() {
+    public Result showNewDashboard() {
         Form<CreateDashboard1> createDashboard1Form = formFactory.form(CreateDashboard1.class);
         Form<CreateDashboard1> filledForm = createDashboard1Form.fill(
                 new CreateDashboard1(
@@ -91,12 +102,13 @@ public class Application extends Controller {
         return ok(views.html.createDashboard1.render(filledForm));
     }
 
-    public Result createDashboard2() {
+    public Result processNewDashboard() {
         CreateDashboard1 createDashboard1Form = formFactory.form(CreateDashboard1.class).bindFromRequest(request()).get();
         session("dashboardName", createDashboard1Form.getDashboardName());
         session("dashboardDescription", createDashboard1Form.getDashboardDescription());
         session("dashboardType", createDashboard1Form.getDashboardType());
-        Form<CreateDashboard2> createDashboard2Form = formFactory.form(CreateDashboard2.class).bind(Json.parse(session(SESSION_ITEMS)));
+        final String sessionItems = session(SESSION_ITEMS);
+        Form<CreateDashboard2> createDashboard2Form = sessionItems != null ? formFactory.form(CreateDashboard2.class).bind(Json.parse(sessionItems)) : formFactory.form(CreateDashboard2.class);
         return ok(createDashboard2.render(createDashboard2Form));
 
     }
@@ -143,7 +155,7 @@ public class Application extends Controller {
 
     }
 
-    public Result createDashboard3() {
+    public Result showDashboardOwner() {
         Form<CreateDashboard3> createDashboard3Form = formFactory.form(CreateDashboard3.class);
         Form<CreateDashboard3> filledForm = createDashboard3Form.fill(
                 new CreateDashboard3(
@@ -151,6 +163,10 @@ public class Application extends Controller {
                         session("ownerEmail")
                 ));
         return ok(views.html.createDashboard3.render(filledForm));
+    }
+
+    public Result processDashboardOwner() {
+        return ok();
     }
 
 

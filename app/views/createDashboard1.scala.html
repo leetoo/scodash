@@ -26,7 +26,7 @@
 
     <div class="padding-15 row">
         <div class="col-md-offset-4 col-md-4">
-            @helper.form(action = routes.Application.createDashboard2, 'class -> "form-horizontal") {
+            @helper.form(action = routes.Application.processNewDashboard, 'class -> "form-horizontal") {
                 @helper.inputText(
                     dashboardForm1("dashboardName"), '_label -> "Dashboard Name", 'class -> "form-control", 'placeholder -> "Dashboard name"
                 )
