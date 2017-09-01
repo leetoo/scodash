@@ -164,7 +164,11 @@ public class Application extends Controller {
         session(SESSION_DASHBOARD_OWNER_NAME, createDashboard3Form.getOwnerName());
         session(SESSION_DASHBOARD_OWNER_EMAIL, createDashboard3Form.getOwnerEmail());
 
-        return showDashboardOwner();
+        return showCreatedDashboard();
+    }
+
+    private Result showCreatedDashboard() {
+        return ok(views.html.createdDashboard.render());
     }
 
 
