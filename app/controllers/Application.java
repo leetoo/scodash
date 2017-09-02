@@ -1,5 +1,7 @@
 package controllers;
 
+import controllers.forms.*;
+import org.apache.commons.lang3.RandomStringUtils;
 import pojo.Dashboard;
 import actors.DashboardParentActor;
 import actors.UserParentActor;
@@ -14,10 +16,6 @@ import akka.stream.javadsl.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import controllers.forms.CreateDashboardItems;
-import controllers.forms.CreateDashboardNew;
-import controllers.forms.CreateDashboardOwner;
-import controllers.forms.Item;
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reactivestreams.Publisher;
@@ -40,6 +38,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
@@ -167,7 +166,7 @@ public class Application extends Controller {
         session(SESSION_DASHBOARD_OWNER_EMAIL, createDashboard3Form.getOwnerEmail());
 
         Dashboard dashboard = new Dashboard();
-        dashboard.setName(session(SESSION_DASHBOARD_ITEMS));
+        dashboard.setName(session(SESSION_DASHBOARD_NAME));
         dashboard.setDescription(session(SESSION_DASHBOARD_DESCRIPTION));
         dashboard.setType(session(SESSION_DASHBOARD_TYPE));
         ArrayNode itemsNodes = (ArrayNode) Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
@@ -175,15 +174,16 @@ public class Application extends Controller {
         dashboard.setOwnerName(session(SESSION_DASHBOARD_OWNER_NAME));
         dashboard.setOwnerEmail(session(SESSION_DASHBOARD_OWNER_EMAIL));
 
+        dashboard.setReadOnlyHash(RandomStringUtils.randomAlphanumeric(8));
+        dashboard.setWriteHash(RandomStringUtils.randomAlphanumeric(8));
+
         DashboardsRepository.dashboards().insert(dashboard);
 
-        return showCreatedDashboard();
-    }
+        CreatedDashboard createdDashboard = new CreatedDashboard(dashboard.getName(), dashboard.getReadOnlyHash(), dashboard.getWriteHash());
 
-    private Result showCreatedDashboard() {
-        return ok(views.html.createdDashboard.render());
+        Form<CreatedDashboard> createdDashboardForm = formFactory.form(CreatedDashboard.class).fill(createdDashboard);
+        return ok(views.html.createdDashboard.render(createdDashboardForm));
     }
-
 
     public Result index() {
         return ok(index.render("Your new application is ready."));

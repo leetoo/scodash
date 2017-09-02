@@ -1,5 +1,117 @@
+@(createdDashboard: play.data.Form[controllers.forms.CreatedDashboard])
 @mainBasic("ScoDash") {
-    <div class="row green-message">
-        <div class="col-md-12 text-center"><h3>Dashboard was created!</h3></div>
+    <div class="row green-message vertical-align">
+        <div class="col-md-12 text-center"><span><img src="@routes.Assets.at("images/icon-check-white.png")"/>&nbsp;Dashboard was created!</span>&nbsp;<a href="todo">View it</a></div>
     </div>
+
+    <div class="row vertical-align padding-15">
+        <div class="col-md-offset-3 col-md-6 text-center headline-inline">
+            <img src="@routes.Assets.at("images/icon-share.png")"/>&nbsp;&nbsp;<h3>SHARE&nbsp;@{createdDashboard("name").value().toUpperCase}&nbsp;DASHBOARD</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-offset-4 col-md-4 shadow-box padding-15">
+            <span class="viewMode"><span id="viewUrl" class="url">@{createdDashboard("readOnlyHash").value()}</span></span>
+            <span class="scoreMode"><span id="scoreUrl" class="url">@{createdDashboard("writeHash").value()}</span></span>
+            <span class="viewMode pull-right"><a id="copyViewUrl" href="#">COPY</a></span>
+            <span class="scoreMode pull-right"><a id="copyScoreUrl" href="#">COPY</a></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-offset-4 col-md-4 padding-15">
+            <div class="viewMode">
+                <span>View mode only</span>
+                <span class="pull-right"><a id="showScoreMode" href="#">Score mode (can change score)</a></span>
+            </div>
+            <div class="scoreMode">
+                <span><a id="showViewMode" href="#">View mode only</a></span>
+                <span class="pull-right">Score mode (can change score)</span>
+            </div>
+        </div>
+    </div>
+
 }
+
+    <script language="JavaScript">
+        $(".viewMode").show();
+        $(".scoreMode").hide();
+        $(".url").each(function() {
+            $(this).text(location.origin + "/" + $(this).text());
+        });
+        $("#showScoreMode").click(
+            function() {
+                $(".viewMode").hide();
+                $(".scoreMode").show();
+            }
+        );
+        $("#showViewMode").click(
+            function() {
+                $(".viewMode").show();
+                $(".scoreMode").hide();
+            }
+        );
+        $("#copyScoreUrl").click(
+            function() {
+                copyToClipboard($("#scoreUrl"))
+            }
+        );
+        $("#copyViewUrl").click(
+            function() {
+                copyToClipboard($("#copyUrl"))
+            }
+        );
+
+
+        copyToClipboard = function(elem) {
+            // create hidden text element, if it doesn't already exist
+            var targetId = "_hiddenCopyText_";
+            var isInput = elem.tagName === "INPUT" || elem.tagName === "TEXTAREA";
+            var origSelectionStart, origSelectionEnd;
+            if (isInput) {
+                // can just use the original source element for the selection and copy
+                target = elem;
+                origSelectionStart = elem.selectionStart;
+                origSelectionEnd = elem.selectionEnd;
+            } else {
+                // must use a temporary form element for the selection and copy
+                target = document.getElementById(targetId);
+                if (!target) {
+                    var target = document.createElement("textarea");
+                    target.style.position = "absolute";
+                    target.style.left = "-9999px";
+                    target.style.top = "0";
+                    target.id = targetId;
+                    document.body.appendChild(target);
+                }
+                target.textContent = elem.textContent;
+            }
+            // select the content
+            var currentFocus = document.activeElement;
+            target.focus();
+            target.setSelectionRange(0, target.value.length);
+
+            // copy the selection
+            var succeed;
+            try {
+                succeed = document.execCommand("copy");
+            } catch(e) {
+                succeed = false;
+            }
+            // restore original focus
+            if (currentFocus && typeof currentFocus.focus === "function") {
+                currentFocus.focus();
+            }
+
+            if (isInput) {
+                // restore prior selection
+                elem.setSelectionRange(origSelectionStart, origSelectionEnd);
+            } else {
+                // clear temporary content
+                target.textContent = "";
+            }
+            return succeed;
+        }
+
+    </script>

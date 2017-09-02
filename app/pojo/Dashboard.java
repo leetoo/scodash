@@ -18,6 +18,8 @@ public class Dashboard {
     List<String> items = new ArrayList<>();
     private String ownerName;
     private String ownerEmail;
+    private String readOnlyHash;
+    private String writeHash;
 
     public String getName() {
         return name;
@@ -65,6 +67,22 @@ public class Dashboard {
 
     public void setOwnerEmail(String ownerEmail) {
         this.ownerEmail = ownerEmail;
+    }
+
+    public String getReadOnlyHash() {
+        return readOnlyHash;
+    }
+
+    public void setReadOnlyHash(String readOnlyHash) {
+        this.readOnlyHash = readOnlyHash;
+    }
+
+    public String getWriteHash() {
+        return writeHash;
+    }
+
+    public void setWriteHash(String writeHash) {
+        this.writeHash = writeHash;
     }
 
     public static final class Watch {
