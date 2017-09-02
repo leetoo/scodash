@@ -4,6 +4,7 @@ import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import com.google.inject.assistedinject.Assisted;
+import pojo.Dashboard;
 
 import javax.inject.Inject;
 import java.util.HashMap;

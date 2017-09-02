@@ -24,6 +24,7 @@ import akka.event.LoggingAdapter;
 import controllers.Application;
 import play.Configuration;
 import play.libs.Json;
+import pojo.Dashboard;
 import scala.compat.java8.FutureConverters;
 
 /**

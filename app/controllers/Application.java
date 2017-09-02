@@ -1,6 +1,6 @@
 package controllers;
 
-import actors.Dashboard;
+import pojo.Dashboard;
 import actors.DashboardParentActor;
 import actors.UserParentActor;
 import akka.NotUsed;
@@ -30,6 +30,7 @@ import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.*;
 import scala.compat.java8.FutureConverters;
+import util.DashboardsRepository;
 import views.html.createDashboardItems;
 import views.html.index;
 import views.html.old_dashboard;
@@ -52,6 +53,7 @@ public class Application extends Controller {
     private Logger logger = org.slf4j.LoggerFactory.getLogger("controllers.Application");
 
     public static final String SESSION_DASHBOARD_ITEMS = "items";
+    public static final String SESSION_DASHBOARD_ITEMS_ITEMS = "items";
     public static final String SESSION_DASHBOARD_OWNER_NAME = "ownerName";
     public static final String SESSION_DASHBOARD_OWNER_EMAIL = "ownerEmail";
     public static final String SESSION_DASHBOARD_NAME = "name";
@@ -112,9 +114,9 @@ public class Application extends Controller {
         ArrayNode itemsArray;
 
         if (session(SESSION_DASHBOARD_ITEMS) == null) {
-            itemsArray = Json.newObject().putArray(SESSION_DASHBOARD_ITEMS).add(addItem.getItemName());
+            itemsArray = Json.newObject().putArray(SESSION_DASHBOARD_ITEMS_ITEMS).add(addItem.getItemName());
         } else {
-            itemsArray = (ArrayNode)Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS);
+            itemsArray = (ArrayNode)Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
             itemsArray.add(addItem.getItemName());
         }
 
@@ -163,6 +165,17 @@ public class Application extends Controller {
         CreateDashboardOwner createDashboard3Form = formFactory.form(CreateDashboardOwner.class).bindFromRequest(request()).get();
         session(SESSION_DASHBOARD_OWNER_NAME, createDashboard3Form.getOwnerName());
         session(SESSION_DASHBOARD_OWNER_EMAIL, createDashboard3Form.getOwnerEmail());
+
+        Dashboard dashboard = new Dashboard();
+        dashboard.setName(session(SESSION_DASHBOARD_ITEMS));
+        dashboard.setDescription(session(SESSION_DASHBOARD_DESCRIPTION));
+        dashboard.setType(session(SESSION_DASHBOARD_TYPE));
+        ArrayNode itemsNodes = (ArrayNode) Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
+        dashboard.setItems(IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toList()));
+        dashboard.setOwnerName(session(SESSION_DASHBOARD_OWNER_NAME));
+        dashboard.setOwnerEmail(session(SESSION_DASHBOARD_OWNER_EMAIL));
+
+        DashboardsRepository.dashboards().insert(dashboard);
 
         return showCreatedDashboard();
     }

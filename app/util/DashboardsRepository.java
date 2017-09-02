@@ -1,6 +1,6 @@
 package util;
 
-import actors.Dashboard;
+import pojo.Dashboard;
 import play.Play;
 import uk.co.panaxiom.playjongo.PlayJongo;
 
@@ -14,6 +14,5 @@ public class DashboardsRepository {
 
     public void insert(Dashboard dashboard) {
         dashboards().insert(dashboard);
-
     }
 }
