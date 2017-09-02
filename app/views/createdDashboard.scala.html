@@ -54,12 +54,12 @@
         );
         $("#copyScoreUrl").click(
             function() {
-                copyToClipboard($("#scoreUrl"))
+                copyToClipboard($("#scoreUrl").get(0))
             }
         );
         $("#copyViewUrl").click(
             function() {
-                copyToClipboard($("#copyUrl"))
+                copyToClipboard($("#copyUrl").get(0))
             }
         );
 
