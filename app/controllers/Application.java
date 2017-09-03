@@ -185,11 +185,6 @@ public class Application extends Controller {
         return ok(views.html.createdDashboard.render(createdDashboardForm));
     }
 
-    public Result index() {
-        return ok(index.render("Your new application is ready."));
-    }
-
-
     public WebSocket ws(String hash) {
         return WebSocket.Json.acceptOrResult(request -> {
             if (sameOriginCheck(request)) {

@@ -1,7 +1,7 @@
 @(createdDashboard: play.data.Form[controllers.forms.CreatedDashboard])
 @mainBasic("ScoDash") {
     <div class="row green-message vertical-align">
-        <div class="col-md-12 text-center"><span><img src="@routes.Assets.at("images/icon-check-white.png")"/>&nbsp;Dashboard was created!</span>&nbsp;<a href="todo">View it</a></div>
+        <div class="col-md-12 text-center"><span><img src="@routes.Assets.at("images/icon-check-white.png")"/>&nbsp;Dashboard was created!</span>&nbsp;<a class="url" href="@{createdDashboard("writeHash").value()}">View it</a></div>
     </div>
 
     <div class="row vertical-align padding-15">
@@ -37,9 +37,12 @@
     <script language="JavaScript">
         $(".viewMode").show();
         $(".scoreMode").hide();
-        $(".url").each(function() {
+        $("span.url").each(function() {
             $(this).text(location.origin + "/" + $(this).text());
         });
+        $("a.url").each(function() {
+            $(this).attr("href", location.origin + "/" + $(this).attr("href"));
+        })
         $("#showScoreMode").click(
             function() {
                 $(".viewMode").hide();

@@ -2,7 +2,7 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET         /                           controllers.Application.index
+GET         /:hash                      controllers.Application.dashboard(hash)
 GET         /dashboard/:hash            controllers.Application.dashboard(hash)
 GET         /ws/:hash                   controllers.Application.ws(hash)
 GET         /sentiment/:symbol          controllers.StockSentiment.get(symbol)
