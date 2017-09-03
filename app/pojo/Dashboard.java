@@ -15,7 +15,7 @@ public class Dashboard {
     private String name;
     private String description;
     private String type;
-    List<String> items = new ArrayList<>();
+    private final Map<String, Item> items = new HashMap<>();
     private String ownerName;
     private String ownerEmail;
     private String readOnlyHash;
@@ -45,12 +45,8 @@ public class Dashboard {
         this.type = type;
     }
 
-    public List<String> getItems() {
+    public Map<String, Item> getItems() {
         return items;
-    }
-
-    public void setItems(List<String> items) {
-        this.items = items;
     }
 
     public String getOwnerName() {
@@ -133,7 +129,10 @@ public class Dashboard {
         }
     }
 
-    public static final class GetHash {
+    public static final class GetWriteHash {
+
+    }
+    public static final class GetReadonlyHash {
 
     }
 

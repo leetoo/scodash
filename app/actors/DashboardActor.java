@@ -1,10 +1,15 @@
 package actors;
 
+import akka.actor.AbstractActor;
 import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
+import akka.persistence.AbstractPersistentActor;
+import akka.persistence.PersistentActor;
 import com.google.inject.assistedinject.Assisted;
 import pojo.Dashboard;
+import scala.PartialFunction;
+import scala.runtime.BoxedUnit;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -14,19 +19,17 @@ import java.util.Map;
 /**
  * Created by vasek on 11. 12. 2016.
  */
-public class DashboardActor extends UntypedActor {
+public class DashboardActor extends AbstractPersistentActor {
 
-    private final String name;
-    private final String hash;
+    private Dashboard dashboard;
 
-    private final Map<String, Item> items = new HashMap<>();
     private final HashSet<ActorRef> watchers = new HashSet<ActorRef>();
 
     @Inject
-    public DashboardActor(@Assisted("name") String name, @Assisted("hash") String hash) {
-        this.name = name;
-        this.hash = hash;
+    public DashboardActor(@Assisted("dashboard") Dashboard dashboard) {
+        this.dashboard = dashboard;
     }
+
 
     @Override
     public void preStart() throws Exception {
@@ -39,7 +42,7 @@ public class DashboardActor extends UntypedActor {
 
         if (message instanceof Dashboard.IncrementItem) {
             Dashboard.IncrementItem incrementItem = (Dashboard.IncrementItem)message;
-            Item item = items.get(incrementItem.name);
+            Item item = dashboard.getItems().get(incrementItem.name);
             if (item != null) {
                 item.increment();
             }
@@ -48,7 +51,7 @@ public class DashboardActor extends UntypedActor {
 
         if (message instanceof Dashboard.DecrementItem) {
             Dashboard.DecrementItem decrementItem = (Dashboard.DecrementItem)message;
-            Item item = items.get(decrementItem.name);
+            Item item = dashboard.getItems().get(decrementItem.name);
             if (item != null) {
                 item.decrement();
             }
@@ -56,7 +59,7 @@ public class DashboardActor extends UntypedActor {
         }
 
         if (message instanceof Dashboard.Watch) {
-            Dashboard.Data data = new Dashboard.Data(items);
+            Dashboard.Data data = new Dashboard.Data(dashboard.getItems());
             sender().tell(data, self());
             watchers.add(sender());
         }
@@ -65,17 +68,22 @@ public class DashboardActor extends UntypedActor {
             watchers.remove(sender());
         }
 
-        if (message instanceof Dashboard.GetHash) {
-            sender().tell(this.hash, self());
+        if (message instanceof Dashboard.GetWriteHash) {
+            sender().tell(dashboard.getWriteHash(), self());
         }
 
+        if (message instanceof Dashboard.GetReadonlyHash) {
+            sender().tell(dashboard.getReadOnlyHash(), self());
+        }
+
+
         if (message instanceof Dashboard.GetName) {
-            sender().tell(this.name, self());
+            sender().tell(dashboard.getName(), self());
         }
 
         if (message instanceof Dashboard.AddItem) {
             Dashboard.AddItem addItem = (Dashboard.AddItem)message;
-            items.put(addItem.name, new Item(addItem.name));
+            dashboard.getItems().put(addItem.name, new Item(addItem.name));
 
             notifyWatchers();
 
@@ -83,7 +91,7 @@ public class DashboardActor extends UntypedActor {
 
         if (message instanceof Dashboard.RemoveItem) {
             Dashboard.RemoveItem removeItem = (Dashboard.RemoveItem)message;
-            items.remove(removeItem.name);
+            dashboard.getItems().remove(removeItem.name);
 
             notifyWatchers();
 
@@ -120,7 +128,22 @@ public class DashboardActor extends UntypedActor {
     }
 
     private void notifyWatchers() {
-        watchers.forEach(watcher -> watcher.tell(new Dashboard.Data(items), self()));
+        watchers.forEach(watcher -> watcher.tell(new Dashboard.Data(dashboard.getItems()), self()));
+    }
+
+    @Override
+    public Receive createReceiveRecover() {
+        return null;
+    }
+
+    @Override
+    public Receive createReceive() {
+        return null;
+    }
+
+    @Override
+    public String persistenceId() {
+        return null;
     }
 
     public interface Factory {
