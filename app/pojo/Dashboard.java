@@ -1,10 +1,6 @@
 package pojo;
 
-import actors.Item;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,7 +11,7 @@ public class Dashboard {
     private String name;
     private String description;
     private String type;
-    private final Map<String, Item> items = new HashMap<>();
+    private Map<String, Item> items = new HashMap<>();
     private String ownerName;
     private String ownerEmail;
     private String readOnlyHash;
@@ -43,10 +39,6 @@ public class Dashboard {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public Map<String, Item> getItems() {
-        return items;
     }
 
     public String getOwnerName() {
@@ -79,6 +71,14 @@ public class Dashboard {
 
     public void setWriteHash(String writeHash) {
         this.writeHash = writeHash;
+    }
+
+    public Map<String, Item> getItems() {
+        return items;
+    }
+
+    public void setItems(final Map<String, Item> items) {
+        this.items = items;
     }
 
     public static final class Watch {

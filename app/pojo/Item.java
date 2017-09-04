@@ -1,4 +1,4 @@
-package actors;
+package pojo;
 
 public class Item {
 

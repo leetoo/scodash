@@ -20,7 +20,7 @@ libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1"
 
 libraryDependencies += "com.github.ironfish" % "akka-persistence-mongo-common_2.11" % "0.7.6"
 
-libraryDependencies += "com.typesafe.akka" % "akka-persistence_2.11" % "2.5.4"
+libraryDependencies += "com.typesafe.akka" % "akka-persistence-experimental" % "2.3.4"
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  
 

@@ -1,8 +1,27 @@
 package controllers;
 
-import controllers.forms.*;
+import static akka.pattern.Patterns.ask;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import pojo.Dashboard;
+import org.apache.commons.lang3.StringUtils;
+import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import actors.DashboardParentActor;
 import actors.UserParentActor;
 import akka.NotUsed;
@@ -12,38 +31,32 @@ import akka.actor.Status;
 import akka.japi.Pair;
 import akka.stream.Materializer;
 import akka.stream.OverflowStrategy;
-import akka.stream.javadsl.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.apache.commons.collections4.IteratorUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
+import akka.stream.javadsl.AsPublisher;
+import akka.stream.javadsl.Flow;
+import akka.stream.javadsl.Keep;
+import akka.stream.javadsl.Sink;
+import akka.stream.javadsl.Source;
+import controllers.forms.CreateDashboardItems;
+import controllers.forms.CreateDashboardNew;
+import controllers.forms.CreateDashboardOwner;
+import controllers.forms.CreatedDashboard;
+import controllers.forms.Item;
 import play.api.libs.Crypto;
 import play.data.Form;
 import play.data.FormFactory;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
-import play.mvc.*;
+import play.mvc.Controller;
+import play.mvc.Http;
+import play.mvc.Result;
+import play.mvc.Results;
+import play.mvc.WebSocket;
+import pojo.Dashboard;
 import scala.compat.java8.FutureConverters;
 import util.DashboardsRepository;
 import views.html.createDashboardItems;
-import views.html.index;
 import views.html.old_dashboard;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
-
-import static akka.pattern.Patterns.ask;
 
 
 @Singleton
@@ -170,7 +183,7 @@ public class Application extends Controller {
         dashboard.setDescription(session(SESSION_DASHBOARD_DESCRIPTION));
         dashboard.setType(session(SESSION_DASHBOARD_TYPE));
         ArrayNode itemsNodes = (ArrayNode) Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
-        dashboard.setItems(IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toList()));
+        dashboard.setItems(IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toMap(item -> item, item -> new pojo.Item(item) )));
         dashboard.setOwnerName(session(SESSION_DASHBOARD_OWNER_NAME));
         dashboard.setOwnerEmail(session(SESSION_DASHBOARD_OWNER_EMAIL));
 
@@ -337,7 +350,7 @@ public class Application extends Controller {
         return CompletableFuture.supplyAsync(
                 () -> createDashboardActor(dashboardForm.getName()), ec.current())
                 .thenComposeAsync(dashboardActorFuture -> dashboardActorFuture
-                        .thenComposeAsync(dashboardActor -> FutureConverters.toJava(ask(dashboardActor, new Dashboard.GetHash(), TIMEOUT_MILLIS))
+                        .thenComposeAsync(dashboardActor -> FutureConverters.toJava(ask(dashboardActor, new Dashboard.GetWriteHash(), TIMEOUT_MILLIS))
                                 .thenApplyAsync(hash -> dashboard((String) hash), ec.current()), ec.current()), ec.current());
 
     }
