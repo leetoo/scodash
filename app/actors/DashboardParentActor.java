@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import play.libs.akka.InjectedActorSupport;
+import pojo.Dashboard;
 
 /**
  * Created by vasek on 19. 11. 2016.
@@ -15,20 +16,18 @@ import play.libs.akka.InjectedActorSupport;
 public class DashboardParentActor extends UntypedActor implements InjectedActorSupport {
 
     public static class Create {
-        private String name;
-        private String hash;
+        private Dashboard dashboard;
 
-        public Create(String name, String hash) {
-            this.name = name;
-            this.hash = hash;
+        public Create(Dashboard dashboard) {
+            this.dashboard = dashboard;
         }
     }
 
     public static class GetDashboard {
-        private String hash;
+        private String writeHash;
 
-        public GetDashboard(String hash) {
-            this.hash = hash;
+        public GetDashboard(String writeHash) {
+            this.writeHash = writeHash;
         }
     }
 
@@ -44,14 +43,14 @@ public class DashboardParentActor extends UntypedActor implements InjectedActorS
     public void onReceive(Object message) throws Exception {
         if (message instanceof DashboardParentActor.Create) {
             DashboardParentActor.Create create = (DashboardParentActor.Create) message;
-            ActorRef child = injectedChild(() -> childFactory.create(create.name, create.hash), "dashboardActor-" + create.hash);
-            dashboardActors.put(create.hash, child);
+            ActorRef child = injectedChild(() -> childFactory.create(create.dashboard), "dashboardActor-" + create.dashboard.getWriteHash());
+            dashboardActors.put(create.dashboard.getWriteHash(), child);
             sender().tell(child, self());
         }
 
         if (message instanceof DashboardParentActor.GetDashboard) {
             DashboardParentActor.GetDashboard getDashboard = (DashboardParentActor.GetDashboard) message;
-            ActorRef dashboard = dashboardActors.get(getDashboard.hash);
+            ActorRef dashboard = dashboardActors.get(getDashboard.writeHash);
             sender().tell(dashboard, self());
         }
     }

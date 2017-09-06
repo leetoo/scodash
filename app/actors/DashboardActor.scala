@@ -11,7 +11,7 @@ object DashboardActor {
   private val LOG = LoggerFactory.getLogger(classOf[DashboardActor])
 
   trait Factory {
-    def create(@Assisted("name") name: String, @Assisted("hash") hash: String): Actor
+    def create(@Assisted("dashboard") dashboard: Dashboard): Actor
   }
 
 }
@@ -87,8 +87,9 @@ class DashboardActor extends PersistentActor {
     case cmd:Dashboard.AddItem =>
     case cmd:Dashboard.DecrementItem =>
     case cmd:Dashboard.IncrementItem =>
-      persist(dashboard)
-      handleCommand(cmd)
+      persist(dashboard) { cmd =>
+        handleCommand(cmd)
+      }
     case cmd:Dashboard.Data =>
     case cmd:Dashboard.GetName =>
     case cmd:Dashboard.GetReadonlyHash =>
