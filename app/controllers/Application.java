@@ -56,6 +56,7 @@ import pojo.Dashboard;
 import scala.compat.java8.FutureConverters;
 import util.DashboardsRepository;
 import views.html.createDashboardItems;
+import views.html.index;
 import views.html.old_dashboard;
 
 
@@ -324,6 +325,10 @@ public class Application extends Controller {
 
     private boolean originMatches(String origin) {
         return origin.contains("localhost:9000") || origin.contains("localhost:19001");
+    }
+
+    public Result index() {
+        return ok(index.render("Your new application is ready."));
     }
 
     public Result dashboard(String hash) {
