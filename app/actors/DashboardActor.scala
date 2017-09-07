@@ -1,6 +1,6 @@
 package actors
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.persistence.PersistentActor
 import com.google.inject.assistedinject.Assisted
 import org.slf4j.LoggerFactory
@@ -10,17 +10,17 @@ object DashboardActor {
 
   private val LOG = LoggerFactory.getLogger(classOf[DashboardActor])
 
-  trait Factory {
-    def create(@Assisted("dashboard") dashboard: Dashboard): Actor
-  }
+//  trait Factory {
+//    def create(@Assisted("dashboard") dashboard: Dashboard): Actor
+//  }
+
+  def props(dashboard: Dashboard): Props = Props(new DashboardActor(dashboard))
 
 }
 
-class DashboardActor extends PersistentActor {
+class DashboardActor(dashboard: Dashboard) extends PersistentActor {
 
   final private val watchers: Set[ActorRef] = Set();
-
-  var dashboard: Dashboard = new Dashboard();
 
   private def handleCommand(command: Dashboard.IncrementItem): Unit = {
     val item: Item = dashboard.getItems.get(command.name)
@@ -78,9 +78,7 @@ class DashboardActor extends PersistentActor {
     }
   }
 
-  override def receiveRecover: Receive = {
-    case dsh: Dashboard => dashboard = dsh;
-  }
+  override def receiveRecover: Receive = ???
 
   override def receiveCommand: Receive = {
     case cmd:Dashboard.RemoveItem =>

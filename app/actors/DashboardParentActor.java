@@ -32,19 +32,19 @@ public class DashboardParentActor extends UntypedActor implements InjectedActorS
         }
     }
 
-    private DashboardActor.Factory childFactory;
     private Map<String, ActorRef> dashboardActors = new HashMap<>();
 
-    @Inject
-    public DashboardParentActor(DashboardActor.Factory childFactory) {
-        this.childFactory = childFactory;
-    }
+//    @Inject
+//    public DashboardParentActor(DashboardActor.Factory childFactory) {
+//        this.childFactory = childFactory;
+//    }
 
     @Override
     public void onReceive(Object message) throws Exception {
         if (message instanceof DashboardParentActor.Create) {
             DashboardParentActor.Create create = (DashboardParentActor.Create) message;
-            ActorRef child = injectedChild(() -> childFactory.create(create.dashboard), "dashboardActor-" + create.dashboard.getWriteHash());
+            ActorRef child = context().actorOf(DashboardActor.props(create.dashboard));
+            //ActorRef child = injectedChild(() -> childFactory.create(create.dashboard), "dashboardActor-" + create.dashboard.getWriteHash());
             dashboardActors.put(create.dashboard.getWriteHash(), child);
             sender().tell(child, self());
         }
