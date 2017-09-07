@@ -87,7 +87,7 @@ class DashboardActor extends PersistentActor {
     case cmd:Dashboard.AddItem =>
     case cmd:Dashboard.DecrementItem =>
     case cmd:Dashboard.IncrementItem =>
-      persist(dashboard) { cmd =>
+      persist(cmd) { cmd =>
         handleCommand(cmd)
       }
     case cmd:Dashboard.Data =>

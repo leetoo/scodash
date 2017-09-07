@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import akka.actor.ActorRef;
+import akka.actor.Props;
 import akka.actor.UntypedActor;
 import play.libs.akka.InjectedActorSupport;
 import pojo.Dashboard;

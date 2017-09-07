@@ -5,8 +5,6 @@
 GET         /                           controllers.Application.index
 GET         /dashboard/:hash            controllers.Application.dashboard(hash)
 GET         /ws/:hash                   controllers.Application.ws(hash)
-GET         /sentiment/:symbol          controllers.StockSentiment.get(symbol)
-POST        /create/                    controllers.Application.create
 GET         /showNewDashboard           controllers.Application.showNewDashboard
 POST        /processNewDashboard        controllers.Application.processNewDashboard
 GET         /showDashboardItems         controllers.Application.showDashboardItems

@@ -191,7 +191,10 @@ public class Application extends Controller {
         dashboard.setReadOnlyHash(RandomStringUtils.randomAlphanumeric(8));
         dashboard.setWriteHash(RandomStringUtils.randomAlphanumeric(8));
 
-        DashboardsRepository.dashboards().insert(dashboard);
+        CompletableFuture.supplyAsync(
+                () -> createDashboardActor(dashboard), ec.current());
+
+        //DashboardsRepository.dashboards().insert(dashboard);
 
         CreatedDashboard createdDashboard = new CreatedDashboard(dashboard.getName(), dashboard.getReadOnlyHash(), dashboard.getWriteHash());
 
@@ -262,13 +265,11 @@ public class Application extends Controller {
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
-    public CompletionStage<ActorRef> createDashboardActor(String name) {
-
-        final String hash = Crypto.crypto().generateToken();
+    public CompletionStage<ActorRef> createDashboardActor(Dashboard dashboard) {
 
         // Use guice assisted injection to instantiate and configure the child actor.
         return FutureConverters.toJava(
-                ask(dashboardParentActor, new DashboardParentActor.Create(name, hash), TIMEOUT_MILLIS)
+                ask(dashboardParentActor, new DashboardParentActor.Create(dashboard), TIMEOUT_MILLIS)
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
@@ -348,17 +349,19 @@ public class Application extends Controller {
 
     }
 
-    public CompletionStage<Result> create() {
-
-        DashboardForm dashboardForm = formFactory.form(DashboardForm.class).bindFromRequest().get();
-
-        return CompletableFuture.supplyAsync(
-                () -> createDashboardActor(dashboardForm.getName()), ec.current())
-                .thenComposeAsync(dashboardActorFuture -> dashboardActorFuture
-                        .thenComposeAsync(dashboardActor -> FutureConverters.toJava(ask(dashboardActor, new Dashboard.GetWriteHash(), TIMEOUT_MILLIS))
-                                .thenApplyAsync(hash -> dashboard((String) hash), ec.current()), ec.current()), ec.current());
-
-    }
+//    public CompletionStage<Result> create() {
+//
+//        //DashboardForm dashboardForm = formFactory.form(DashboardForm.class).bindFromRequest().get();
+//
+//        final String inputHash = "TODO";
+//
+//        return CompletableFuture.supplyAsync(
+//                () -> createDashboardActor(inputHash), ec.current())
+//                .thenComposeAsync(dashboardActorFuture -> dashboardActorFuture
+//                        .thenComposeAsync(dashboardActor -> FutureConverters.toJava(ask(dashboardActor, new Dashboard.GetWriteHash(), TIMEOUT_MILLIS))
+//                                .thenApplyAsync(hash -> dashboard((String) hash), ec.current()), ec.current()), ec.current());
+//
+//    }
 
 //    public Result addItem() {
 //        ItemForm itemForm = formFactory.form(ItemForm.class).bindFromRequest().get();
