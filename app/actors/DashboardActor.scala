@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.persistence.PersistentActor
 import com.google.inject.assistedinject.Assisted
 import org.slf4j.LoggerFactory
+import pojo.Dashboard.Cmd
 import pojo.{Dashboard, Item}
 
 object DashboardActor {
@@ -22,51 +23,56 @@ class DashboardActor(dashboard: Dashboard) extends PersistentActor {
 
   final private val watchers: Set[ActorRef] = Set();
 
-  private def handleCommand(command: Dashboard.IncrementItem): Unit = {
-    val item: Item = dashboard.getItems.get(command.name)
+  private def handleIncrementItemCommand(command: Dashboard.IncrementItem): Unit = {
+    val item: Item = dashboard.items(command.name)
     if (item != null) {
       item.increment()
     }
     notifyWatchers()
   }
 
-  private def handleCommand (command: Dashboard.DecrementItem): Unit = {
-    val item: Item = dashboard.getItems.get (command.name)
+  private def handleDecremenItemCommand (command: Dashboard.DecrementItem): Unit = {
+    val item: Item = dashboard.items(command.name)
     if (item != null) {
       item.decrement ()
     }
     notifyWatchers ()
   }
 
-  private def handleCommand (command: Dashboard.Watch): Unit = {
-    val data: Dashboard.Data = new Dashboard.Data (dashboard.getItems)
+  private def handleWatchCommand (command: Dashboard.Watch): Unit = {
+    val data: Dashboard.Data = new Dashboard.Data(dashboard.items)
     sender.tell (data, self)
     watchers.+(sender)
   }
 
-  private def handleCommand (command: Dashboard.Unwatch): Unit = {
+  private def handleDataCommand (command: Dashboard.Data): Unit = {
+    val data: Dashboard.Data = new Dashboard.Data (dashboard.items)
+    sender.tell (data, self)
+  }
+
+  private def handleUnwatchCommand (command: Dashboard.Unwatch): Unit = {
     watchers.-(sender())
   }
 
-  private def handleCommand (command: Dashboard.GetWriteHash): Unit = {
+  private def handleGetWriteHashCommand (command: Dashboard.GetWriteHash): Unit = {
     sender().tell (dashboard.getWriteHash, self)
   }
 
-  private def handleCommand (command: Dashboard.GetReadonlyHash): Unit = {
+  private def handleGetReadonlyHashCommand (command: Dashboard.GetReadonlyHash): Unit = {
     sender().tell (dashboard.getReadOnlyHash, self)
   }
 
-  private def handleCommand (command: Dashboard.GetName): Unit = {
+  private def handleGetNameCommand (command: Dashboard.GetName): Unit = {
     sender().tell (dashboard.getName, self)
   }
 
-  private def handleCommand (command: Dashboard.AddItem): Unit = {
+  private def handleAddItemCommand (command: Dashboard.AddItem): Unit = {
     val addItem: Dashboard.AddItem = command.asInstanceOf[Dashboard.AddItem]
     dashboard.getItems.put (addItem.name, new Item (addItem.name) )
     notifyWatchers ()
   }
 
-  def handleCommand (command: Dashboard.RemoveItem): Unit = {
+  private def handleRemoveItemCommand (command: Dashboard.RemoveItem): Unit = {
     val removeItem: Dashboard.RemoveItem = command.asInstanceOf[Dashboard.RemoveItem]
     dashboard.getItems.remove (removeItem.name)
     notifyWatchers ()
@@ -78,21 +84,17 @@ class DashboardActor(dashboard: Dashboard) extends PersistentActor {
     }
   }
 
-  override def receiveRecover: Receive = ???
+  override def receiveRecover: Receive = receiveCommand
 
   override def receiveCommand: Receive = {
-    case cmd:Dashboard.RemoveItem =>
-    case cmd:Dashboard.AddItem =>
-    case cmd:Dashboard.DecrementItem =>
-    case cmd:Dashboard.IncrementItem =>
-      persist(cmd) { cmd =>
-        handleCommand(cmd)
-      }
-    case cmd:Dashboard.Data =>
-    case cmd:Dashboard.GetName =>
-    case cmd:Dashboard.GetReadonlyHash =>
-    case cmd:Dashboard.GetWriteHash =>
-      handleCommand(cmd)
+    case cmd:Dashboard.RemoveItem => handleRemoveItemCommand(cmd)
+    case cmd:Dashboard.AddItem => handleAddItemCommand(cmd)
+    case cmd:Dashboard.DecrementItem => handleDecremenItemCommand(cmd)
+    case cmd:Dashboard.IncrementItem => handleIncrementItemCommand(cmd)
+    case cmd:Dashboard.Data => handleDataCommand(cmd)
+    case cmd:Dashboard.GetName => handleGetNameCommand(cmd)
+    case cmd:Dashboard.GetReadonlyHash => handleGetReadonlyHashCommand(cmd)
+    case cmd:Dashboard.GetWriteHash => handleGetWriteHashCommand(cmd)
   }
 
   override def persistenceId: String = dashboard.getWriteHash

@@ -41,7 +41,6 @@ import controllers.forms.CreateDashboardNew;
 import controllers.forms.CreateDashboardOwner;
 import controllers.forms.CreatedDashboard;
 import controllers.forms.Item;
-import play.api.libs.Crypto;
 import play.data.Form;
 import play.data.FormFactory;
 import play.libs.F;
@@ -52,9 +51,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import play.mvc.WebSocket;
-import pojo.Dashboard;
 import scala.compat.java8.FutureConverters;
-import util.DashboardsRepository;
 import views.html.createDashboardItems;
 import views.html.index;
 import views.html.old_dashboard;
@@ -73,7 +70,7 @@ public class Application extends Controller {
     public static final String SESSION_DASHBOARD_DESCRIPTION = "description";
     public static final String SESSION_DASHBOARD_TYPE = "type";
 
-    public static long TIMEOUT_MILLIS = 100;
+    public static long TIMEOUT_MILLIS = 1000;
 
     private ActorRef dashboardParentActor;
     private ActorRef userParentActor;

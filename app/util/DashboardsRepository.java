@@ -1,6 +1,5 @@
 package util;
 
-import pojo.Dashboard;
 import play.Play;
 import uk.co.panaxiom.playjongo.PlayJongo;
 

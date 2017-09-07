@@ -3,10 +3,7 @@ package actors;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import akka.actor.ActorRef;
-import akka.actor.Props;
 import akka.actor.UntypedActor;
 import play.libs.akka.InjectedActorSupport;
 import pojo.Dashboard;
@@ -45,7 +42,7 @@ public class DashboardParentActor extends UntypedActor implements InjectedActorS
             DashboardParentActor.Create create = (DashboardParentActor.Create) message;
             ActorRef child = context().actorOf(DashboardActor.props(create.dashboard));
             //ActorRef child = injectedChild(() -> childFactory.create(create.dashboard), "dashboardActor-" + create.dashboard.getWriteHash());
-            dashboardActors.put(create.dashboard.getWriteHash(), child);
+            dashboardActors.put(create.dashboard.writeHash(), child);
             sender().tell(child, self());
         }
 

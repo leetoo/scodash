@@ -19,7 +19,11 @@ libraryDependencies += "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3"
 libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1"
 
 //libraryDependencies += "com.github.ironfish" % "akka-persistence-mongo-common_2.11" % "0.7.6"
-//
+
+libraryDependencies += "org.mongodb" % "casbah_2.11" % "3.1.0"
+
+libraryDependencies += "com.github.scullxbones" %% "akka-persistence-mongo-casbah" % "2.0.3"
+
 libraryDependencies += "com.typesafe.akka" % "akka-persistence_2.11" % "2.5.4"
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  

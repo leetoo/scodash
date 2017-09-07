@@ -38,10 +38,10 @@
         $(".viewMode").show();
         $(".scoreMode").hide();
         $("span.url").each(function() {
-            $(this).text(location.origin + "/" + $(this).text());
+            $(this).text(location.origin + "/dashboard/" + $(this).text());
         });
         $("a.url").each(function() {
-            $(this).attr("href", location.origin + "/" + $(this).attr("href"));
+            $(this).attr("href", location.origin + "/dashboard/" + $(this).attr("href"));
         })
         $("#showScoreMode").click(
             function() {
