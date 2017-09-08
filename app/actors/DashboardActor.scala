@@ -1,7 +1,7 @@
 package actors
 
 import akka.actor.{Actor, ActorRef, Props}
-import akka.persistence.PersistentActor
+import akka.persistence.{PersistentActor, SnapshotOffer}
 import com.google.inject.assistedinject.Assisted
 import org.slf4j.LoggerFactory
 import pojo.Dashboard.Cmd
@@ -19,7 +19,7 @@ object DashboardActor {
 
 }
 
-class DashboardActor(dashboard: Dashboard) extends PersistentActor {
+class DashboardActor(var dashboard: Dashboard) extends PersistentActor {
 
   final private val watchers: Set[ActorRef] = Set();
 
@@ -55,36 +55,43 @@ class DashboardActor(dashboard: Dashboard) extends PersistentActor {
   }
 
   private def handleGetWriteHashCommand (command: Dashboard.GetWriteHash): Unit = {
-    sender().tell (dashboard.getWriteHash, self)
+    sender().tell (dashboard.writeHash, self)
   }
 
   private def handleGetReadonlyHashCommand (command: Dashboard.GetReadonlyHash): Unit = {
-    sender().tell (dashboard.getReadOnlyHash, self)
+    sender().tell (dashboard.readonlyHash, self)
   }
 
   private def handleGetNameCommand (command: Dashboard.GetName): Unit = {
-    sender().tell (dashboard.getName, self)
+    sender().tell (dashboard.name, self)
+  }
+
+  private def handlerGetDashboard(command: Dashboard.GetDashboard): Unit = {
+    sender().tell(dashboard, self)
   }
 
   private def handleAddItemCommand (command: Dashboard.AddItem): Unit = {
     val addItem: Dashboard.AddItem = command.asInstanceOf[Dashboard.AddItem]
-    dashboard.getItems.put (addItem.name, new Item (addItem.name) )
+    dashboard.items + addItem.name
     notifyWatchers ()
   }
 
   private def handleRemoveItemCommand (command: Dashboard.RemoveItem): Unit = {
     val removeItem: Dashboard.RemoveItem = command.asInstanceOf[Dashboard.RemoveItem]
-    dashboard.getItems.remove (removeItem.name)
+    dashboard.items - removeItem.name
     notifyWatchers ()
   }
 
   private def notifyWatchers (): Unit = {
     for (watcher:ActorRef <- watchers) {
-      watcher.tell(new Dashboard.Data (dashboard.getItems), self);
+      watcher.tell(new Dashboard.Data (dashboard.items), self);
     }
   }
 
-  override def receiveRecover: Receive = receiveCommand
+  override def receiveRecover: Receive = {
+    case SnapshotOffer(_, snapshot: Dashboard) =>
+      dashboard = snapshot
+  }
 
   override def receiveCommand: Receive = {
     case cmd:Dashboard.RemoveItem => handleRemoveItemCommand(cmd)
@@ -95,7 +102,10 @@ class DashboardActor(dashboard: Dashboard) extends PersistentActor {
     case cmd:Dashboard.GetName => handleGetNameCommand(cmd)
     case cmd:Dashboard.GetReadonlyHash => handleGetReadonlyHashCommand(cmd)
     case cmd:Dashboard.GetWriteHash => handleGetWriteHashCommand(cmd)
+    case cmd:Dashboard.GetDashboard => handlerGetDashboard(cmd)
+
+    saveSnapshot(dashboard)
   }
 
-  override def persistenceId: String = dashboard.getWriteHash
+  override def persistenceId: String = dashboard.writeHash
 }

@@ -1,6 +1,7 @@
 package util;
 
 import play.Play;
+import pojo.Dashboard;
 import uk.co.panaxiom.playjongo.PlayJongo;
 
 public class DashboardsRepository {

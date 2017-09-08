@@ -24,8 +24,11 @@ import akka.event.LoggingAdapter;
 import controllers.Application;
 import play.Configuration;
 import play.libs.Json;
+import pojo.Dashboard;
 import pojo.Item;
+import scala.collection.JavaConverters;
 import scala.compat.java8.FutureConverters;
+import scala.concurrent.JavaConversions;
 
 /**
  * The broker between the WebSocket and the StockActor(s).  The UserActor holds the connection and sends serialized
@@ -125,7 +128,7 @@ public class UserActor extends UntypedActor {
             ObjectNode message =
                     Json.newObject()
                         .put("type", "additem")
-                        .put("name", addItem.name);
+                        .put("name", addItem.name());
             logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
@@ -135,7 +138,7 @@ public class UserActor extends UntypedActor {
             ObjectNode message =
                     Json.newObject()
                             .put("type", "decrementitem")
-                            .put("name", decrementItem.name);
+                            .put("name", decrementItem.name());
             logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
@@ -145,7 +148,7 @@ public class UserActor extends UntypedActor {
             ObjectNode message =
                     Json.newObject()
                             .put("type", "incrementitem")
-                            .put("name", incrementItem.name);
+                            .put("name", incrementItem.name());
             logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
@@ -155,7 +158,7 @@ public class UserActor extends UntypedActor {
             ObjectNode message =
                     Json.newObject()
                             .put("type", "removeitem")
-                            .put("name", removeItem.name);
+                            .put("name", removeItem.name());
             logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
@@ -163,8 +166,8 @@ public class UserActor extends UntypedActor {
         if (msg instanceof Dashboard.Data) {
             Dashboard.Data data = (Dashboard.Data)msg;
             ArrayNode items = Json.newArray();
-            for (Item item : data.items.values()) {
-                items.addObject().put("name", item.getName()).put("score", item.getScore());
+            for (Item item : JavaConverters.mapAsJavaMapConverter(data.items()).asJava().values()) {
+                items.addObject().put("name", item.name()).put("score", item.score());
             }
 
             ObjectNode message = Json.newObject();
