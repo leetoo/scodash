@@ -20,7 +20,8 @@ object Dashboard {
 
 }
 
-class Dashboard(
+@SerialVersionUID(100L)
+class Dashboard (
    var name: String,
    var description: String,
    var style: String,
@@ -29,4 +30,4 @@ class Dashboard(
    var ownerEmail: String,
    var readonlyHash: String,
    var writeHash: String
-)
+)  extends Serializable

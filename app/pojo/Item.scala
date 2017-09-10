@@ -1,6 +1,7 @@
 package pojo
 
-class Item(var name: String, var score: Int) {
+@SerialVersionUID(200L)
+class Item(var name: String, var score: Int) extends Serializable {
 
   def this(name: String ) {
     this(name, 0)
