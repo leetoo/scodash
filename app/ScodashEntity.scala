@@ -1,5 +1,5 @@
 import pojo.Dashboard.Cmd
-import pojo.{DashboardId, Item}
+import pojo.{Dashboard, DashboardId, Item}
 
 import scala.collection.mutable
 
@@ -18,4 +18,18 @@ object ScodashEntity {
   case class GetReadonlyHash(id: DashboardId) extends ScodashCommand
   case class GetName(id: DashboardId) extends ScodashCommand
   case class GetDashboard(id: DashboardId) extends ScodashCommand
+
+  sealed trait ScodashEvent {
+    val id: DashboardId
+    val dashboard: Dashboard
+  }
+
+  final case class DashboardNotFound(id: DashboardId) extends RuntimeException(s"Blog post not found with id $id")
+
+  type MaybeDashbord[+A] = Either[DashboardNotFound, A]
+
+  final case class ScodashState(dashboards: Map[DashboardId, Dashboard]) {
+    def apply(id: DashboardId): MaybeDashbord[Dashboard] = dashboards.get(id).toRight(DashboardNotFound(id))
+    def +(event: ScodashEvent): ScodashState = ScodashState(dashboards.updated(event.id, event.dashboard))
+  }
 }
