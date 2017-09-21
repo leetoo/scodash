@@ -1,13 +1,14 @@
 package actors
 
-import akka.actor.Props
-import akka.pattern.pipe
+import java.util.concurrent.TimeUnit
 
-import actors.ScodashActor._
-import akka.actor.ActorRef
+import akka.pattern.pipe
 import akka.persistence.{PersistentActor, SnapshotOffer}
+import akka.util.Timeout
+import controllers.Application
 import pojo.{Dashboard, DashboardId}
 
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.{Future, Promise}
 
 class ScodashActor extends PersistentActor {
@@ -25,11 +26,12 @@ class ScodashActor extends PersistentActor {
   }
 
   override def receiveCommand: Receive = {
-    case GetDashboard(id) =>
-      sender() ! state(id)
+    case GetDashboardActor(id) =>
+      context.actorSelection(state(id)).resolveOne(FiniteDuration(10, TimeUnit.SECONDS)) pipeTo sender
     case CreateDashboard(dashboard) =>
-      val dashboardActor = context.actorOf(DashboardActor.props(dashboard))
-      handleEvent(DashboardCreated(DashboardId(dashboard.writeHash), dashboardActor)) pipeTo sender
+      val dashboardActorName = s"dashboard-${dashboard.writeHash}"
+      val dashboardActor = context.actorOf(DashboardActor.props(dashboard), dashboardActorName)
+      handleEvent(DashboardCreated(DashboardId(dashboard.writeHash), dashboardActorName)) pipeTo sender
       ()
   }
 
@@ -56,22 +58,22 @@ object ScodashActor {
   sealed trait ScodashCommand
 
   case class CreateDashboard(dashboard: Dashboard) extends ScodashCommand
-  case class GetDashboard(id: DashboardId) extends ScodashCommand
+  case class GetDashboardActor(id: DashboardId) extends ScodashCommand
 
   sealed trait ScodashEvent {
     val id: DashboardId
-    val dashboardActor: ActorRef
+    val dashboardActorName: String
   }
 
-  case class DashboardCreated(id: DashboardId, dashboardActor: ActorRef) extends ScodashEvent
+  case class DashboardCreated(id: DashboardId, dashboardActorName: String) extends ScodashEvent
   final case class DashboardNotFound(id: DashboardId) extends RuntimeException(s"Blog post not found with id $id")
 
   type MaybeDashbord[+A] = Either[DashboardNotFound, A]
 
-  final case class ScodashState(dashboardActors: Map[DashboardId, ActorRef]) {
+  final case class ScodashState(dashboardActorNames: Map[DashboardId, String]) {
     //def apply(id: DashboardId): MaybeDashbord[ActorRef] = dashboardActors.get(id).toRight(DashboardNotFound(id))
-    def apply(id: DashboardId): ActorRef = dashboardActors.get(id).get
-    def +(event: ScodashEvent): ScodashState = ScodashState(dashboardActors.updated(event.id, event.dashboardActor))
+    def apply(id: DashboardId): String = dashboardActorNames.get(id).get
+    def +(event: ScodashEvent): ScodashState = ScodashState(dashboardActorNames.updated(event.id, event.dashboardActorName))
   }
 
   object ScodashState {

@@ -6,7 +6,6 @@ package actors;
 
 import static akka.pattern.Patterns.ask;
 
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
@@ -59,7 +58,7 @@ public class UserActor extends UntypedActor {
     private void initDashboardActor() {
         try {
             this.dashboardActor = (ActorRef) FutureConverters.toJava(
-                    ask(scodashActor, new ScodashActor.GetDashboard(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
+                    ask(scodashActor, new ScodashActor.GetDashboardActor(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
             ).toCompletableFuture().get();
             this.dashboardActor.tell(new Dashboard.Watch(), self() );
         } catch (InterruptedException e) {

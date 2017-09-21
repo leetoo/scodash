@@ -348,7 +348,7 @@ public class Application extends Controller {
         try {
 //            String hash = "abc";
             ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
-                    ask(scodashActor, new ScodashActor.GetDashboard(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
+                    ask(scodashActor, new ScodashActor.GetDashboardActor(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
             ).toCompletableFuture().get();
             Dashboard dsh = (Dashboard)FutureConverters.toJava(
                     ask(dashboardActor, new Dashboard.GetDashboard(), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
