@@ -20,6 +20,10 @@ object Dashboard {
   case class GetName() extends Cmd
   case class GetDashboard() extends Cmd
 
+  def apply(writeHash: String) : Dashboard = {
+    new Dashboard(writeHash = writeHash);
+  }
+
 }
 
 @SerialVersionUID(100L)

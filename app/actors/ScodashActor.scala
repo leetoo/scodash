@@ -27,6 +27,7 @@ class ScodashActor extends PersistentActor {
 
   override def receiveCommand: Receive = {
     case GetDashboardActor(id) =>
+      context.actorOf(DashboardActor.props(Dashboard(writeHash = id.writeHash)))
       context.actorSelection(state(id)).resolveOne(FiniteDuration(10, TimeUnit.SECONDS)) pipeTo sender
     case CreateDashboard(dashboard) =>
       val dashboardActorName = s"dashboard-${dashboard.writeHash}"
