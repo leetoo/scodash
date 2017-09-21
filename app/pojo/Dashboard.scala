@@ -1,5 +1,7 @@
 package pojo
 
+import java.util.UUID
+
 import scala.collection.mutable
 
 object Dashboard {

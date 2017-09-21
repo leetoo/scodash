@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import actors.ScodashActor;
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +24,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import actors.DashboardParentActor;
 import actors.UserParentActor;
 import akka.NotUsed;
 import akka.actor.ActorRef;
@@ -74,7 +74,7 @@ public class Application extends Controller {
 
     public static long TIMEOUT_MILLIS = 100000;
 
-    private ActorRef dashboardParentActor;
+    private ActorRef scodashActor;
     private ActorRef userParentActor;
     private Materializer materializer;
     private ActorSystem actorSystem;
@@ -90,9 +90,9 @@ public class Application extends Controller {
     public Application(ActorSystem actorSystem,
                        Materializer materializer,
                        FormFactory formFactory,
-                       @Named("dashboardParentActor") ActorRef dashboardParentActor,
+                       @Named("scodashActor") ActorRef scodashActor,
                        @Named("userParentActor") ActorRef userParentActor) {
-        this.dashboardParentActor = dashboardParentActor;
+        this.scodashActor = scodashActor;
         this.userParentActor = userParentActor;
         this.materializer = materializer;
         this.actorSystem = actorSystem;
@@ -280,7 +280,7 @@ public class Application extends Controller {
 
         // Use guice assisted injection to instantiate and configure the child actor.
         return FutureConverters.toJava(
-                ask(dashboardParentActor, new DashboardParentActor.Create(dashboard), TIMEOUT_MILLIS)
+                ask(scodashActor, new ScodashActor.CreateDashboard(dashboard), TIMEOUT_MILLIS)
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
@@ -348,7 +348,7 @@ public class Application extends Controller {
         try {
 //            String hash = "abc";
             ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
-                    ask(dashboardParentActor, new DashboardParentActor.GetDashboard(hash), Application.TIMEOUT_MILLIS)
+                    ask(scodashActor, new ScodashActor.GetDashboard(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
             ).toCompletableFuture().get();
             Dashboard dsh = (Dashboard)FutureConverters.toJava(
                     ask(dashboardActor, new Dashboard.GetDashboard(), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
@@ -379,7 +379,7 @@ public class Application extends Controller {
 //
 //        try {
 //            ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
-//                    ask(dashboardParentActor, new DashboardParentActor.GetDashboard(itemForm.getHash()), Application.TIMEOUT_MILLIS)
+//                    ask(dashboardParentActor, new JavaDashboardParentActor.GetDashboard(itemForm.getHash()), Application.TIMEOUT_MILLIS)
 //            ).toCompletableFuture().get();
 //
 //            ask(dashboardActor, new Dashboard.Item(itemForm.getName()), Application.TIMEOUT_MILLIS);

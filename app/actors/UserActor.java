@@ -6,6 +6,7 @@ package actors;
 
 import static akka.pattern.Patterns.ask;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
@@ -28,7 +29,6 @@ import pojo.Dashboard;
 import pojo.Item;
 import scala.collection.JavaConverters;
 import scala.compat.java8.FutureConverters;
-import scala.concurrent.JavaConversions;
 
 /**
  * The broker between the WebSocket and the StockActor(s).  The UserActor holds the connection and sends serialized
@@ -42,24 +42,24 @@ public class UserActor extends UntypedActor {
     private Configuration configuration;
     private ActorRef dashboardActor;
     private String hash;
-    private ActorRef dashboardParentActor;
+    private ActorRef scodashActor;
 
     @Inject
     public UserActor(@Assisted("hash") String hash,
                      @Assisted ActorRef out,
-                     @Named("dashboardParentActor") ActorRef dashboardParentActor,
+                     @Named("scodashActor") ActorRef scodashActor,
                      Configuration configuration) {
         this.out = out;
         this.configuration = configuration;
         this.hash = hash;
-        this.dashboardParentActor = dashboardParentActor;
+        this.scodashActor = scodashActor;
     }
 
 
     private void initDashboardActor() {
         try {
             this.dashboardActor = (ActorRef) FutureConverters.toJava(
-                    ask(dashboardParentActor, new DashboardParentActor.GetDashboard(hash), Application.TIMEOUT_MILLIS)
+                    ask(scodashActor, new ScodashActor.GetDashboard(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
             ).toCompletableFuture().get();
             this.dashboardActor.tell(new Dashboard.Watch(), self() );
         } catch (InterruptedException e) {
