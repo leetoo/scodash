@@ -1,11 +1,44 @@
 package actors
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{ActorRef, Props}
 import akka.persistence.{PersistentActor, SnapshotOffer}
-import com.google.inject.assistedinject.Assisted
+import common.{EntityFieldsObject, PersistentEntity}
 import org.slf4j.LoggerFactory
-import pojo.Dashboard.Cmd
-import pojo.{Dashboard, Item}
+
+import scala.collection.mutable
+
+case class Item(var name: String, var score: Int) {
+
+  def this(name: String ) {
+    this(name, 0)
+  }
+
+  def increment(): Unit = this.score = this.score + 1
+
+  def decrement(): Unit = if (this.score > 0) this.score = this.score - 1
+
+
+}
+
+case class Dashboard(id: String,
+                      name: String,
+                      description: String,
+                      style: String,
+                      items: mutable.Map[String, Item] = mutable.Map(),
+                     ownerName: String,
+                     ownerEmail: String,
+                     readonlyHash: String,
+                     writeHash: String,
+                    deleted: Boolean = false
+                    ) extends EntityFieldsObject[String, Dashboard] {
+  /**
+    * Assigns an id to the fields object, returning a new instance
+    *
+    * @param id The id to assign
+    */
+  override def assignId(id: String) = this.copy(id = id)
+  override def markDeleted = this.copy(deleted = false)
+}
 
 object DashboardActor {
 
@@ -15,11 +48,11 @@ object DashboardActor {
 //    def create(@Assisted("dashboard") dashboard: Dashboard): Actor
 //  }
 
-  def props(dashboard: Dashboard): Props = Props(new DashboardActor(dashboard))
+  //def props(dashboard: Dashboard): Props = Props(new DashboardActor(dashboard))
 
 }
 
-class DashboardActor(var dashboard: Dashboard) extends PersistentActor {
+class DashboardActor(id: String) extends PersistentEntity[Dashboard](id) {
 
   final private val watchers: Set[ActorRef] = Set();
 

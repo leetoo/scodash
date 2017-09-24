@@ -1,17 +1,13 @@
 package actors
 
-import java.util.concurrent.TimeUnit
-
 import akka.pattern.pipe
 import akka.persistence.{PersistentActor, SnapshotOffer}
-import akka.util.Timeout
-import controllers.Application
+import common.PersistentEntity
 import pojo.{Dashboard, DashboardId}
 
-import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.{Future, Promise}
 
-class ScodashActor extends PersistentActor {
+class ScodashActor(id: String) extends PersistentEntity[Dashboard](id) {
 
   import ScodashActor._
   import context._
@@ -27,8 +23,11 @@ class ScodashActor extends PersistentActor {
 
   override def receiveCommand: Receive = {
     case GetDashboardActor(id) =>
-      context.actorOf(DashboardActor.props(Dashboard(writeHash = id.writeHash)))
-      context.actorSelection(state(id)).resolveOne(FiniteDuration(10, TimeUnit.SECONDS)) pipeTo sender
+      val dashboardActorName = s"dashboard-${id.writeHash}"
+      context.child(dashboardActorName).getOrElse{
+        //context.actorOf(Props(id.writeHash), dashboardActorName))
+      }
+
     case CreateDashboard(dashboard) =>
       val dashboardActorName = s"dashboard-${dashboard.writeHash}"
       val dashboardActor = context.actorOf(DashboardActor.props(dashboard), dashboardActorName)

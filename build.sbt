@@ -28,6 +28,6 @@ libraryDependencies += "com.typesafe.akka" % "akka-persistence_2.11" % "2.5.4"
 
 libraryDependencies += "io.circe" %% "circe-generic" % "0.8.0"
 
-unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  
+unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"  
