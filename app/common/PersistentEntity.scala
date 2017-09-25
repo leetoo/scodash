@@ -2,24 +2,17 @@ package common
 
 import java.util.concurrent.TimeUnit
 
-import akka.persistence.PersistentActor
-import akka.actor.ReceiveTimeout
-import akka.actor.ActorLogging
-
-import scala.reflect.ClassTag
-import akka.actor.Props
-import akka.persistence.SaveSnapshotSuccess
-import akka.persistence.SaveSnapshotFailure
-import akka.persistence.SnapshotOffer
-import akka.persistence.RecoveryCompleted
+import akka.actor.{ActorLogging, Props, ReceiveTimeout}
+import akka.persistence._
 import com.typesafe.config.Config
 
 import scala.concurrent.duration.Duration
+import scala.reflect.ClassTag
 
 /**
   * Marker trait for something that is an event generated as the result of a command
   */
-trait EntityEvent extends Serializable {
+trait EntityEvent extends Serializable with DatamodelWriter {
   /**
     * Gets the string identifier of the entity this event is for, for tagging purposes
     */
@@ -47,7 +40,6 @@ object PersistentEntity {
 abstract class PersistentEntity[FO <: EntityFieldsObject[String, FO]: ClassTag](id:String)
   extends PersistentActor with ActorLogging{
   import PersistentEntity._
-  import concurrent.duration._
 
   val entityType = getClass.getSimpleName
   var state:FO = initialState

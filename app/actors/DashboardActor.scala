@@ -1,8 +1,10 @@
 package actors
 
+import actors.DashboardActor.Command
+import actors.DashboardActor.Command.{Data, DecrementItem, IncrementItem, Watch}
 import akka.actor.{ActorRef, Props}
 import akka.persistence.{PersistentActor, SnapshotOffer}
-import common.{EntityFieldsObject, PersistentEntity}
+import common.{EntityEvent, EntityFieldsObject, PersistentEntity}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
@@ -44,11 +46,40 @@ object DashboardActor {
 
   private val LOG = LoggerFactory.getLogger(classOf[DashboardActor])
 
+  val EntityType = "dashboard"
+
 //  trait Factory {
 //    def create(@Assisted("dashboard") dashboard: Dashboard): Actor
 //  }
 
   //def props(dashboard: Dashboard): Props = Props(new DashboardActor(dashboard))
+
+  object Command {
+    case class CreateDashboard(dashboard: Dashboard)
+    case class Watch()
+    case class Unwatch()
+    case class Data(items: mutable.Map[String, Item])
+    case class IncrementItem(name: String)
+    case class DecrementItem(name: String)
+    case class AddItem(name: String)
+    case class RemoveItem(name: String)
+    case class GetWriteHash()
+    case class GetReadonlyHash()
+    case class GetName()
+    case class GetDashboard()
+  }
+
+  object Event {
+    trait DasboardEvent extends EntityEvent{override def entityType: String = EntityType}
+    case class DashboardCreated(dashboard: Dashboard) extends DasboardEvent {
+      def toDataModel = {
+        val dashboardDM = Datamodel.Dashboard.new
+
+      }
+    }
+  }
+
+ 
 
 }
 
@@ -56,7 +87,7 @@ class DashboardActor(id: String) extends PersistentEntity[Dashboard](id) {
 
   final private val watchers: Set[ActorRef] = Set();
 
-  private def handleIncrementItemCommand(command: Dashboard.IncrementItem): Unit = {
+  private def handleIncrementItemCommand(command: IncrementItem): Unit = {
     val item: Item = dashboard.items(command.name)
     if (item != null) {
       item.increment()
@@ -64,7 +95,7 @@ class DashboardActor(id: String) extends PersistentEntity[Dashboard](id) {
     notifyWatchers()
   }
 
-  private def handleDecremenItemCommand (command: Dashboard.DecrementItem): Unit = {
+  private def handleDecremenItemCommand (command: DecrementItem): Unit = {
     val item: Item = dashboard.items(command.name)
     if (item != null) {
       item.decrement ()
@@ -72,44 +103,44 @@ class DashboardActor(id: String) extends PersistentEntity[Dashboard](id) {
     notifyWatchers ()
   }
 
-  private def handleWatchCommand (command: Dashboard.Watch): Unit = {
+  private def handleWatchCommand (command: Watch): Unit = {
     val data: Dashboard.Data = new Dashboard.Data(dashboard.items)
     sender.tell (data, self)
     watchers.+(sender)
   }
 
-  private def handleDataCommand (command: Dashboard.Data): Unit = {
+  private def handleDataCommand (command: Data): Unit = {
     val data: Dashboard.Data = new Dashboard.Data (dashboard.items)
     sender.tell (data, self)
   }
 
-  private def handleUnwatchCommand (command: Dashboard.Unwatch): Unit = {
+  private def handleUnwatchCommand (command: Unwatch): Unit = {
     watchers.-(sender())
   }
 
-  private def handleGetWriteHashCommand (command: Dashboard.GetWriteHash): Unit = {
+  private def handleGetWriteHashCommand (command: GetWriteHash): Unit = {
     sender().tell (dashboard.writeHash, self)
   }
 
-  private def handleGetReadonlyHashCommand (command: Dashboard.GetReadonlyHash): Unit = {
+  private def handleGetReadonlyHashCommand (command: GetReadonlyHash): Unit = {
     sender().tell (dashboard.readonlyHash, self)
   }
 
-  private def handleGetNameCommand (command: Dashboard.GetName): Unit = {
+  private def handleGetNameCommand (command: GetName): Unit = {
     sender().tell (dashboard.name, self)
   }
 
-  private def handlerGetDashboard(command: Dashboard.GetDashboard): Unit = {
+  private def handlerGetDashboard(command: GetDashboard): Unit = {
     sender().tell(dashboard, self)
   }
 
-  private def handleAddItemCommand (command: Dashboard.AddItem): Unit = {
+  private def handleAddItemCommand (command: AddItem): Unit = {
     val addItem: Dashboard.AddItem = command.asInstanceOf[Dashboard.AddItem]
     dashboard.items + addItem.name
     notifyWatchers ()
   }
 
-  private def handleRemoveItemCommand (command: Dashboard.RemoveItem): Unit = {
+  private def handleRemoveItemCommand (command: RemoveItem): Unit = {
     val removeItem: Dashboard.RemoveItem = command.asInstanceOf[Dashboard.RemoveItem]
     dashboard.items - removeItem.name
     notifyWatchers ()
