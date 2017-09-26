@@ -60,7 +60,7 @@ public class UserActor extends UntypedActor {
             this.dashboardActor = (ActorRef) FutureConverters.toJava(
                     ask(scodashActor, new ScodashActor.GetDashboardActor(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
             ).toCompletableFuture().get();
-            this.dashboardActor.tell(new Dashboard.Watch(), self() );
+            this.dashboardActor.tell(new DashboardFO.Watch(), self() );
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -122,8 +122,8 @@ public class UserActor extends UntypedActor {
 //            out.tell(message, self());
 //        }
 
-        if (msg instanceof Dashboard.AddItem) {
-            Dashboard.AddItem addItem = (Dashboard.AddItem) msg;
+        if (msg instanceof DashboardFO.AddItem) {
+            DashboardFO.AddItem addItem = (DashboardFO.AddItem) msg;
             ObjectNode message =
                     Json.newObject()
                         .put("type", "additem")
@@ -132,8 +132,8 @@ public class UserActor extends UntypedActor {
             out.tell(message, self());
         }
 
-        if (msg instanceof Dashboard.DecrementItem) {
-            Dashboard.DecrementItem decrementItem = (Dashboard.DecrementItem) msg;
+        if (msg instanceof DashboardFO.DecrementItem) {
+            DashboardFO.DecrementItem decrementItem = (DashboardFO.DecrementItem) msg;
             ObjectNode message =
                     Json.newObject()
                             .put("type", "decrementitem")
@@ -142,8 +142,8 @@ public class UserActor extends UntypedActor {
             out.tell(message, self());
         }
 
-        if (msg instanceof Dashboard.IncrementItem) {
-            Dashboard.IncrementItem incrementItem = (Dashboard.IncrementItem) msg;
+        if (msg instanceof DashboardFO.IncrementItem) {
+            DashboardFO.IncrementItem incrementItem = (DashboardFO.IncrementItem) msg;
             ObjectNode message =
                     Json.newObject()
                             .put("type", "incrementitem")
@@ -152,8 +152,8 @@ public class UserActor extends UntypedActor {
             out.tell(message, self());
         }
 
-        if (msg instanceof Dashboard.RemoveItem) {
-            Dashboard.RemoveItem removeItem = (Dashboard.RemoveItem) msg;
+        if (msg instanceof DashboardFO.RemoveItem) {
+            DashboardFO.RemoveItem removeItem = (DashboardFO.RemoveItem) msg;
             ObjectNode message =
                     Json.newObject()
                             .put("type", "removeitem")
@@ -162,10 +162,10 @@ public class UserActor extends UntypedActor {
             out.tell(message, self());
         }
 
-        if (msg instanceof Dashboard.Data) {
-            Dashboard.Data data = (Dashboard.Data)msg;
+        if (msg instanceof DashboardFO.Data) {
+            DashboardFO.Data data = (DashboardFO.Data)msg;
             ArrayNode items = Json.newArray();
-            for (Item item : JavaConverters.mapAsJavaMapConverter(data.items()).asJava().values()) {
+            for (ItemFO item : JavaConverters.mapAsJavaMapConverter(data.items()).asJava().values()) {
                 items.addObject().put("name", item.name()).put("score", item.score());
             }
 
@@ -183,11 +183,11 @@ public class UserActor extends UntypedActor {
             final String operation = json.get("operation").textValue();
             final String item = json.get("name").textValue();
             if ("increment".equals(operation)) {
-                dashboardActor.tell(new Dashboard.IncrementItem(item), self());
+                dashboardActor.tell(new DashboardFO.IncrementItem(item), self());
             } else if ("decrement".equals(operation)) {
-                dashboardActor.tell(new Dashboard.DecrementItem(item), self());
+                dashboardActor.tell(new DashboardFO.DecrementItem(item), self());
             } else if ("remove".equals(operation)) {
-                dashboardActor.tell(new Dashboard.RemoveItem(item), self());
+                dashboardActor.tell(new DashboardFO.RemoveItem(item), self());
             } else {
                 logger.error("No operation in JSON");
             }

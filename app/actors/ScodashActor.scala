@@ -3,11 +3,10 @@ package actors
 import akka.pattern.pipe
 import akka.persistence.{PersistentActor, SnapshotOffer}
 import common.PersistentEntity
-import pojo.{Dashboard, DashboardId}
 
 import scala.concurrent.{Future, Promise}
 
-class ScodashActor(id: String) extends PersistentEntity[Dashboard](id) {
+class ScodashActor(id: String) extends PersistentEntity[DashboardFO](id) {
 
   import ScodashActor._
   import context._
@@ -30,7 +29,7 @@ class ScodashActor(id: String) extends PersistentEntity[Dashboard](id) {
 
     case CreateDashboard(dashboard) =>
       val dashboardActorName = s"dashboard-${dashboard.writeHash}"
-      val dashboardActor = context.actorOf(DashboardActor.props(dashboard), dashboardActorName)
+      val dashboardActor = context.actorOf(Dashboard.props(dashboard), dashboardActorName)
       handleEvent(DashboardCreated(DashboardId(dashboard.writeHash), dashboardActorName)) pipeTo sender
       ()
   }
@@ -57,7 +56,7 @@ object ScodashActor {
 
   sealed trait ScodashCommand
 
-  case class CreateDashboard(dashboard: Dashboard) extends ScodashCommand
+  case class CreateDashboard(dashboard: DashboardFO) extends ScodashCommand
   case class GetDashboardActor(id: DashboardId) extends ScodashCommand
 
   sealed trait ScodashEvent {
