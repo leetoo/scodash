@@ -1,4 +1,4 @@
-package controllers.forms;
+package forms;
 
 /**
  * Created by vasek on 16. 7. 2017.

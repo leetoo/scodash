@@ -1,4 +1,5 @@
-@(createdDashboard: play.data.Form[controllers.forms.CreatedDashboard])
+
+@(createdDashboard: play.data.Form[CreatedDashboard])
 @mainBasic("ScoDash") {
     <div class="row green-message vertical-align">
         <div class="col-md-12 text-center"><span><img src="@routes.Assets.at("images/icon-check-white.png")"/>&nbsp;Dashboard was created!</span>&nbsp;<a class="url" href="@{createdDashboard("writeHash").value()}">View it</a></div>

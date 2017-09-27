@@ -1,5 +1,3 @@
-package controllers;
-
 import static akka.pattern.Patterns.ask;
 
 import java.io.IOException;
@@ -13,9 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import actors.ScodashActor;
 import org.apache.commons.collections4.IteratorUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -24,6 +20,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import actors.Dashboard;
+import actors.DashboardFO;
+import actors.ItemFO;
+import actors.Scodash;
 import actors.UserParentActor;
 import akka.NotUsed;
 import akka.actor.ActorRef;
@@ -37,11 +37,12 @@ import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Keep;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import controllers.forms.CreateDashboardItems;
-import controllers.forms.CreateDashboardNew;
-import controllers.forms.CreateDashboardOwner;
-import controllers.forms.CreatedDashboard;
-import controllers.forms.Item;
+import common.PersistentEntity;
+import forms.CreateDashboardItems;
+import forms.CreateDashboardNew;
+import forms.CreateDashboardOwner;
+import forms.CreatedDashboard;
+import forms.Item;
 import play.data.Form;
 import play.data.FormFactory;
 import play.libs.F;
@@ -52,7 +53,6 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import play.mvc.WebSocket;
-import pojo.Dashboard;
 import scala.collection.JavaConverters;
 import scala.compat.java8.FutureConverters;
 import views.html.createDashboardItems;
@@ -179,18 +179,12 @@ public class Application extends Controller {
         session(SESSION_DASHBOARD_OWNER_EMAIL, createDashboard3Form.getOwnerEmail());
 
         ArrayNode itemsNodes = (ArrayNode) Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
-        final Map<String, pojo.Item> items = IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toMap(item -> item, item -> new pojo.Item(item.toString())));
+        final Map<String, ItemFO> items = IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toMap(item -> item, item -> new ItemFO(item.toString())));
 
-        Dashboard dashboard = new Dashboard(
-                session(SESSION_DASHBOARD_NAME),
-                session(SESSION_DASHBOARD_DESCRIPTION),
-                session(SESSION_DASHBOARD_TYPE),
-                JavaConverters.mapAsScalaMapConverter(items).asScala(),
-                session(SESSION_DASHBOARD_OWNER_NAME),
-                session(SESSION_DASHBOARD_OWNER_EMAIL),
-                RandomStringUtils.randomAlphanumeric(8),
-                RandomStringUtils.randomAlphanumeric(8)
-        );
+//        DashboardFO dashboard = new DashboardFO(
+//
+//                s
+//        );
 //        Dashboard dashboard = new Dashboard(
 //        dashboard.name(session(SESSION_DASHBOARD_NAME),
 //        dashboard.description(session(SESSION_DASHBOARD_DESCRIPTION),
@@ -202,12 +196,25 @@ public class Application extends Controller {
 //        dashboard.writeHash(RandomStringUtils.randomAlphanumeric(8)
 //        )
 
-        CompletableFuture.supplyAsync(
-                () -> createDashboardActor(dashboard), ec.current());
+//        CompletableFuture.supplyAsync(
+//                () -> createDashboardActor(dashboard), ec.current());
 
-        //DashboardsRepository.dashboards().insert(dashboard);
 
-        CreatedDashboard createdDashboard = new CreatedDashboard(dashboard.name(), dashboard.readonlyHash(), dashboard.writeHash());
+        CompletionStage<ActorRef> dashboardActor =
+        FutureConverters.toJava(
+                ask(scodashActor, new Scodash.CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
+                        session(SESSION_DASHBOARD_DESCRIPTION),
+                        session(SESSION_DASHBOARD_TYPE),
+                        JavaConverters.mapAsScalaMapConverter(items).asScala(),
+                        session(SESSION_DASHBOARD_OWNER_NAME),
+                        session(SESSION_DASHBOARD_OWNER_EMAIL)), TIMEOUT_MILLIS)
+        ).thenApply(stageObj -> (ActorRef) stageObj);
+
+        DashboardFO dashboardFO = (DashboardFO)FutureConverters.toJava(
+                ask(dashboardActor, new PersistentEntity.GetState(), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
+        
+
+        CreatedDashboard createdDashboard = new CreatedDashboard(dashboardFO.name(), dashboardFO.readonlyHash(), dashboardFO.writeHash());
 
         Form<CreatedDashboard> createdDashboardForm = formFactory.form(CreatedDashboard.class).fill(createdDashboard);
         return ok(views.html.createdDashboard.render(createdDashboardForm));
@@ -276,13 +283,13 @@ public class Application extends Controller {
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
-    public CompletionStage<ActorRef> createDashboardActor(Dashboard dashboard) {
-
-        // Use guice assisted injection to instantiate and configure the child actor.
-        return FutureConverters.toJava(
-                ask(scodashActor, new ScodashActor.CreateDashboard(dashboard), TIMEOUT_MILLIS)
-        ).thenApply(stageObj -> (ActorRef) stageObj);
-    }
+//    public CompletionStage<ActorRef> createDashboardActor(Dashboard dashboard) {
+//
+//        // Use guice assisted injection to instantiate and configure the child actor.
+//        return FutureConverters.toJava(
+//                ask(scodashActor, new Scodash.CreateNewDashboard(dashboard), TIMEOUT_MILLIS)
+//        ).thenApply(stageObj -> (ActorRef) stageObj);
+//    }
 
     public Flow<JsonNode, JsonNode, NotUsed> createWebSocketFlow(Publisher<JsonNode> webSocketIn, ActorRef userActor) {
         // http://doc.akka.io/docs/akka/current/scala/stream/stream-flows-and-basics.html#stream-materialization

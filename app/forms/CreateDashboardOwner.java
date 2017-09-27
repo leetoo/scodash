@@ -1,4 +1,4 @@
-package controllers.forms;
+package forms;
 
 public class CreateDashboardOwner {
 

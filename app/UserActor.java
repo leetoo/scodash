@@ -4,8 +4,6 @@ package actors;
  * Created by vasek on 19. 11. 2016.
  */
 
-import static akka.pattern.Patterns.ask;
-
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
@@ -24,8 +22,6 @@ import akka.event.LoggingAdapter;
 import controllers.Application;
 import play.Configuration;
 import play.libs.Json;
-import pojo.Dashboard;
-import pojo.Item;
 import scala.collection.JavaConverters;
 import scala.compat.java8.FutureConverters;
 
@@ -58,9 +54,9 @@ public class UserActor extends UntypedActor {
     private void initDashboardActor() {
         try {
             this.dashboardActor = (ActorRef) FutureConverters.toJava(
-                    ask(scodashActor, new ScodashActor.GetDashboardActor(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
+                    ask(scodashActor, new Scodash.FindDashboard(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
             ).toCompletableFuture().get();
-            this.dashboardActor.tell(new DashboardFO.Watch(), self() );
+            this.dashboardActor.tell(new Dashboard.Command.Watch(), self() );
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

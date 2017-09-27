@@ -1,81 +1,32 @@
 package actors
 
-import actors.Dashboard.Command
 import actors.Dashboard.Command._
 import actors.Dashboard.Event.DashboardCreated
 import akka.actor.{ActorRef, Props}
-import akka.persistence.{PersistentActor, SnapshotOffer}
 import common._
-import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 
 case class ItemFO(var name: String, var score: Int) {
-
   def this(name: String ) {
     this(name, 0)
   }
-
-  def increment(): Unit = this.score = this.score + 1
-
-  def decrement(): Unit = if (this.score > 0) this.score = this.score - 1
-
-
+  def increment(): Unit = score = score + 1
+  def decrement(): Unit = if (score > 0) score = score - 1
 }
 
 object DashboardFO {
   def empty = DashboardFO("", "", "", "", mutable.Map.empty[String, ItemFO], "", "", "", "")
 }
 
-case class DashboardFO(id: String,
-                       name: String,
-                       description: String,
-                       style: String,
-                       items: mutable.Map[String, ItemFO] = mutable.Map(),
-                       ownerName: String,
-                       ownerEmail: String,
-                       readonlyHash: String,
-                       writeHash: String,
-                       deleted: Boolean = false
-                    ) extends EntityFieldsObject[String, DashboardFO] {
-  /**
-    * Assigns an id to the fields object, returning a new instance
-    *
-    * @param id The id to assign
-    */
+case class DashboardFO(id: String, name: String, description: String, style: String, items: mutable.Map[String, ItemFO] = mutable.Map(), ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
   override def assignId(id: String) = this.copy(id = id)
   override def markDeleted = this.copy(deleted = false)
 }
 
-object Dashboard {
-
-  val EntityType = "dashboard"
-
-  object Command {
-    case class CreateDashboard(dashboard: DashboardFO)
-    case class Watch()
-    case class Unwatch()
-    case class Data(items: mutable.Map[String, ItemFO])
-    case class IncrementItem(name: String)
-    case class DecrementItem(name: String)
-    case class AddItem(name: String)
-    case class RemoveItem(name: String)
-    case class GetWriteHash()
-    case class GetReadonlyHash()
-    case class GetName()
-    case class GetDashboard()
-  }
-
-  object Event {
-    trait DasboardEvent extends EntityEvent{override def entityType: String = EntityType}
-    case class DashboardCreated(dashboard: DashboardFO) extends DasboardEvent
-  }
-
-
-
-}
-
 class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
+
+  import Dashboard._
 
   def initialState = DashboardFO.empty
   final private val watchers: Set[ActorRef] = Set();
@@ -89,6 +40,11 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
       } else {
         persist(DashboardCreated(dashboard))(handleEventAndRespond())
       }
+  }
+
+  override def isCreateMessage(cmd: Any) = cmd match {
+    case cr:CreateDashboard => true
+    case _ => false
   }
 
   def handleEvent(event:EntityEvent):Unit = event match {
@@ -182,7 +138,37 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
 //
 //  override def persistenceId: String = dashboard.writeHash
 
+
+
+}
+
+object Dashboard {
+
+  val EntityType = "dashboard"
+
+  object Command {
+    case class CreateDashboard(dashboard: DashboardFO)
+    case class Watch()
+    case class Unwatch()
+    case class Data(items: mutable.Map[String, ItemFO])
+    case class IncrementItem(name: String)
+    case class DecrementItem(name: String)
+    case class AddItem(name: String)
+    case class RemoveItem(name: String)
+    case class GetWriteHash()
+    case class GetReadonlyHash()
+    case class GetName()
+    case class GetDashboard()
+  }
+
+  object Event {
+    trait DasboardEvent extends EntityEvent{override def entityType: String = EntityType}
+    case class DashboardCreated(dashboard: DashboardFO) extends DasboardEvent
+  }
+
   def props(id: String) = Props(classOf[Dashboard], id)
 
   val DashboardAlreadyCreated = ErrorMessage("dashboard.alreadyexists", Some("This dashboard has already been created and can not handle another CreateDashboard request"))
+
 }
+

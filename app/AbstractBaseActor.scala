@@ -1,12 +1,13 @@
 package common
 
 import akka.actor._
+
 import scala.concurrent.Future
 
 /**
   * Base actor definition for other actors in the bookstore app to extend from
   */
-trait BookstoreActor extends Actor with ActorLogging{
+trait AbstractBaseActor extends Actor with ActorLogging {
   import akka.pattern.pipe
   import context.dispatcher
 

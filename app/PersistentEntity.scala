@@ -223,7 +223,7 @@ abstract class PersistentEntity[FO <: EntityFieldsObject[String, FO]: ClassTag](
 /**
   * Abstract class to represent an Aggregate Actor that sits in front of entities and delegates requests to them
   */
-abstract class Aggregate[FO <: EntityFieldsObject[String, FO], E <: PersistentEntity[FO] : ClassTag] extends BookstoreActor{
+abstract class Aggregate[FO <: EntityFieldsObject[String, FO], E <: PersistentEntity[FO] : ClassTag] extends AbstractBaseActor{
 
   /**
     * Looks up or creates a new child entity for the id supplied

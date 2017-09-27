@@ -1,10 +1,10 @@
 package actors;
 
+import javax.inject.Inject;
+
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import play.libs.akka.InjectedActorSupport;
-
-import javax.inject.Inject;
 
 /**
  * Created by vasek on 19. 11. 2016.
