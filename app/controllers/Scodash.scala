@@ -1,19 +1,24 @@
-package actors
+package controllers
 
 import java.util.UUID
 
-import actors.Dashboard.Command.CreateDashboard
-import actors.Scodash.{CreateNewDashboard, FindDashboard}
+import Dashboard.Command.CreateDashboard
+import Scodash.{CreateNewDashboard, FindDashboard}
 import akka.actor.Props
-import common.Aggregate
-import common.PersistentEntity.GetState
+import controllers.PersistentEntity.GetState
+import controllers.Scodash.Command.{CreateNewDashboard, FindDashboard}
 import org.apache.commons.lang3.RandomStringUtils
 
 import scala.collection.mutable
 
 object Scodash {
-  case class FindDashboard(id: String)
-  case class CreateNewDashboard(name: String, description: String, style: String, items: mutable.Map[String, ItemFO] = mutable.Map(), ownerName: String, ownerEmail: String)
+  object Command {
+    case class FindDashboardByWriteHash(writeHash: String) extends EntityCommand {
+      override def entityId: String = writeHash
+    }
+    case class CreateNewDashboard(name: String, description: String, style: String, items: mutable.Map[String, ItemFO] = mutable.Map(), ownerName: String, ownerEmail: String)
+  }
+
 
   def props = Props[Scodash]
 

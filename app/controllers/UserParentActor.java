@@ -1,4 +1,4 @@
-package actors;
+package controllers;
 
 import javax.inject.Inject;
 

@@ -1,6 +1,6 @@
-package common
+package controllers
 
-import akka.actor._
+import akka.actor.{Actor, ActorLogging}
 
 import scala.concurrent.Future
 

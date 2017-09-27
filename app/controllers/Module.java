@@ -1,7 +1,7 @@
+package controllers;
+
 import com.google.inject.AbstractModule;
 
-import actors.UserActor;
-import actors.UserParentActor;
 import play.libs.akka.AkkaGuiceSupport;
 
 public class Module extends AbstractModule implements AkkaGuiceSupport {

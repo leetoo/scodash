@@ -1,4 +1,4 @@
-package actors;
+package controllers;
 
 /**
  * Created by vasek on 19. 11. 2016.

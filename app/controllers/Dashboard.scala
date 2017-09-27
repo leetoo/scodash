@@ -1,9 +1,8 @@
-package actors
+package controllers
 
-import actors.Dashboard.Command._
-import actors.Dashboard.Event.DashboardCreated
+import Dashboard.Command._
+import Dashboard.Event.DashboardCreated
 import akka.actor.{ActorRef, Props}
-import common._
 
 import scala.collection.mutable
 

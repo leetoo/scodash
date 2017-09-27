@@ -1,4 +1,4 @@
-package common
+package controllers
 
 import java.util.concurrent.TimeUnit
 
@@ -8,6 +8,20 @@ import com.typesafe.config.Config
 
 import scala.concurrent.duration.Duration
 import scala.reflect.ClassTag
+
+/**
+  * Base trait for all entity based commands to extend from
+  */
+trait EntityCommand{
+
+  /**
+    * Gets the id of the entity that this command is for, to
+    * use for shard routing
+    * @return a String representing the entity id of this command
+    */
+  def entityId:String
+}
+
 
 /**
   * Marker trait for something that is an event generated as the result of a command
@@ -25,10 +39,14 @@ trait EntityEvent extends Serializable {
 object PersistentEntity {
 
   /** Request to get the current state from an entity actor */
-  case object GetState
+  case class GetState(id:String) extends EntityCommand{
+    def entityId = id
+  }
 
   /** Request to mark an entity instance as deleted*/
-  case object MarkAsDeleted
+  case class MarkAsDeleted(id:String)  extends EntityCommand{
+    def entityId = id
+  }
 
   def getPersistentEntityTimeout(config: Config, timeUnit: TimeUnit): Duration =
     Duration.create(config.getDuration("persistent-entity-timeout", TimeUnit.SECONDS), timeUnit)

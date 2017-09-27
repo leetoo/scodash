@@ -1,3 +1,5 @@
+package controllers;
+
 import static akka.pattern.Patterns.ask;
 
 import java.io.IOException;
@@ -20,11 +22,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import actors.Dashboard;
-import actors.DashboardFO;
-import actors.ItemFO;
-import actors.Scodash;
-import actors.UserParentActor;
 import akka.NotUsed;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -37,7 +34,6 @@ import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Keep;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import common.PersistentEntity;
 import forms.CreateDashboardItems;
 import forms.CreateDashboardNew;
 import forms.CreateDashboardOwner;
@@ -200,7 +196,7 @@ public class Application extends Controller {
 //                () -> createDashboardActor(dashboard), ec.current());
 
 
-        CompletionStage<ActorRef> dashboardActor =
+        CompletionStage<DashboardFO> dashboardFO =
         FutureConverters.toJava(
                 ask(scodashActor, new Scodash.CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
                         session(SESSION_DASHBOARD_DESCRIPTION),
@@ -208,11 +204,8 @@ public class Application extends Controller {
                         JavaConverters.mapAsScalaMapConverter(items).asScala(),
                         session(SESSION_DASHBOARD_OWNER_NAME),
                         session(SESSION_DASHBOARD_OWNER_EMAIL)), TIMEOUT_MILLIS)
-        ).thenApply(stageObj -> (ActorRef) stageObj);
+        ).thenApply(stageObj -> (DashboardFO) stageObj);
 
-        DashboardFO dashboardFO = (DashboardFO)FutureConverters.toJava(
-                ask(dashboardActor, new PersistentEntity.GetState(), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
-        
 
         CreatedDashboard createdDashboard = new CreatedDashboard(dashboardFO.name(), dashboardFO.readonlyHash(), dashboardFO.writeHash());
 
