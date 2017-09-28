@@ -3,7 +3,6 @@ package controllers
 import java.util.UUID
 
 import Dashboard.Command.CreateDashboard
-import Scodash.{CreateNewDashboard, FindDashboard}
 import akka.actor.Props
 import controllers.PersistentEntity.GetState
 import controllers.Scodash.Command.{CreateNewDashboard, FindDashboard}
@@ -13,9 +12,7 @@ import scala.collection.mutable
 
 object Scodash {
   object Command {
-    case class FindDashboardByWriteHash(writeHash: String) extends EntityCommand {
-      override def entityId: String = writeHash
-    }
+    case class FindDashboard(id: String)
     case class CreateNewDashboard(name: String, description: String, style: String, items: mutable.Map[String, ItemFO] = mutable.Map(), ownerName: String, ownerEmail: String)
   }
 
