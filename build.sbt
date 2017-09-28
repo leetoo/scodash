@@ -20,15 +20,21 @@ libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1"
 
 //libraryDependencies += "com.github.ironfish" % "akka-persistence-mongo-common_2.11" % "0.7.6"
 
-libraryDependencies += "org.mongodb" % "casbah_2.11" % "3.1.0"
+//libraryDependencies += "org.mongodb" % "casbah_2.11" % "3.1.0"
 
-libraryDependencies += "com.github.scullxbones" %% "akka-persistence-mongo-casbah" % "2.0.3"
+libraryDependencies += "com.typesafe.akka" %% "akka-persistence-cassandra" % "0.16" excludeAll(ExclusionRule("io.netty"))
+
+libraryDependencies += "com.typesafe.akka" %% "akka-persistence" % "2.5.4" excludeAll(ExclusionRule("io.netty"))
+
+//libraryDependencies += "com.github.scullxbones" %% "akka-persistence-mongo-casbah" % "2.0.3"
 
 libraryDependencies += "com.typesafe.akka" % "akka-persistence_2.11" % "2.5.4"
 
 libraryDependencies += "io.circe" %% "circe-generic" % "0.8.0"
 
 libraryDependencies += "com.google.protobuf" % "protobuf-java"  % "2.5.0"
+
+libraryDependencies += "org.json4s" %% "json4s-ext" % "3.2.9"
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
 
