@@ -26,6 +26,17 @@ libraryDependencies += "com.typesafe.akka" %% "akka-persistence-cassandra" % "0.
 
 libraryDependencies += "com.typesafe.akka" %% "akka-persistence" % "2.5.4" excludeAll(ExclusionRule("io.netty"))
 
+libraryDependencies += "net.databinder" %% "unfiltered-filter" % "0.8.4"
+
+libraryDependencies += "net.databinder" %% "unfiltered-netty" % "0.8.4"
+
+libraryDependencies += "net.databinder" %% "unfiltered-netty-server" % "0.8.4"
+
+libraryDependencies += "net.databinder" %% "unfiltered-json4s" % "0.8.4"
+
+libraryDependencies += "net.databinder.dispatch" %% "dispatch-core" % "0.11.2"
+
+
 //libraryDependencies += "com.github.scullxbones" %% "akka-persistence-mongo-casbah" % "2.0.3"
 
 libraryDependencies += "com.typesafe.akka" % "akka-persistence_2.11" % "2.5.4"

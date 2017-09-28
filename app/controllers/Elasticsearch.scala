@@ -33,7 +33,7 @@ object ElasticsearchApi {
   implicit val formats = Serialization.formats(NoTypeHints)
 }
 
-trait ElasticsearchSupport{ me:BookstoreActor =>
+trait ElasticsearchSupport{ me:AbstractBaseActor =>
   import ElasticsearchApi._
 
   val esSettings = ElasticsearchSettings(context.system)
