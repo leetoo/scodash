@@ -93,12 +93,13 @@ public class Application extends Controller {
         this.actorSystem = actorSystem;
         this.formFactory = formFactory;
 
-        scodashActor = actorSystem.actorOf(Scodash.props, Scodash.Name);
-        dashboardView = actorSystem.actorOf(DashboardView.props, DashboardView.Name);
-        actorSystem.actorOf(DashboardViewBuilder.props, DashboardViewBuilder.Name);
+        scodashActor = actorSystem.actorOf(Scodash.props(), Scodash.Name());
+        dashboardView = actorSystem.actorOf(DashboardView.props(), DashboardView.Name());
+        actorSystem.actorOf(DashboardViewBuilder.props(), DashboardViewBuilder.Name());
     }
 
     public Result showNewDashboard() {
+
         Form<CreateDashboardNew> createDashboard1Form = formFactory.form(CreateDashboardNew.class);
         Form<CreateDashboardNew> filledForm = createDashboard1Form.fill(
                 new CreateDashboardNew(
