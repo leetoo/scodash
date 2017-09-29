@@ -198,7 +198,7 @@ public class Application extends Controller {
 
         CompletionStage<DashboardFO> dashboardFO =
         FutureConverters.toJava(
-                ask(scodashActor, new Scodash.CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
+                ask(scodashActor, new Scodash.Command.CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
                         session(SESSION_DASHBOARD_DESCRIPTION),
                         session(SESSION_DASHBOARD_TYPE),
                         JavaConverters.mapAsScalaMapConverter(items).asScala(),
