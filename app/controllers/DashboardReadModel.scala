@@ -39,7 +39,7 @@ class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[Dashboard
 }
 
 
-object BookView{
+object DashboardView{
   val Name = "dashboard-view"
   case class FindDashboardByWriteHash(writeHash:String)
   case class FindDashboardByReadonlyHash(readonlyHash:String)
@@ -47,7 +47,7 @@ object BookView{
 }
 
 class DashboardView extends DashboardReadModel with AbstractBaseActor with ElasticsearchSupport{
-  import BookView._
+  import DashboardView._
   import ElasticsearchApi._
   import context.dispatcher
 
