@@ -55,8 +55,11 @@ import views.html.createDashboardItems;
 import views.html.index;
 
 
+
+
 @Singleton
 public class Application extends Controller {
+
 
     private Logger logger = org.slf4j.LoggerFactory.getLogger("controllers.Application");
 
@@ -71,7 +74,7 @@ public class Application extends Controller {
     public static long TIMEOUT_MILLIS = 100000;
 
     private ActorRef scodashActor;
-    private ActorRef userParentActor;
+    private final ActorRef dashboardView;
     private Materializer materializer;
     private ActorSystem actorSystem;
     private FormFactory formFactory;
@@ -85,14 +88,14 @@ public class Application extends Controller {
     @Inject
     public Application(ActorSystem actorSystem,
                        Materializer materializer,
-                       FormFactory formFactory,
-                       @Named("scodashActor") ActorRef scodashActor,
-                       @Named("userParentActor") ActorRef userParentActor) {
-        this.scodashActor = scodashActor;
-        this.userParentActor = userParentActor;
+                       FormFactory formFactory) {
         this.materializer = materializer;
         this.actorSystem = actorSystem;
         this.formFactory = formFactory;
+
+        scodashActor = actorSystem.actorOf(Scodash.props, Scodash.Name);
+        dashboardView = actorSystem.actorOf(DashboardView.props, DashboardView.Name);
+        actorSystem.actorOf(DashboardViewBuilder.props, DashboardViewBuilder.Name);
     }
 
     public Result showNewDashboard() {
@@ -194,6 +197,8 @@ public class Application extends Controller {
 
 //        CompletableFuture.supplyAsync(
 //                () -> createDashboardActor(dashboard), ec.current());
+
+
 
 
         CompletionStage<DashboardFO> dashboardFO =
@@ -343,53 +348,29 @@ public class Application extends Controller {
         return ok(index.render("Your new application is ready."));
     }
 
-    public Result dashboard(String hash) {
+    //public Result dashboard(String hash) {
 
-        try {
-//            String hash = "abc";
-            ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
-                    ask(scodashActor, new ScodashActor.GetDashboardActor(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
-            ).toCompletableFuture().get();
-            Dashboard dsh = (Dashboard)FutureConverters.toJava(
-                    ask(dashboardActor, new Dashboard.GetDashboard(), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
-            return ok(views.html.dashboard.render(dsh));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return internalServerError();
-        }
 
-    }
 
-//    public CompletionStage<Result> create() {
-//
-//        //DashboardForm dashboardForm = formFactory.form(DashboardForm.class).bindFromRequest().get();
-//
-//        final String inputHash = "TODO";
-//
-//        return CompletableFuture.supplyAsync(
-//                () -> createDashboardActor(inputHash), ec.current())
-//                .thenComposeAsync(dashboardActorFuture -> dashboardActorFuture
-//                        .thenComposeAsync(dashboardActor -> FutureConverters.toJava(ask(dashboardActor, new Dashboard.GetWriteHash(), TIMEOUT_MILLIS))
-//                                .thenApplyAsync(hash -> dashboard((String) hash), ec.current()), ec.current()), ec.current());
-//
-//    }
+        //val d = dashboardView ?
 
-//    public Result addItem() {
-//        ItemForm itemForm = formFactory.form(ItemForm.class).bindFromRequest().get();
-//
 //        try {
-//            ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
-//                    ask(dashboardParentActor, new JavaDashboardParentActor.GetDashboard(itemForm.getHash()), Application.TIMEOUT_MILLIS)
-//            ).toCompletableFuture().get();
 //
-//            ask(dashboardActor, new Dashboard.Item(itemForm.getName()), Application.TIMEOUT_MILLIS);
+//
+////            String hash = "abc";
+//            ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
+//                    ask(scodashActor, new ScodashActor.GetDashboardActor(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
+//            ).toCompletableFuture().get();
+//            Dashboard dsh = (Dashboard)FutureConverters.toJava(
+//                    ask(dashboardActor, new Dashboard.GetDashboard(), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
+//            return ok(views.html.dashboard.render(dsh));
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //            return internalServerError();
 //        }
-//
-//        return dashboard(itemForm.getHash());
-//    }
+
+ //   }
+
 
 
 

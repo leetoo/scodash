@@ -23,7 +23,7 @@ object Scodash {
 }
 
 class Scodash extends Aggregate[DashboardFO, Dashboard] {
-  
+
   override def receive = {
     case FindDashboard(id) =>
       log.info("Finding dashboard {}", id)
