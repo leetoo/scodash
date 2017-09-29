@@ -349,7 +349,9 @@ public class Application extends Controller {
         return ok(index.render("Your new application is ready."));
     }
 
-    //public Result dashboard(String hash) {
+    public Result dashboard(String hash) {
+
+        dashboardView.
 
 
 
@@ -370,7 +372,7 @@ public class Application extends Controller {
 //            return internalServerError();
 //        }
 
- //   }
+    }
 
 
 
