@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -181,28 +182,6 @@ public class Application extends Controller {
         ArrayNode itemsNodes = (ArrayNode) Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
         final Map<String, ItemFO> items = IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toMap(item -> item, item -> new ItemFO(item.toString())));
 
-//        DashboardFO dashboard = new DashboardFO(
-//
-//                s
-//        );
-//        Dashboard dashboard = new Dashboard(
-//        dashboard.name(session(SESSION_DASHBOARD_NAME),
-//        dashboard.description(session(SESSION_DASHBOARD_DESCRIPTION),
-//        dashboard.style(session(SESSION_DASHBOARD_TYPE),
-//        dashboard.items(IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toMap(item -> item, item -> new pojo.Item(item) )),
-//        dashboard.ownerName(session(SESSION_DASHBOARD_OWNER_NAME),
-//        dashboard.ownerEmail(session(SESSION_DASHBOARD_OWNER_EMAIL),
-//        dashboard.readonlyHash(RandomStringUtils.randomAlphanumeric(8)),
-//        dashboard.writeHash(RandomStringUtils.randomAlphanumeric(8)
-//        )
-
-//        CompletableFuture.supplyAsync(
-//                () -> createDashboardActor(dashboard), ec.current());
-
-
-
-
-        CompletionStage<DashboardFO> dashboardFO =
         FutureConverters.toJava(
                 ask(scodashActor, new Scodash.Command.CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
                         session(SESSION_DASHBOARD_DESCRIPTION),
@@ -210,10 +189,9 @@ public class Application extends Controller {
                         JavaConverters.mapAsScalaMapConverter(items).asScala(),
                         session(SESSION_DASHBOARD_OWNER_NAME),
                         session(SESSION_DASHBOARD_OWNER_EMAIL)), TIMEOUT_MILLIS)
-        ).thenApply(stageObj -> (DashboardFO) stageObj);
+        );
 
-
-        CreatedDashboard createdDashboard = new CreatedDashboard(dashboardFO.name(), dashboardFO.readonlyHash(), dashboardFO.writeHash());
+        CreatedDashboard createdDashboard = new CreatedDashboard(dashboardFO. name(), dashboardFO.readonlyHash(), dashboardFO.writeHash());
 
         Form<CreatedDashboard> createdDashboardForm = formFactory.form(CreatedDashboard.class).fill(createdDashboard);
         return ok(views.html.createdDashboard.render(createdDashboardForm));
@@ -351,8 +329,13 @@ public class Application extends Controller {
 
     public Result dashboard(String hash) {
 
-        dashboardView.
-
+        try {
+            DashboardFO dsh = (DashboardFO) FutureConverters.toJava(ask(dashboardView, new DashboardView.FindDashboardByWriteHash(hash), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
+            return ok(views.html.dashboard.render(dsh));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return internalServerError();
+        }
 
 
         //val d = dashboardView ?
