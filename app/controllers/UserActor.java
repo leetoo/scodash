@@ -52,16 +52,16 @@ public class UserActor extends UntypedActor {
 
 
     private void initDashboardActor() {
-        try {
-            this.dashboardActor = (ActorRef) FutureConverters.toJava(
-                    ask(scodashActor, new Scodash.FindDashboard(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
-            ).toCompletableFuture().get();
-            this.dashboardActor.tell(new Dashboard.Command.Watch(), self() );
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            this.dashboardActor = (ActorRef) FutureConverters.toJava(
+//                    ask(scodashActor, new Scodash.FindDashboard(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
+//            ).toCompletableFuture().get();
+//            this.dashboardActor.tell(new Dashboard.Command.Watch(), self() );
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
