@@ -2,7 +2,7 @@ package controllers
 
 import java.util.UUID
 
-import akka.actor.Props
+import akka.actor.{ActorRef, Props}
 import controllers.Dashboard.Command.CreateDashboard
 import controllers.PersistentEntity.GetState
 import controllers.Scodash.Command.{CreateNewDashboard, CreateUser, FindDashboard}
@@ -14,7 +14,7 @@ object Scodash {
   object Command {
     case class FindDashboard(id: String)
     case class CreateNewDashboard(name: String, description: String, style: String, items: mutable.Map[String, ItemFO] = mutable.Map(), ownerName: String, ownerEmail: String)
-    case class CreateUser(id: String)
+    case class CreateUser(id: String, webOutActor: ActorRef)
   }
 
 
@@ -40,7 +40,7 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       val command = CreateDashboard(fo)
       forwardCommand(id, command)
 
-    case CreateUser(id) =>
+    case CreateUser(id, webOutActor) =>
       val user = context.actorOf(User.props(id), User.Name)
       sender ! user
   }

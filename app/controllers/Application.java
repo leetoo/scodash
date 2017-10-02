@@ -183,7 +183,7 @@ public class Application extends Controller {
         final Map<String, ItemFO> items = IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toMap(item -> item, item -> new ItemFO(item.toString())));
 
         FutureConverters.toJava(
-                ask(scodashActor, new Scodash.Command.CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
+                ask(scodashActor, new Scodash$Command$CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
                         session(SESSION_DASHBOARD_DESCRIPTION),
                         session(SESSION_DASHBOARD_TYPE),
                         JavaConverters.mapAsScalaMapConverter(items).asScala(),
@@ -191,7 +191,7 @@ public class Application extends Controller {
                         session(SESSION_DASHBOARD_OWNER_EMAIL)), TIMEOUT_MILLIS)
         );
 
-        CreatedDashboard createdDashboard = new CreatedDashboard(dashboardFO. name(), dashboardFO.readonlyHash(), dashboardFO.writeHash());
+        CreatedDashboard createdDashboard = new CreatedDashboard();
 
         Form<CreatedDashboard> createdDashboardForm = formFactory.form(CreatedDashboard.class).fill(createdDashboard);
         return ok(views.html.createdDashboard.render(createdDashboardForm));
@@ -256,7 +256,7 @@ public class Application extends Controller {
 //                ask(userParentActor, new UserParentActor.Create(id, webSocketOut), timeoutMillis)
 //        ).thenApply(stageObj -> (ActorRef) stageObj);
         return FutureConverters.toJava(
-                ask(userParentActor, new UserParentActor.Create(id, webSocketOut, hash), TIMEOUT_MILLIS)
+                ask(scodashActor, new Scodash$Command$CreateUser(id, webSocketOut), TIMEOUT_MILLIS)
         ).thenApply(stageObj -> (ActorRef) stageObj);
     }
 
