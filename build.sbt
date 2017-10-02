@@ -14,7 +14,7 @@ libraryDependencies += "org.webjars" % "bootstrap" % "3.3.7"
 
 libraryDependencies += "org.webjars" % "flot" % "0.8.3"
 
-libraryDependencies += "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3"
+//libraryDependencies += "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3"
 
 libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1"
 

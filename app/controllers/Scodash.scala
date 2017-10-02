@@ -2,10 +2,10 @@ package controllers
 
 import java.util.UUID
 
-import Dashboard.Command.CreateDashboard
 import akka.actor.Props
+import controllers.Dashboard.Command.CreateDashboard
 import controllers.PersistentEntity.GetState
-import controllers.Scodash.Command.{CreateNewDashboard, FindDashboard}
+import controllers.Scodash.Command.{CreateNewDashboard, CreateUser, FindDashboard}
 import org.apache.commons.lang3.RandomStringUtils
 
 import scala.collection.mutable
@@ -14,6 +14,7 @@ object Scodash {
   object Command {
     case class FindDashboard(id: String)
     case class CreateNewDashboard(name: String, description: String, style: String, items: mutable.Map[String, ItemFO] = mutable.Map(), ownerName: String, ownerEmail: String)
+    case class CreateUser(id: String)
   }
 
 
@@ -38,6 +39,10 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       val fo = DashboardFO(id, name, description, style, items, ownerName, ownerEmail, readonlyHash, writeHash)
       val command = CreateDashboard(fo)
       forwardCommand(id, command)
+
+    case CreateUser(id) =>
+      val user = context.actorOf(User.props(id), User.Name)
+      sender ! user
   }
 
   def entityProps(id: String) = Dashboard.props(id)

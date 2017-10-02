@@ -5,7 +5,7 @@ import akka.actor.{Actor, ActorLogging}
 import scala.concurrent.Future
 
 /**
-  * Base actor definition for other actors in the bookstore app to extend from
+  * Base actor definition for other actors in the scodash app to extend from
   */
 trait AbstractBaseActor extends Actor with ActorLogging {
   import akka.pattern.pipe
