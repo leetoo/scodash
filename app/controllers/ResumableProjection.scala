@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import akka.actor._
 import akka.event.Logging
-import com.datastax.driver.core._
 
 import scala.concurrent.Future
 
@@ -33,7 +32,6 @@ class CassandraResumableProjection(identifier:String, system:ActorSystem) extend
 }
 
 class CassandraProjectionStorageExt(system:ActorSystem) extends Extension {
-  import akka.persistence.cassandra.listenableFutureToFuture
   import system.dispatcher
 
   val cassandraConfig = system.settings.config.getConfig("cassandra")
@@ -41,12 +39,12 @@ class CassandraProjectionStorageExt(system:ActorSystem) extends Extension {
 
   var initialized = new AtomicBoolean(false)
   val createKeyspaceStmt = """
-      CREATE KEYSPACE IF NOT EXISTS bookstore
+      CREATE KEYSPACE IF NOT EXISTS scodash
       WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }
     """
 
   val createTableStmt = """
-      CREATE TABLE IF NOT EXISTS bookstore.projectionoffsets (
+      CREATE TABLE IF NOT EXISTS scodash.projectionoffsets (
         identifier varchar primary key, offset bigint)
   """
 
@@ -66,7 +64,6 @@ class CassandraProjectionStorageExt(system:ActorSystem) extends Extension {
     session <- session.underlying()
     rs <- session.executeAsync(s"select offset from bookstore.projectionoffsets where identifier = '$identifier'")
   } yield {
-    import collection.JavaConversions._
     rs.all().headOption.map(_.getLong(0))
   }
 }
