@@ -7,11 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.commons.collections4.IteratorUtils;
@@ -38,7 +36,7 @@ import akka.stream.javadsl.Source;
 import forms.CreateDashboardItems;
 import forms.CreateDashboardNew;
 import forms.CreateDashboardOwner;
-import forms.CreatedDashboard;
+import forms.Forms;
 import forms.Item;
 import play.data.Form;
 import play.data.FormFactory;
@@ -182,19 +180,24 @@ public class Application extends Controller {
         ArrayNode itemsNodes = (ArrayNode) Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
         final Map<String, ItemFO> items = IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toMap(item -> item, item -> new ItemFO(item.toString())));
 
-        FutureConverters.toJava(
-                ask(scodashActor, new Scodash$Command$CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
-                        session(SESSION_DASHBOARD_DESCRIPTION),
-                        session(SESSION_DASHBOARD_TYPE),
-                        JavaConverters.mapAsScalaMapConverter(items).asScala(),
-                        session(SESSION_DASHBOARD_OWNER_NAME),
-                        session(SESSION_DASHBOARD_OWNER_EMAIL)), TIMEOUT_MILLIS)
-        );
+        try {
 
-        CreatedDashboard createdDashboard = new CreatedDashboard();
+            FullResult fr = (FullResult) FutureConverters.toJava(
+                    ask(scodashActor, new Scodash$Command$CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
+                            session(SESSION_DASHBOARD_DESCRIPTION),
+                            session(SESSION_DASHBOARD_TYPE),
+                            JavaConverters.mapAsScalaMapConverter(items).asScala(),
+                            session(SESSION_DASHBOARD_OWNER_NAME),
+                            session(SESSION_DASHBOARD_OWNER_EMAIL)), TIMEOUT_MILLIS)).toCompletableFuture().get();
+            DashboardFO dashboardFO = (DashboardFO) fr.toOption().get();
 
-        Form<CreatedDashboard> createdDashboardForm = formFactory.form(CreatedDashboard.class).fill(createdDashboard);
-        return ok(views.html.createdDashboard.render(createdDashboardForm));
+            forms.Forms.CreatedDashboard createdDashboard = new forms.Forms.CreatedDashboard(dashboardFO.name(), dashboardFO.writeHash(), dashboardFO.readonlyHash());
+
+            Form<Forms.CreatedDashboard> createdDashboardForm = formFactory.form(Forms.CreatedDashboard.class).fill(createdDashboard);
+            return ok(views.html.createdDashboard.render(createdDashboardForm));
+        } catch (Exception e) {
+            return internalServerError();
+        }
     }
 
     public WebSocket ws(String hash) {

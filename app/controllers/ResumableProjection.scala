@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import akka.actor._
 import akka.event.Logging
+import com.datastax.driver.core._
 
 import scala.concurrent.Future
-
 /**
   * Interface into a projection's offset storage system so that it can be properly resumed
   */
@@ -32,6 +32,7 @@ class CassandraResumableProjection(identifier:String, system:ActorSystem) extend
 }
 
 class CassandraProjectionStorageExt(system:ActorSystem) extends Extension {
+  import akka.persistence.cassandra.listenableFutureToFuture
   import system.dispatcher
 
   val cassandraConfig = system.settings.config.getConfig("cassandra")
@@ -57,13 +58,14 @@ class CassandraProjectionStorageExt(system:ActorSystem) extends Extension {
 
   def updateOffset(identifier:String, offset:Long): Future[Boolean] = (for {
     session <- session.underlying()
-    _ <- session.executeAsync(s"update bookstore.projectionoffsets set offset = $offset where identifier = '$identifier'")
+    _ <- session.executeAsync(s"update scodash.projectionoffsets set offset = $offset where identifier = '$identifier'")
   } yield true) recover { case t => false }
 
   def fetchLatestOffset(identifier:String): Future[Option[Long]] = for {
     session <- session.underlying()
-    rs <- session.executeAsync(s"select offset from bookstore.projectionoffsets where identifier = '$identifier'")
+    rs <- session.executeAsync(s"select offset from scodash.projectionoffsets where identifier = '$identifier'")
   } yield {
+    import collection.JavaConversions._
     rs.all().headOption.map(_.getLong(0))
   }
 }
