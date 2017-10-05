@@ -8,7 +8,7 @@ import akka.persistence.query.EventEnvelope
 import scala.collection.mutable
 
 trait DashboardReadModel{
-  def indexRoot = "inventory"
+  def indexRoot = "scodash"
   def entityType = Dashboard.EntityType
 }
 
