@@ -69,7 +69,7 @@ public class Application extends Controller {
 
     public static long TIMEOUT_MILLIS = 100000;
 
-    private final ActorRef dashboardView;
+    //private final ActorRef dashboardView;
     private Materializer materializer;
     private ActorSystem actorSystem;
     private FormFactory formFactory;
@@ -89,8 +89,8 @@ public class Application extends Controller {
         this.formFactory = formFactory;
 
         //scodashActor = actorSystem.actorOf(Scodash.props(), Scodash.Name());
-        dashboardView = actorSystem.actorOf(DashboardView.props(), DashboardView.Name());
-        actorSystem.actorOf(DashboardViewBuilder.props(), DashboardViewBuilder.Name());
+        //dashboardView = actorSystem.actorOf(DashboardView.props(), DashboardView.Name());
+        //actorSystem.actorOf(DashboardViewBuilder.props(), DashboardViewBuilder.Name());
     }
 
     public Result showNewDashboard() {
@@ -315,15 +315,15 @@ public class Application extends Controller {
         return ok(index.render("Your new application is ready."));
     }
 
-    public Result dashboard(String hash) {
-
-        try {
-            DashboardFO dsh = (DashboardFO) FutureConverters.toJava(ask(dashboardView, new DashboardView.FindDashboardByWriteHash(hash), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
-            return ok(views.html.dashboard.render(dsh));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return internalServerError();
-        }
+  //  public Result dashboard(String hash) {
+//
+//        try {
+//            DashboardFO dsh = (DashboardFO) FutureConverters.toJava(ask(dashboardView, new DashboardView.FindDashboardByWriteHash(hash), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
+//            return ok(views.html.dashboard.render(dsh));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return internalServerError();
+//        }
 
 
         //val d = dashboardView ?
@@ -343,7 +343,7 @@ public class Application extends Controller {
 //            return internalServerError();
 //        }
 
-    }
+  //  }
 
 
 

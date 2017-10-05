@@ -29,12 +29,12 @@ class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[Dashboard
 
   def projectionId = "dashboard-view-builder"
 
-  def actionFor(bookId:String, env:EventEnvelope) = env.event match {
+  def actionFor(dashboardId:String, env:EventEnvelope) = env.event match {
     case DashboardCreated(dashboard) =>
       log.info("Saving a new dashboard entity into the elasticsearch index: {}", dashboard)
-      val bookRM = DashboardRM(dashboard.id, dashboard.name, dashboard.description, dashboard.style,
+      val dashboardRM = DashboardRM(dashboard.id, dashboard.name, dashboard.description, dashboard.style,
         dashboard.items, dashboard.ownerName, dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash, dashboard.deleted )
-      InsertAction(dashboard.id, bookRM)
+      InsertAction(dashboard.id, dashboardRM)
   }
 }
 

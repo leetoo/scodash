@@ -1,15 +1,18 @@
 package controllers
 
 import akka.actor.ActorSystem
+import akka.pattern.ask
+import akka.util.Timeout
 import com.google.inject.Inject
 import controllers.Scodash.Command.CreateNewDashboard
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.{Action, Controller}
-import akka.pattern.ask
-import akka.util.Timeout
-import scala.concurrent.duration._
 
+import scala.compat.java8.FutureConverters
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 
 class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
@@ -25,6 +28,10 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
   implicit val timeout: Timeout = 5.seconds
 
   val scodashActor = system.actorOf(Scodash.props, Scodash.Name)
+  val dashboardView = system.actorOf(DashboardView.props, DashboardView.Name)
+  val dashboardViewBuild = system.actorOf(DashboardViewBuilder.props, DashboardViewBuilder.Name)
+
+
 
   val dashboardOwnerForm = Form(
     mapping(
@@ -39,10 +46,10 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
     Ok(views.html.createDashboardOwner(dashboardOwnerForm))
   }
 
-  def processDashboardOwner() = Action { implicit request =>
+  def processDashboardOwner() = Action.async { implicit request =>
     dashboardOwnerForm.bindFromRequest.fold(
       formWithErrors => {
-        BadRequest(views.html.createDashboardOwner(formWithErrors))
+        Future(BadRequest(views.html.createDashboardOwner(formWithErrors)))
       },
       ownerData => {
         (scodashActor ? CreateNewDashboard(
@@ -51,34 +58,17 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
           request.session(SESSION_DASHBOARD_TYPE),
           Map("Vasek" -> ItemFO("Vasek")),
           ownerData.name,
-          ownerData.email))).mapTo(resp =>
-            Ok(views.html.createdDashboard(Forms.CreatedDashboard(ownerData.name, "xxx", "yyy")))
-        )
-
+          ownerData.email)).mapTo[FullResult[DashboardFO]].map {
+            r => Ok(views.html.createdDashboard(Forms.CreatedDashboard(r.value.name, r.value.writeHash, r.value.readonlyHash)))
+          }
       }
     )
+  }
 
-
-    
-
-//    val createDashboard3Form: CreateDashboardOwner = formFactory.form(classOf[CreateDashboardOwner]).bindFromRequest(request).get
-//    session(SESSION_DASHBOARD_OWNER_NAME, createDashboard3Form.getOwnerName)
-//    session(SESSION_DASHBOARD_OWNER_EMAIL, createDashboard3Form.getOwnerEmail)
-//
-//    val itemsNodes: ArrayNode = Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS).asInstanceOf[ArrayNode]
-//    val items: util.Map[String, ItemFO] = IteratorUtils.toList(itemsNodes.elements).stream.map((node: JsonNode) => node.asText).collect(Collectors.toMap((item: String) => item, (item: String) => new ItemFO(item.toString)))
-//
-//    try {
-//      val fr: FullResult[Any] = FutureConverters.toJava(ask(scodashActor, new Nothing(session(SESSION_DASHBOARD_NAME), session(SESSION_DASHBOARD_DESCRIPTION), session(SESSION_DASHBOARD_TYPE), JavaConverters.mapAsScalaMapConverter(items).asScala, session(SESSION_DASHBOARD_OWNER_NAME), session(SESSION_DASHBOARD_OWNER_EMAIL)), TIMEOUT_MILLIS)).toCompletableFuture.get.asInstanceOf[FullResult[Any]]
-//      val dashboardFO: DashboardFO = fr.toOption.get.asInstanceOf[DashboardFO]
-//      val createdDashboard: Forms.CreatedDashboard = new Forms.CreatedDashboard(dashboardFO.name, dashboardFO.writeHash, dashboardFO.readonlyHash)
-//      val createdDashboardForm: Form[Forms.CreatedDashboard] = formFactory.form(classOf[Forms.CreatedDashboard]).fill(createdDashboard)
-//      return Ok(views.html.createdDashboard.render(createdDashboardForm))
-//    } catch {
-//      case e: Exception =>
-//        return internalServerError
-//    }
-//    Ok("Hello")
+  def dashboard(hash: String) = Action.async {
+    (dashboardView ? DashboardView.FindDashboardByWriteHash(hash)).mapTo[FullResult[DashboardFO]].map {
+      r => Ok(views.html.dashboard(r.value))
+    }
   }
 
 }
