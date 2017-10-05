@@ -6,19 +6,19 @@ import akka.actor.{ActorRef, Props}
 
 import scala.collection.mutable
 
-case class ItemFO(var name: String, var score: Int) {
-  def this(name: String ) {
-    this(name, 0)
-  }
+case class ItemFO(name: String, var score: Int = 0) {
+//  def this(name: String) {
+//    this(name, 0)
+//  }
   def increment(): Unit = score = score + 1
   def decrement(): Unit = if (score > 0) score = score - 1
 }
 
 object DashboardFO {
-  def empty = DashboardFO("", "", "", "", mutable.Map.empty[String, ItemFO], "", "", "", "")
+  def empty = DashboardFO("", "", "", "", Map.empty[String, ItemFO], "", "", "", "")
 }
 
-case class DashboardFO(id: String, name: String, description: String, style: String, items: mutable.Map[String, ItemFO] = mutable.Map(), ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
+case class DashboardFO(id: String, name: String, description: String, style: String, items: Map[String, ItemFO] = Map(), ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
   override def assignId(id: String) = this.copy(id = id)
   override def markDeleted = this.copy(deleted = false)
 }

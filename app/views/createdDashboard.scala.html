@@ -2,19 +2,19 @@
 @(createdDashboard: controllers.Forms.CreatedDashboard)
 @mainBasic("ScoDash") {
     <div class="row green-message vertical-align">
-        <div class="col-md-12 text-center"><span><img src="@routes.Assets.at("images/icon-check-white.png")"/>&nbsp;Dashboard was created!</span>&nbsp;<a class="url" href="@{createdDashboard("writeHash").value()}">View it</a></div>
+        <div class="col-md-12 text-center"><span><img src="@routes.Assets.at("images/icon-check-white.png")"/>&nbsp;Dashboard was created!</span>&nbsp;<a class="url" href="@{createdDashboard.writeHash}">View it</a></div>
     </div>
 
     <div class="row vertical-align padding-15">
         <div class="col-md-offset-3 col-md-6 text-center headline-inline">
-            <img src="@routes.Assets.at("images/icon-share.png")"/>&nbsp;&nbsp;<h3>SHARE&nbsp;@{createdDashboard("name").value().toUpperCase}&nbsp;DASHBOARD</h3>
+            <img src="@routes.Assets.at("images/icon-share.png")"/>&nbsp;&nbsp;<h3>SHARE&nbsp;@{createdDashboard.name.toUpperCase}&nbsp;DASHBOARD</h3>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-offset-4 col-md-4 shadow-box padding-15">
-            <span class="viewMode"><span id="viewUrl" class="url">@{createdDashboard("readOnlyHash").value()}</span></span>
-            <span class="scoreMode"><span id="scoreUrl" class="url">@{createdDashboard("writeHash").value()}</span></span>
+            <span class="viewMode"><span id="viewUrl" class="url">@{createdDashboard.readOnlyHash}</span></span>
+            <span class="scoreMode"><span id="scoreUrl" class="url">@{createdDashboard.writeHash}</span></span>
             <span class="viewMode pull-right"><a id="copyViewUrl" href="#">COPY</a></span>
             <span class="scoreMode pull-right"><a id="copyScoreUrl" href="#">COPY</a></span>
         </div>

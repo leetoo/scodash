@@ -1,10 +1,30 @@
 package controllers
 
+import akka.actor.ActorSystem
+import com.google.inject.Inject
+import controllers.Scodash.Command.CreateNewDashboard
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc.{Action, Controller}
+import akka.pattern.ask
+import akka.util.Timeout
+import scala.concurrent.duration._
 
-class ApplicationScala extends Controller {
+
+
+class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
+
+  val SESSION_DASHBOARD_NAME = "name"
+  val SESSION_DASHBOARD_DESCRIPTION = "description"
+  val SESSION_DASHBOARD_TYPE = "type"
+  val SESSION_DASHBOARD_ITEMS = "items"
+  val SESSION_DASHBOARD_ITEMS_ITEMS = "items"
+  val SESSION_DASHBOARD_OWNER_NAME = "ownerName"
+  val SESSION_DASHBOARD_OWNER_EMAIL = "ownerEmail"
+
+  implicit val timeout: Timeout = 5.seconds
+
+  val scodashActor = system.actorOf(Scodash.props, Scodash.Name)
 
   val dashboardOwnerForm = Form(
     mapping(
@@ -13,6 +33,11 @@ class ApplicationScala extends Controller {
     )(Forms.DashboardOwner.apply)(Forms.DashboardOwner.unapply)
   )
 
+  def showDashboardOwner() = Action { implicit request =>
+    //dashboardOwnerForm.fill(DashboardOwner(request.session(SESSION_DASHBOARD_OWNER_NAME), request.session(SESSION_DASHBOARD_OWNER_EMAIL)))
+    //dashboardOwnerForm.fill(DashboardOwner(request.session(SESSION_DASHBOARD_OWNER_NAME), request.session(SESSION_DASHBOARD_OWNER_EMAIL)))
+    Ok(views.html.createDashboardOwner(dashboardOwnerForm))
+  }
 
   def processDashboardOwner() = Action { implicit request =>
     dashboardOwnerForm.bindFromRequest.fold(
@@ -20,7 +45,16 @@ class ApplicationScala extends Controller {
         BadRequest(views.html.createDashboardOwner(formWithErrors))
       },
       ownerData => {
-        Ok(views.html.createdDashboard(Forms.CreatedDashboard(ownerData.name, "xxx", "yyy")))
+        (scodashActor ? CreateNewDashboard(
+          request.session(SESSION_DASHBOARD_NAME),
+          request.session(SESSION_DASHBOARD_DESCRIPTION),
+          request.session(SESSION_DASHBOARD_TYPE),
+          Map("Vasek" -> ItemFO("Vasek")),
+          ownerData.name,
+          ownerData.email))).mapTo(resp =>
+            Ok(views.html.createdDashboard(Forms.CreatedDashboard(ownerData.name, "xxx", "yyy")))
+        )
+
       }
     )
 

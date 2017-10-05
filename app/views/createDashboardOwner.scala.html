@@ -1,5 +1,5 @@
 
-@(dashboardForm3:Form[controllers.Forms.DashboardOwner])
+@(dashboardForm3:play.api.data.Form[controllers.Forms.DashboardOwner])
 
 @import helper._
 
@@ -27,12 +27,12 @@
 
     <div class="padding-15 row">
         <div class="col-md-offset-4 col-md-4">
-            @helper.form(action = routes.Application.processDashboardOwner, 'class -> "form-horizontal") {
+            @helper.form(action = routes.ApplicationScala.processDashboardOwner, 'class -> "form-horizontal") {
                 @helper.inputText(
-                    dashboardForm3("ownerName"), '_label -> "Name", 'class -> "form-control", 'placeholder -> "Name"
+                    dashboardForm3("name"), '_label -> "Name", 'class -> "form-control", 'placeholder -> "Name"
                 )
                 @helper.textarea(
-                    dashboardForm3("ownerEmail"), '_label -> "Email", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Email"
+                    dashboardForm3("email"), '_label -> "Email", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Email"
                 )
 
                 <div class="form-group pull-right">

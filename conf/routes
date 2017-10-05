@@ -10,8 +10,8 @@ POST        /processNewDashboard        controllers.Application.processNewDashbo
 GET         /showDashboardItems         controllers.Application.showDashboardItems
 POST        /addItem                    controllers.Application.addItem
 POST        /removeItem                 controllers.Application.removeItem
-GET         /showDashboardOwner         controllers.Application.showDashboardOwner
-POST        /processDashboardOwner      controllers.Application.processDashboardOwner
+GET         /showDashboardOwner         controllers.ApplicationScala.showDashboardOwner
+POST        /processDashboardOwner      controllers.ApplicationScala.processDashboardOwner
 
 
 # Map static resources from the /public folder to the /assets URL path

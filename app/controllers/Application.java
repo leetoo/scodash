@@ -35,8 +35,6 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import forms.CreateDashboardItems;
 import forms.CreateDashboardNew;
-import forms.CreateDashboardOwner;
-import forms.Forms;
 import forms.Item;
 import play.data.Form;
 import play.data.FormFactory;
@@ -64,15 +62,13 @@ public class Application extends Controller {
 
     public static final String SESSION_DASHBOARD_ITEMS = "items";
     public static final String SESSION_DASHBOARD_ITEMS_ITEMS = "items";
-    public static final String SESSION_DASHBOARD_OWNER_NAME = "ownerName";
-    public static final String SESSION_DASHBOARD_OWNER_EMAIL = "ownerEmail";
+
     public static final String SESSION_DASHBOARD_NAME = "name";
     public static final String SESSION_DASHBOARD_DESCRIPTION = "description";
     public static final String SESSION_DASHBOARD_TYPE = "type";
 
     public static long TIMEOUT_MILLIS = 100000;
 
-    private ActorRef scodashActor;
     private final ActorRef dashboardView;
     private Materializer materializer;
     private ActorSystem actorSystem;
@@ -92,7 +88,7 @@ public class Application extends Controller {
         this.actorSystem = actorSystem;
         this.formFactory = formFactory;
 
-        scodashActor = actorSystem.actorOf(Scodash.props(), Scodash.Name());
+        //scodashActor = actorSystem.actorOf(Scodash.props(), Scodash.Name());
         dashboardView = actorSystem.actorOf(DashboardView.props(), DashboardView.Name());
         actorSystem.actorOf(DashboardViewBuilder.props(), DashboardViewBuilder.Name());
     }
@@ -162,43 +158,35 @@ public class Application extends Controller {
 
     }
 
-    public Result showDashboardOwner() {
-        Form<CreateDashboardOwner> createDashboard3Form = formFactory.form(CreateDashboardOwner.class);
-        Form<CreateDashboardOwner> filledForm = createDashboard3Form.fill(
-                new CreateDashboardOwner(
-                        session(SESSION_DASHBOARD_OWNER_NAME),
-                        session(SESSION_DASHBOARD_OWNER_EMAIL)
-                ));
-        return ok(views.html.createDashboardOwner.render(filledForm));
-    }
 
-    public Result processDashboardOwner() {
-        CreateDashboardOwner createDashboard3Form = formFactory.form(CreateDashboardOwner.class).bindFromRequest(request()).get();
-        session(SESSION_DASHBOARD_OWNER_NAME, createDashboard3Form.getOwnerName());
-        session(SESSION_DASHBOARD_OWNER_EMAIL, createDashboard3Form.getOwnerEmail());
 
-        ArrayNode itemsNodes = (ArrayNode) Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
-        final Map<String, ItemFO> items = IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toMap(item -> item, item -> new ItemFO(item.toString())));
-
-        try {
-
-            FullResult fr = (FullResult) FutureConverters.toJava(
-                    ask(scodashActor, new Scodash$Command$CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
-                            session(SESSION_DASHBOARD_DESCRIPTION),
-                            session(SESSION_DASHBOARD_TYPE),
-                            JavaConverters.mapAsScalaMapConverter(items).asScala(),
-                            session(SESSION_DASHBOARD_OWNER_NAME),
-                            session(SESSION_DASHBOARD_OWNER_EMAIL)), TIMEOUT_MILLIS)).toCompletableFuture().get();
-            DashboardFO dashboardFO = (DashboardFO) fr.toOption().get();
-
-            forms.Forms.CreatedDashboard createdDashboard = new forms.Forms.CreatedDashboard(dashboardFO.name(), dashboardFO.writeHash(), dashboardFO.readonlyHash());
-
-            Form<Forms.CreatedDashboard> createdDashboardForm = formFactory.form(Forms.CreatedDashboard.class).fill(createdDashboard);
-            return ok(views.html.createdDashboard.render(createdDashboardForm));
-        } catch (Exception e) {
-            return internalServerError();
-        }
-    }
+//    public Result processDashboardOwner() {
+//        Forms.CreateDashboardOwner createDashboard3Form = formFactory.form(Forms.CreateDashboardOwner.class).bindFromRequest(request()).get();
+//        session(SESSION_DASHBOARD_OWNER_NAME, createDashboard3Form.ownerName());
+//        session(SESSION_DASHBOARD_OWNER_EMAIL, createDashboard3Form.ownerEmail());
+//
+//        ArrayNode itemsNodes = (ArrayNode) Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
+//        final Map<String, ItemFO> items = IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toMap(item -> item, item -> new ItemFO(item.toString())));
+//
+//        try {
+//
+//            FullResult fr = (FullResult) FutureConverters.toJava(
+//                    ask(scodashActor, new Scodash$Command$CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
+//                            session(SESSION_DASHBOARD_DESCRIPTION),
+//                            session(SESSION_DASHBOARD_TYPE),
+//                            JavaConverters.mapAsScalaMapConverter(items).asScala(),
+//                            session(SESSION_DASHBOARD_OWNER_NAME),
+//                            session(SESSION_DASHBOARD_OWNER_EMAIL)), TIMEOUT_MILLIS)).toCompletableFuture().get();
+//            DashboardFO dashboardFO = (DashboardFO) fr.toOption().get();
+//
+//            forms.Forms.CreatedDashboard createdDashboard = new forms.Forms.CreatedDashboard(dashboardFO.name(), dashboardFO.writeHash(), dashboardFO.readonlyHash());
+//
+//            Form<Forms.CreatedDashboard> createdDashboardForm = formFactory.form(Forms.CreatedDashboard.class).fill(createdDashboard);
+//            return ok(views.html.createdDashboard.render(createdDashboardForm));
+//        } catch (Exception e) {
+//            return internalServerError();
+//        }
+//    }
 
     public WebSocket ws(String hash) {
         return WebSocket.Json.acceptOrResult(request -> {
@@ -254,13 +242,10 @@ public class Application extends Controller {
     }
 
     public CompletionStage<ActorRef> createUserActor(String id, ActorRef webSocketOut, String hash) {
-        // Use guice assisted injection to instantiate and configure the child actor.
 //        return FutureConverters.toJava(
-//                ask(userParentActor, new UserParentActor.Create(id, webSocketOut), timeoutMillis)
+//                ask(scodashActor, new Scodash$Command$CreateUser(id, webSocketOut), TIMEOUT_MILLIS)
 //        ).thenApply(stageObj -> (ActorRef) stageObj);
-        return FutureConverters.toJava(
-                ask(scodashActor, new Scodash$Command$CreateUser(id, webSocketOut), TIMEOUT_MILLIS)
-        ).thenApply(stageObj -> (ActorRef) stageObj);
+        return null;
     }
 
 //    public CompletionStage<ActorRef> createDashboardActor(Dashboard dashboard) {
