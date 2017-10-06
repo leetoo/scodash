@@ -3,6 +3,9 @@ package controllers
 import java.util.UUID
 
 import akka.actor.{ActorRef, Props}
+import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
+import akka.persistence.query.{EventEnvelope, PersistenceQuery}
+import akka.stream.ActorMaterializer
 import controllers.Dashboard.Command.CreateDashboard
 import controllers.PersistentEntity.GetState
 import controllers.Scodash.Command.{CreateNewDashboard, CreateUser, FindDashboard}
@@ -25,6 +28,18 @@ object Scodash {
 
 class Scodash extends Aggregate[DashboardFO, Dashboard] {
 
+  import context.dispatcher
+
+  val projection = ResumableProjection("scodash", context.system)
+  implicit val mater = ActorMaterializer()
+  val journal = PersistenceQuery(context.system).
+    readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
+  projection.fetchLatestOffset.foreach{ o =>
+    journal.
+      eventsByTag("dashboardcreated", o.getOrElse(0L)).
+      runForeach(e => self ! e)
+  }
+
   override def receive = {
     case FindDashboard(id) =>
       log.info("Finding dashboard {}", id)
@@ -43,6 +58,9 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
     case CreateUser(id, webOutActor) =>
       val user = context.actorOf(User.props(id), User.Name)
       sender ! user
+
+    case EventEnvelope(offset, pid, seq, event) =>
+      projection.storeLatestOffset(offset)
   }
 
   def entityProps(id: String) = Dashboard.props(id)
