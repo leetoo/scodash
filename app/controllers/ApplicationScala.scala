@@ -5,7 +5,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.Inject
 import controllers.Scodash.Command.CreateNewDashboard
-import org.json4s.{DefaultFormats, NoTypeHints}
+import org.json4s.{DefaultFormats, _}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -13,12 +13,7 @@ import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import org.json4s._
-import org.json4s.native.Serialization
-import org.json4s.native.Serialization.{read, write}
 //import org.json4s.native.JsonMethods._
-
-import org.json4s.jackson.JsonMethods._
 
 
 class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
@@ -63,6 +58,7 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
           request.session(SESSION_DASHBOARD_NAME),
           request.session(SESSION_DASHBOARD_DESCRIPTION),
           request.session(SESSION_DASHBOARD_TYPE),
+          request.s
           Map("Vasek" -> ItemFO("Vasek")),
           ownerData.name,
           ownerData.email)).mapTo[FullResult[DashboardFO]].map {
