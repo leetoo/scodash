@@ -5,14 +5,20 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.Inject
 import controllers.Scodash.Command.CreateNewDashboard
+import org.json4s.{DefaultFormats, NoTypeHints}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.{Action, Controller}
 
-import scala.compat.java8.FutureConverters
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import org.json4s._
+import org.json4s.native.Serialization
+import org.json4s.native.Serialization.{read, write}
+//import org.json4s.native.JsonMethods._
+
+import org.json4s.jackson.JsonMethods._
 
 
 class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
@@ -26,6 +32,7 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
   val SESSION_DASHBOARD_OWNER_EMAIL = "ownerEmail"
 
   implicit val timeout: Timeout = 5.seconds
+  implicit lazy val formats = DefaultFormats
 
   val scodashActor = system.actorOf(Scodash.props, Scodash.Name)
   val dashboardView = system.actorOf(DashboardView.props, DashboardView.Name)
@@ -65,9 +72,13 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
     )
   }
 
+
   def dashboard(hash: String) = Action.async {
-    (dashboardView ? DashboardView.FindDashboardByWriteHash(hash)).mapTo[FullResult[DashboardFO]].map {
-      r => Ok(views.html.dashboard(r.value))
+    (dashboardView ? DashboardView.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+      result => {
+        val dashboardFO = result.value.head.extract[DashboardFO]
+        Ok(views.html.dashboard(dashboardFO))
+      }
     }
   }
 
