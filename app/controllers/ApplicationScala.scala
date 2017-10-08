@@ -58,7 +58,6 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
           request.session(SESSION_DASHBOARD_NAME),
           request.session(SESSION_DASHBOARD_DESCRIPTION),
           request.session(SESSION_DASHBOARD_TYPE),
-          request.s
           Map("Vasek" -> ItemFO("Vasek")),
           ownerData.name,
           ownerData.email)).mapTo[FullResult[DashboardFO]].map {
