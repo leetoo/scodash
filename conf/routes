@@ -1,12 +1,11 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-
-GET         /                           controllers.Application.index
+GET         /                           controllers.ApplicationScala.index
 GET         /dashboard/:hash            controllers.ApplicationScala.dashboard(hash)
 GET         /ws/:hash                   controllers.Application.ws(hash)
-GET         /showNewDashboard           controllers.Application.showNewDashboard
-POST        /processNewDashboard        controllers.Application.processNewDashboard
+GET         /showNewDashboard           controllers.ApplicationScala.showNewDashboard
+POST        /processNewDashboard        controllers.ApplicationScala.processNewDashboard
 GET         /showDashboardItems         controllers.Application.showDashboardItems
 POST        /addItem                    controllers.Application.addItem
 POST        /removeItem                 controllers.Application.removeItem

@@ -31,8 +31,42 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
 
   val scodashActor = system.actorOf(Scodash.props, Scodash.Name)
   val dashboardView = system.actorOf(DashboardView.props, DashboardView.Name)
-  val dashboardViewBuild = system.actorOf(DashboardViewBuilder.props, DashboardViewBuilder.Name)
+  val dashboardViewBuilder = system.actorOf(DashboardViewBuilder.props, DashboardViewBuilder.Name)
 
+  def index() = Action {
+    Ok(views.html.index());
+  }
+
+
+  val newDashboardForm = Form(
+    mapping(
+      "name" -> text,
+      "description" -> text,
+      "style" -> text
+    )(Forms.NewDashboard.apply)(Forms.NewDashboard.unapply)
+  )
+
+  def showNewDashboard() = Action {
+    Ok(views.html.createDashboardNew(newDashboardForm))
+  }
+
+  val dashboardItemsForm = Form(
+    mapping(
+      "items" -> list(text)
+    )(Forms.CreateDashboardItems.apply)(Forms.CreateDashboardItems.unapply)
+  )
+
+  def processNewDashboard() = Action {
+    Ok(views.html.createDashboardItems(dashboardItemsForm))
+//    val createDashboardNewForm = formFactory.form(classOf[CreateDashboardNew]).bindFromRequest(request).get
+//    session(SESSION_DASHBOARD_NAME, createDashboardNewForm.getName)
+//    session(SESSION_DASHBOARD_DESCRIPTION, createDashboardNewForm.getDescription)
+//    session(SESSION_DASHBOARD_TYPE, createDashboardNewForm.getType)
+//    val sessionItems = session(SESSION_DASHBOARD_ITEMS)
+//    val createDashboard2Form = if (sessionItems != null) formFactory.form(classOf[CreateDashboardItems]).bind(Json.parse(sessionItems))
+//    else formFactory.form(classOf[CreateDashboardItems])
+//    ok(createDashboardItems.render(createDashboard2Form))
+  }
 
 
   val dashboardOwnerForm = Form(

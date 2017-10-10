@@ -93,28 +93,28 @@ public class Application extends Controller {
         //actorSystem.actorOf(DashboardViewBuilder.props(), DashboardViewBuilder.Name());
     }
 
-    public Result showNewDashboard() {
-
-        Form<CreateDashboardNew> createDashboard1Form = formFactory.form(CreateDashboardNew.class);
-        Form<CreateDashboardNew> filledForm = createDashboard1Form.fill(
-                new CreateDashboardNew(
-                        session(SESSION_DASHBOARD_NAME),
-                        session(SESSION_DASHBOARD_DESCRIPTION),
-                        session(SESSION_DASHBOARD_TYPE)
-                ));
-        return ok(views.html.createDashboardNew.render(filledForm));
-    }
-
-    public Result processNewDashboard() {
-        CreateDashboardNew createDashboardNewForm = formFactory.form(CreateDashboardNew.class).bindFromRequest(request()).get();
-        session(SESSION_DASHBOARD_NAME, createDashboardNewForm.getName());
-        session(SESSION_DASHBOARD_DESCRIPTION, createDashboardNewForm.getDescription());
-        session(SESSION_DASHBOARD_TYPE, createDashboardNewForm.getType());
-        final String sessionItems = session(SESSION_DASHBOARD_ITEMS);
-        Form<CreateDashboardItems> createDashboard2Form = sessionItems != null ? formFactory.form(CreateDashboardItems.class).bind(Json.parse(sessionItems)) : formFactory.form(CreateDashboardItems.class);
-        return ok(createDashboardItems.render(createDashboard2Form));
-
-    }
+//    public Result showNewDashboard() {
+//
+//        Form<CreateDashboardNew> createDashboard1Form = formFactory.form(CreateDashboardNew.class);
+//        Form<CreateDashboardNew> filledForm = createDashboard1Form.fill(
+//                new CreateDashboardNew(
+//                        session(SESSION_DASHBOARD_NAME),
+//                        session(SESSION_DASHBOARD_DESCRIPTION),
+//                        session(SESSION_DASHBOARD_TYPE)
+//                ));
+//        return ok(views.html.createDashboardNew.render(filledForm));
+//    }
+//
+//    public Result processNewDashboard() {
+//        CreateDashboardNew createDashboardNewForm = formFactory.form(CreateDashboardNew.class).bindFromRequest(request()).get();
+//        session(SESSION_DASHBOARD_NAME, createDashboardNewForm.getName());
+//        session(SESSION_DASHBOARD_DESCRIPTION, createDashboardNewForm.getDescription());
+//        session(SESSION_DASHBOARD_TYPE, createDashboardNewForm.getType());
+//        final String sessionItems = session(SESSION_DASHBOARD_ITEMS);
+//        Form<CreateDashboardItems> createDashboard2Form = sessionItems != null ? formFactory.form(CreateDashboardItems.class).bind(Json.parse(sessionItems)) : formFactory.form(CreateDashboardItems.class);
+//        return ok(createDashboardItems.render(createDashboard2Form));
+//
+//    }
 
     public Result addItem() {
         Item addItem = formFactory.form(Item.class).bindFromRequest(request()).get();
@@ -139,10 +139,12 @@ public class Application extends Controller {
         Form<CreateDashboardItems> createDashboard2Form = formFactory.form(CreateDashboardItems.class);
         try {
             Form<CreateDashboardItems> createDashboard2FormFilled = createDashboard2Form.fill(objectMapper.readValue(session(SESSION_DASHBOARD_ITEMS), CreateDashboardItems.class));
-            return ok(createDashboardItems.render(createDashboard2FormFilled));
+            //return ok(createDashboardItems.render(createDashboard2FormFilled));
+            return ok(createDashboardItems.render(null));
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-            return ok(createDashboardItems.render(createDashboard2Form));
+            //return ok(createDashboardItems.render(createDashboard2Form));
+            return ok(createDashboardItems.render(null));
         }
     }
 
@@ -311,9 +313,9 @@ public class Application extends Controller {
         return origin.contains("localhost:9000") || origin.contains("localhost:19001");
     }
 
-    public Result index() {
-        return ok(index.render("Your new application is ready."));
-    }
+//    public Result index() {
+//        return ok(index.render("Your new application is ready."));
+//    }
 
   //  public Result dashboard(String hash) {
 //

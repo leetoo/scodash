@@ -1,5 +1,5 @@
 
-@(dashboardForm1: play.data.Form[forms.CreateDashboardNew])
+@(dashboardForm1: play.api.data.Form[controllers.Forms.NewDashboard])
 
 @import helper._
 
@@ -27,7 +27,7 @@
 
     <div class="padding-15 row">
         <div class="col-md-offset-4 col-md-4">
-            @helper.form(action = routes.Application.processNewDashboard, 'class -> "form-horizontal") {
+            @helper.form(action = routes.ApplicationScala.processNewDashboard, 'class -> "form-horizontal") {
                 @helper.inputText(
                     dashboardForm1("name"), '_label -> "Dashboard Name", 'class -> "form-control", 'placeholder -> "Dashboard name"
                 )
@@ -37,14 +37,14 @@
                 <div class="form-group">
                     <label>Dashboard type</label>&nbsp;<span class="label-comment">(you can change it anytime later)</span>
                     <div data-toggle="buttons">
-                        <div class="btn btn-default btn-checkbox btn-checkbox-comma @{if (dashboardForm1("type").value() == "comma") "active" else ""}">
-                            <input type="radio" name="type" id="type" value="comma" @{if (dashboardForm1("type").value() == "comma") "checked" else ""} data-toggle="button">Comma dashboard
+                        <div class="btn btn-default btn-checkbox btn-checkbox-comma @{if (dashboardForm1("style") == "comma") "active" else ""}">
+                            <input type="radio" name="type" id="type" value="comma" @{if (dashboardForm1("style") == "comma") "checked" else ""} data-toggle="button">Comma dashboard
                         </div>
-                        <div class="btn btn-default btn-checkbox btn-checkbox-pie @{if (dashboardForm1("type").value() == "pie") "active" else ""} ">
-                            <input type="radio" name="type" id="type" value="pie" @{if (dashboardForm1("type").value() == "pie") "checked" else ""} data-toggle="button">Pie chart
+                        <div class="btn btn-default btn-checkbox btn-checkbox-pie @{if (dashboardForm1("style") == "pie") "active" else ""} ">
+                            <input type="radio" name="type" id="type" value="pie" @{if (dashboardForm1("style") == "pie") "checked" else ""} data-toggle="button">Pie chart
                         </div>
-                        <div class="btn btn-default btn-checkbox btn-checkbox-score @{if (dashboardForm1("type").value() == "score") "active" else ""}">
-                            <input type="radio" name="type" id="type" value="score" @{if (dashboardForm1("type").value() == "score") "checked" else ""} data-toggle="button">Score card
+                        <div class="btn btn-default btn-checkbox btn-checkbox-score @{if (dashboardForm1("style") == "score") "active" else ""}">
+                            <input type="radio" name="type" id="type" value="score" @{if (dashboardForm1("style") == "score") "checked" else ""} data-toggle="button">Score card
                         </div>
                     </div>
                 </div>
