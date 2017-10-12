@@ -81,8 +81,13 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
       case Some(sessDash) => Ok(views.html.createDashboardItems(dashboardItemsForm.fill(JsonMethods.parse(sessDash).extract[Forms.CreateDashboardItems])))
       case _ => Ok(views.html.createDashboardItems(dashboardItemsForm))
     }
-
   }
+
+  val itemForm = Form(
+    mapping(
+      "itemName" -> text
+    )(Forms.Item.apply)(Forms.Item.unapply)
+  )
 
   def addItem() = Action { implicit request =>
     dashboardItemsForm.bindFromRequest.fold(

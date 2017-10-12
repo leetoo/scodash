@@ -2,24 +2,17 @@ package controllers;
 
 import static akka.pattern.Patterns.ask;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.collections4.IteratorUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import akka.NotUsed;
 import akka.actor.ActorRef;
@@ -33,25 +26,14 @@ import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Keep;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import forms.CreateDashboardItems;
-import forms.CreateDashboardNew;
-import forms.Item;
-import play.data.Form;
 import play.data.FormFactory;
 import play.libs.F;
-import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import play.mvc.WebSocket;
-import scala.collection.JavaConverters;
-import scala.compat.java8.FutureConverters;
-import views.html.createDashboardItems;
-import views.html.index;
-
-
 
 
 @Singleton

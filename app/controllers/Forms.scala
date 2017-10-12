@@ -8,6 +8,8 @@ object Forms {
 
   case class CreateDashboardItems(items: List[String])
 
+  case class Item(itemName: String)
+
   case class CreatedDashboard(name: String, writeHash: String, readOnlyHash: String) {
     def this() = this("","","")
   }
