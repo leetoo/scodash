@@ -26,7 +26,7 @@
         <div class="col-md-offset-4 col-md-4">
 
             @repeat(dashboardForm2("items"), min=0) { item =>
-                <form action="@routes.Application.removeItem()" method="post" class="form-inline">
+                <form action="@routes.ApplicationScala.removeItem()" method="post" class="form-inline">
                     <div class="form-group">
                         <input type="text" class="form-control " id="itemName" name="itemName" value="@{item.value}" readonly>
                         <button class="btn btn-default remove-btn" type="submit"></button>
@@ -35,7 +35,7 @@
             }
 
 
-            <form action="@routes.Application.addItem()" method="post" class="form-inline">
+            <form action="@routes.ApplicationScala.addItem()" method="post" class="form-inline">
                     <div class="form-group">
                         <input type="text" class="form-control" id="itemName" name="itemName" placeholder="Item name" autofocus>
                     </div>

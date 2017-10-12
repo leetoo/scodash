@@ -6,9 +6,9 @@ GET         /dashboard/:hash            controllers.ApplicationScala.dashboard(h
 GET         /ws/:hash                   controllers.Application.ws(hash)
 GET         /showNewDashboard           controllers.ApplicationScala.showNewDashboard
 POST        /processNewDashboard        controllers.ApplicationScala.processNewDashboard
-GET         /showDashboardItems         controllers.Application.showDashboardItems
-POST        /addItem                    controllers.Application.addItem
-POST        /removeItem                 controllers.Application.removeItem
+GET         /showDashboardItems         controllers.ApplicationScala.showDashboardItems
+POST        /addItem                    controllers.ApplicationScala.addItem
+POST        /removeItem                 controllers.ApplicationScala.removeItem
 GET         /showDashboardOwner         controllers.ApplicationScala.showDashboardOwner
 POST        /processDashboardOwner      controllers.ApplicationScala.processDashboardOwner
 

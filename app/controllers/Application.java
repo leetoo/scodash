@@ -116,49 +116,6 @@ public class Application extends Controller {
 //
 //    }
 
-    public Result addItem() {
-        Item addItem = formFactory.form(Item.class).bindFromRequest(request()).get();
-        ArrayNode itemsArray;
-
-        if (session(SESSION_DASHBOARD_ITEMS) == null) {
-            itemsArray = Json.newObject().putArray(SESSION_DASHBOARD_ITEMS_ITEMS).add(addItem.getItemName());
-        } else {
-            itemsArray = (ArrayNode)Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
-            itemsArray.add(addItem.getItemName());
-        }
-
-
-        itemsArray = Json.newArray().addAll(IteratorUtils.toList(itemsArray.elements()).stream().filter(node -> StringUtils.isNotBlank(node.asText())).distinct().collect(Collectors.toList()));
-        JsonNode jsonItems = Json.newObject().set(SESSION_DASHBOARD_ITEMS, itemsArray);
-        session(SESSION_DASHBOARD_ITEMS, jsonItems.toString());
-
-        return showDashboardItems();
-    }
-
-    public Result showDashboardItems() {
-        Form<CreateDashboardItems> createDashboard2Form = formFactory.form(CreateDashboardItems.class);
-        try {
-            Form<CreateDashboardItems> createDashboard2FormFilled = createDashboard2Form.fill(objectMapper.readValue(session(SESSION_DASHBOARD_ITEMS), CreateDashboardItems.class));
-            //return ok(createDashboardItems.render(createDashboard2FormFilled));
-            return ok(createDashboardItems.render(null));
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            //return ok(createDashboardItems.render(createDashboard2Form));
-            return ok(createDashboardItems.render(null));
-        }
-    }
-
-    public Result removeItem() {
-        Item removeItem = formFactory.form(Item.class).bindFromRequest(request()).get();
-        ArrayNode itemsArray = (ArrayNode)Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS);
-
-        List updateItems = IteratorUtils.toList(itemsArray.elements()).stream().filter(item -> !removeItem.getItemName().equals(item.asText())).collect(Collectors.toList());
-        JsonNode jsonItems = Json.newObject().set(SESSION_DASHBOARD_ITEMS, Json.newArray().addAll(updateItems));
-        session(SESSION_DASHBOARD_ITEMS, jsonItems.toString());
-
-        return showDashboardItems();
-
-    }
 
 
 

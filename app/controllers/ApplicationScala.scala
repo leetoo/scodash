@@ -5,18 +5,25 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.Inject
 import controllers.Scodash.Command.CreateNewDashboard
+import org.json4s.native.Json
 import org.json4s.{DefaultFormats, _}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, Controller, Session}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
-//import org.json4s.native.JsonMethods._
+import org.json4s.native._
+import org.json4s.native.JsonMethods._
+
+import org.json4s.native.Serialization
+import org.json4s.native.Serialization.{read, write}
 
 
 class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
+
+  val SESSION_DASHBOARD = "dashboard"
 
   val SESSION_DASHBOARD_NAME = "name"
   val SESSION_DASHBOARD_DESCRIPTION = "description"
@@ -37,7 +44,6 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
     Ok(views.html.index());
   }
 
-
   val newDashboardForm = Form(
     mapping(
       "name" -> text,
@@ -46,8 +52,11 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
     )(Forms.NewDashboard.apply)(Forms.NewDashboard.unapply)
   )
 
-  def showNewDashboard() = Action {
-    Ok(views.html.createDashboardNew(newDashboardForm))
+  def showNewDashboard() = Action { implicit request =>
+    request.session.get(SESSION_DASHBOARD) match {
+      case Some(sessDash) => Ok(views.html.createDashboardNew(newDashboardForm.fill(JsonMethods.parse(sessDash).extract[Forms.NewDashboard])))
+      case _ => Ok(views.html.createDashboardNew(newDashboardForm))
+    }
   }
 
   val dashboardItemsForm = Form(
@@ -56,17 +65,52 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
     )(Forms.CreateDashboardItems.apply)(Forms.CreateDashboardItems.unapply)
   )
 
-  def processNewDashboard() = Action {
-    Ok(views.html.createDashboardItems(dashboardItemsForm))
-//    val createDashboardNewForm = formFactory.form(classOf[CreateDashboardNew]).bindFromRequest(request).get
-//    session(SESSION_DASHBOARD_NAME, createDashboardNewForm.getName)
-//    session(SESSION_DASHBOARD_DESCRIPTION, createDashboardNewForm.getDescription)
-//    session(SESSION_DASHBOARD_TYPE, createDashboardNewForm.getType)
-//    val sessionItems = session(SESSION_DASHBOARD_ITEMS)
-//    val createDashboard2Form = if (sessionItems != null) formFactory.form(classOf[CreateDashboardItems]).bind(Json.parse(sessionItems))
-//    else formFactory.form(classOf[CreateDashboardItems])
-//    ok(createDashboardItems.render(createDashboard2Form))
+  def processNewDashboard() = Action { implicit request =>
+    newDashboardForm.bindFromRequest.fold(
+      formWithErrors => {
+        BadRequest(views.html.createDashboardNew(formWithErrors))
+      },
+      dashboardData => {
+        Ok(views.html.createDashboardItems(dashboardItemsForm)).withSession(SESSION_DASHBOARD -> write(dashboardData))
+      }
+    )
   }
+
+  def showDashboardItems() = Action { implicit request =>
+    request.session.get(SESSION_DASHBOARD) match {
+      case Some(sessDash) => Ok(views.html.createDashboardItems(dashboardItemsForm.fill(JsonMethods.parse(sessDash).extract[Forms.CreateDashboardItems])))
+      case _ => Ok(views.html.createDashboardItems(dashboardItemsForm))
+    }
+
+  }
+
+  def addItem() = Action { implicit request =>
+    dashboardItemsForm.bindFromRequest.fold(
+      formWithErrors => {
+        BadRequest(views.html.createDashboardItems(formWithErrors))
+      },
+      formData => {
+        val sessDash = JsonMethods.parse(request.session.get(SESSION_DASHBOARD).get).extract[Forms.Dashboard]
+        sessDash.setItems(formData.items)
+        Ok(views.html.createDashboardItems(dashboardItemsForm)).withSession(SESSION_DASHBOARD -> write(sessDash))
+      }
+    )
+  }
+
+  def removeItem() = Action { implicit request =>
+    BadRequest(views.html.createDashboardItems(dashboardItemsForm))
+  }
+
+
+
+//  def removeItem: Result = {
+//    val removeItem = formFactory.form(classOf[Item]).bindFromRequest(request).get
+//    val itemsArray = Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS).asInstanceOf[ArrayNode]
+//    val updateItems = IteratorUtils.toList(itemsArray.elements).stream.filter((item: JsonNode) => !(removeItem.getItemName == item.asText)).collect(Collectors.toList)
+//    val jsonItems = Json.newObject.set(SESSION_DASHBOARD_ITEMS, Json.newArray.addAll(updateItems))
+//    session(SESSION_DASHBOARD_ITEMS, jsonItems.toString)
+//    showDashboardItems
+//  }
 
 
   val dashboardOwnerForm = Form(
@@ -93,8 +137,8 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
           request.session(SESSION_DASHBOARD_DESCRIPTION),
           request.session(SESSION_DASHBOARD_TYPE),
           Map("Vasek" -> ItemFO("Vasek")),
-          ownerData.name,
-          ownerData.email)).mapTo[FullResult[DashboardFO]].map {
+          ownerData.ownerName,
+          ownerData.ownerEmail)).mapTo[FullResult[DashboardFO]].map {
             r => Ok(views.html.createdDashboard(Forms.CreatedDashboard(r.value.name, r.value.writeHash, r.value.readonlyHash)))
           }
       }
