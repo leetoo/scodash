@@ -19,8 +19,8 @@ object Forms {
   }
 
   case class Dashboard(name: String, description: String, style: String, items: List[String], ownerName: String, ownerEmail: String) {
-    def this(name: String, description: String, style: String) = this(name, description, style, null, "", "")
+    def this(name: String, description: String, style: String) = this(name, description, style, List(), "", "")
     def this(name: String, description: String, style: String, items: List[String]) = this(name, description, style, items, "", "")
-    def setItems(items: List[String]) = this.copy(items = items)
+    def updateItems(items: List[String]) = this.copy(items = items)
   }
 }

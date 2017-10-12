@@ -68,7 +68,7 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
   def processNewDashboard() = Action { implicit request =>
     newDashboardForm.bindFromRequest.fold(
       formWithErrors => {
-        BadRequest(views.html.createDashboardNew(formWithErrors))
+        BadRequest(views.html.createDashboardNew(newDashboardForm))
       },
       dashboardData => {
         Ok(views.html.createDashboardItems(dashboardItemsForm)).withSession(SESSION_DASHBOARD -> write(dashboardData))
@@ -90,14 +90,14 @@ class ApplicationScala @Inject() (system: ActorSystem) extends Controller {
   )
 
   def addItem() = Action { implicit request =>
-    dashboardItemsForm.bindFromRequest.fold(
+    itemForm.bindFromRequest.fold(
       formWithErrors => {
-        BadRequest(views.html.createDashboardItems(formWithErrors))
+        BadRequest(views.html.createDashboardItems(dashboardItemsForm))
       },
       formData => {
         val sessDash = JsonMethods.parse(request.session.get(SESSION_DASHBOARD).get).extract[Forms.Dashboard]
-        sessDash.setItems(formData.items)
-        Ok(views.html.createDashboardItems(dashboardItemsForm)).withSession(SESSION_DASHBOARD -> write(sessDash))
+        val dashboard1 = sessDash.updateItems(sessDash.items ::: List(formData.itemName))
+        Ok(views.html.createDashboardItems(dashboardItemsForm)).withSession(SESSION_DASHBOARD -> write(dashboard1))
       }
     )
   }
