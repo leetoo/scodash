@@ -37,14 +37,14 @@
                 <div class="form-group">
                     <label>Dashboard type</label>&nbsp;<span class="label-comment">(you can change it anytime later)</span>
                     <div data-toggle="buttons">
-                        <div class="btn btn-default btn-checkbox btn-checkbox-comma @{if (dashboardForm1("style").value.get == "comma") "active" else ""}">
-                            <input type="radio" name="style" id="style" value="comma" @{if (dashboardForm1("style").value.get == "comma") "checked" else ""} data-toggle="button">Comma dashboard
+                        <div class="btn btn-default btn-checkbox btn-checkbox-comma @{if (dashboardForm1("style").value.getOrElse("") == "comma") "active" else ""}">
+                            <input type="radio" name="style" id="style" value="comma" @{if (dashboardForm1("style").value.getOrElse("") == "comma") "checked" else ""} data-toggle="button">Comma dashboard
                         </div>
-                        <div class="btn btn-default btn-checkbox btn-checkbox-pie @{if (dashboardForm1("style").value.get == "pie") "active" else ""} ">
-                            <input type="radio" name="style" id="style" value="pie" @{if (dashboardForm1("style").value.get == "pie") "checked" else ""} data-toggle="button">Pie chart
+                        <div class="btn btn-default btn-checkbox btn-checkbox-pie @{if (dashboardForm1("style").value.getOrElse("") == "pie") "active" else ""} ">
+                            <input type="radio" name="style" id="style" value="pie" @{if (dashboardForm1("style").value.getOrElse("") == "pie") "checked" else ""} data-toggle="button">Pie chart
                         </div>
-                        <div class="btn btn-default btn-checkbox btn-checkbox-score @{if (dashboardForm1("style").value.get == "score") "active" else ""}">
-                            <input type="radio" name="style" id="style" value="score" @{if (dashboardForm1("style").value.get == "score") "checked" else ""} data-toggle="button">Score card
+                        <div class="btn btn-default btn-checkbox btn-checkbox-score @{if (dashboardForm1("style").value.getOrElse("") == "score") "active" else ""}">
+                            <input type="radio" name="style" id="style" value="score" @{if (dashboardForm1("style").value.getOrElse("") == "score") "checked" else ""} data-toggle="button">Score card
                         </div>
                     </div>
                 </div>

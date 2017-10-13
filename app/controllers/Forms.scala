@@ -6,7 +6,9 @@ object Forms {
     def this() = this("","","")
   }
 
-  case class CreateDashboardItems(items: List[String])
+  case class CreateDashboardItems(items: Set[String]) {
+    def this(dashboard: Dashboard) = this(dashboard.items)
+  }
 
   case class Item(itemName: String)
 
@@ -18,9 +20,13 @@ object Forms {
     def this() = this("","")
   }
 
-  case class Dashboard(name: String, description: String, style: String, items: List[String], ownerName: String, ownerEmail: String) {
-    def this(name: String, description: String, style: String) = this(name, description, style, List(), "", "")
-    def this(name: String, description: String, style: String, items: List[String]) = this(name, description, style, items, "", "")
-    def updateItems(items: List[String]) = this.copy(items = items)
+  case class Dashboard(name: String, description: String, style: String, items: Set[String], ownerName: String, ownerEmail: String) {
+
+    def this() = this("","","", Set(),"","")
+    def this(name: String, description: String, style: String) = this(name, description, style, Set(), "", "")
+    def this(name: String, description: String, style: String, items: Set[String]) = this(name, description, style, items, "", "")
+
+    def updateNameDescStyle(name: String, description: String, style: String) = this.copy(name = name, description = description, style = style)
+    def updateItems(items: Set[String]) = this.copy(items = items)
   }
 }
