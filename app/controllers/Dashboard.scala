@@ -28,7 +28,7 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
   import Dashboard._
 
   def initialState = DashboardFO.empty
-  final private val watchers: Set[ActorRef] = Set();
+  final val watchers: Set[ActorRef] = Set();
 
 
   override def additionalCommandHandling: Receive = {
@@ -39,6 +39,10 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
       } else {
         persist(DashboardCreated(dashboard))(handleEventAndRespond())
       }
+    case Watch =>
+      watchers + sender
+    case Unwatch =>
+      watchers - sender
   }
 
   override def isCreateMessage(cmd: Any) = cmd match {

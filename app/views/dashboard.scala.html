@@ -1,4 +1,4 @@
-@(dashboard: DashboardFO)
+@(dashboard: DashboardFO)(implicit request: play.api.mvc.Request[_])
 
 @mainBasic("ScoDash") {
 
@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <div class="col-md-10 col-md-offset-1">
+    <div id="dashboard" class="col-md-10 col-md-offset-1" data-ws-url="@routes.ApplicationScala.ws(dashboard.writeHash).webSocketURL">
 
         @dashboard.items.values.map { item =>
             <div class="row dashboard-comma-row">

@@ -39,24 +39,12 @@ import play.mvc.WebSocket;
 @Singleton
 public class Application extends Controller {
 
-
     private Logger logger = org.slf4j.LoggerFactory.getLogger("controllers.Application");
 
-    public static final String SESSION_DASHBOARD_ITEMS = "items";
-    public static final String SESSION_DASHBOARD_ITEMS_ITEMS = "items";
-
-    public static final String SESSION_DASHBOARD_NAME = "name";
-    public static final String SESSION_DASHBOARD_DESCRIPTION = "description";
-    public static final String SESSION_DASHBOARD_TYPE = "type";
-
-    public static long TIMEOUT_MILLIS = 100000;
-
-    //private final ActorRef dashboardView;
     private Materializer materializer;
     private ActorSystem actorSystem;
     private FormFactory formFactory;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Inject
     HttpExecutionContext ec;
@@ -69,65 +57,7 @@ public class Application extends Controller {
         this.materializer = materializer;
         this.actorSystem = actorSystem;
         this.formFactory = formFactory;
-
-        //scodashActor = actorSystem.actorOf(Scodash.props(), Scodash.Name());
-        //dashboardView = actorSystem.actorOf(DashboardView.props(), DashboardView.Name());
-        //actorSystem.actorOf(DashboardViewBuilder.props(), DashboardViewBuilder.Name());
     }
-
-//    public Result showNewDashboard() {
-//
-//        Form<CreateDashboardNew> createDashboard1Form = formFactory.form(CreateDashboardNew.class);
-//        Form<CreateDashboardNew> filledForm = createDashboard1Form.fill(
-//                new CreateDashboardNew(
-//                        session(SESSION_DASHBOARD_NAME),
-//                        session(SESSION_DASHBOARD_DESCRIPTION),
-//                        session(SESSION_DASHBOARD_TYPE)
-//                ));
-//        return ok(views.html.createDashboardNew.render(filledForm));
-//    }
-//
-//    public Result processNewDashboard() {
-//        CreateDashboardNew createDashboardNewForm = formFactory.form(CreateDashboardNew.class).bindFromRequest(request()).get();
-//        session(SESSION_DASHBOARD_NAME, createDashboardNewForm.getName());
-//        session(SESSION_DASHBOARD_DESCRIPTION, createDashboardNewForm.getDescription());
-//        session(SESSION_DASHBOARD_TYPE, createDashboardNewForm.getType());
-//        final String sessionItems = session(SESSION_DASHBOARD_ITEMS);
-//        Form<CreateDashboardItems> createDashboard2Form = sessionItems != null ? formFactory.form(CreateDashboardItems.class).bind(Json.parse(sessionItems)) : formFactory.form(CreateDashboardItems.class);
-//        return ok(createDashboardItems.render(createDashboard2Form));
-//
-//    }
-
-
-
-
-//    public Result processDashboardOwner() {
-//        Forms.CreateDashboardOwner createDashboard3Form = formFactory.form(Forms.CreateDashboardOwner.class).bindFromRequest(request()).get();
-//        session(SESSION_DASHBOARD_OWNER_NAME, createDashboard3Form.ownerName());
-//        session(SESSION_DASHBOARD_OWNER_EMAIL, createDashboard3Form.ownerEmail());
-//
-//        ArrayNode itemsNodes = (ArrayNode) Json.parse(session(SESSION_DASHBOARD_ITEMS)).get(SESSION_DASHBOARD_ITEMS_ITEMS);
-//        final Map<String, ItemFO> items = IteratorUtils.toList(itemsNodes.elements()).stream().map(node -> node.asText()).collect(Collectors.toMap(item -> item, item -> new ItemFO(item.toString())));
-//
-//        try {
-//
-//            FullResult fr = (FullResult) FutureConverters.toJava(
-//                    ask(scodashActor, new Scodash$Command$CreateNewDashboard(session(SESSION_DASHBOARD_NAME),
-//                            session(SESSION_DASHBOARD_DESCRIPTION),
-//                            session(SESSION_DASHBOARD_TYPE),
-//                            JavaConverters.mapAsScalaMapConverter(items).asScala(),
-//                            session(SESSION_DASHBOARD_OWNER_NAME),
-//                            session(SESSION_DASHBOARD_OWNER_EMAIL)), TIMEOUT_MILLIS)).toCompletableFuture().get();
-//            DashboardFO dashboardFO = (DashboardFO) fr.toOption().get();
-//
-//            forms.Forms.CreatedDashboard createdDashboard = new forms.Forms.CreatedDashboard(dashboardFO.name(), dashboardFO.writeHash(), dashboardFO.readonlyHash());
-//
-//            Form<Forms.CreatedDashboard> createdDashboardForm = formFactory.form(Forms.CreatedDashboard.class).fill(createdDashboard);
-//            return ok(views.html.createdDashboard.render(createdDashboardForm));
-//        } catch (Exception e) {
-//            return internalServerError();
-//        }
-//    }
 
     public WebSocket ws(String hash) {
         return WebSocket.Json.acceptOrResult(request -> {
@@ -148,7 +78,6 @@ public class Application extends Controller {
         return CompletableFuture.completedFuture(left);
     }
 
-
     public boolean sameOriginCheck(Http.RequestHeader rh) {
         final String origin = rh.getHeader("Origin");
 
@@ -163,7 +92,6 @@ public class Application extends Controller {
             return false;
         }
     }
-
 
     public CompletionStage<Flow<JsonNode, JsonNode, NotUsed>> wsFutureFlow(Http.RequestHeader request, String hash) {
         // create an actor ref source and associated publisher for sink
@@ -189,13 +117,6 @@ public class Application extends Controller {
         return null;
     }
 
-//    public CompletionStage<ActorRef> createDashboardActor(Dashboard dashboard) {
-//
-//        // Use guice assisted injection to instantiate and configure the child actor.
-//        return FutureConverters.toJava(
-//                ask(scodashActor, new Scodash.CreateNewDashboard(dashboard), TIMEOUT_MILLIS)
-//        ).thenApply(stageObj -> (ActorRef) stageObj);
-//    }
 
     public Flow<JsonNode, JsonNode, NotUsed> createWebSocketFlow(Publisher<JsonNode> webSocketIn, ActorRef userActor) {
         // http://doc.akka.io/docs/akka/current/scala/stream/stream-flows-and-basics.html#stream-materialization
@@ -251,42 +172,6 @@ public class Application extends Controller {
     private boolean originMatches(String origin) {
         return origin.contains("localhost:9000") || origin.contains("localhost:19001");
     }
-
-//    public Result index() {
-//        return ok(index.render("Your new application is ready."));
-//    }
-
-  //  public Result dashboard(String hash) {
-//
-//        try {
-//            DashboardFO dsh = (DashboardFO) FutureConverters.toJava(ask(dashboardView, new DashboardView.FindDashboardByWriteHash(hash), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
-//            return ok(views.html.dashboard.render(dsh));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return internalServerError();
-//        }
-
-
-        //val d = dashboardView ?
-
-//        try {
-//
-//
-////            String hash = "abc";
-//            ActorRef dashboardActor = (ActorRef) FutureConverters.toJava(
-//                    ask(scodashActor, new ScodashActor.GetDashboardActor(pojo.DashboardId.apply(hash)), Application.TIMEOUT_MILLIS)
-//            ).toCompletableFuture().get();
-//            Dashboard dsh = (Dashboard)FutureConverters.toJava(
-//                    ask(dashboardActor, new Dashboard.GetDashboard(), Application.TIMEOUT_MILLIS)).toCompletableFuture().get();
-//            return ok(views.html.dashboard.render(dsh));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return internalServerError();
-//        }
-
-  //  }
-
-
 
 
 }

@@ -193,5 +193,9 @@ public class UserActor extends UntypedActor {
     public interface Factory {
         Actor create(@Assisted("hash") String hash, ActorRef out);
     }
+
+    public String getHash() {
+        return hash;
+    }
 }
 

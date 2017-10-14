@@ -3,7 +3,7 @@
 # ~~~~
 GET         /                           controllers.ApplicationScala.index
 GET         /dashboard/:hash            controllers.ApplicationScala.dashboard(hash)
-GET         /ws/:hash                   controllers.Application.ws(hash)
+GET         /ws/:hash                   controllers.ApplicationScala.ws(hash)
 GET         /showNewDashboard           controllers.ApplicationScala.showNewDashboard
 POST        /processNewDashboard        controllers.ApplicationScala.processNewDashboard
 GET         /showDashboardItems         controllers.ApplicationScala.showDashboardItems
