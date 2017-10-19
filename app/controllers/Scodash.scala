@@ -56,7 +56,7 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       forwardCommand(id, command)
 
     case CreateUser(id, webOutActor) =>
-      val user = context.actorOf(User.props(id), User.Name)
+      val user = context.actorOf(User.props(id, webOutActor), User.Name)
       sender ! user
 
     case EventEnvelope(offset, pid, seq, event) =>

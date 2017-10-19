@@ -40,11 +40,19 @@
                     <button class="score-button">@{item.score}</button>
                     <button class="plus-button">+</button>
                 </div>
-                <div class="col-md-7">///////////////</div>
+                <div class="col-md-7">
+                    @for(i <- 1 to item.score/5) {
+                        <img src="@routes.Assets.at("images/5-carek.png")">
+                    }
+                    @(item.score % 5) match {
+                        case 1 => { <img src="@routes.Assets.at("images/1-carka.png")"> }
+                        case 2 => { <img src="@routes.Assets.at("images/2-carky.png")"> }
+                        case 3 => { <img src="@routes.Assets.at("images/3-carky.png")"> }
+                        case 4 => { <img src="@routes.Assets.at("images/4-carky.png")"> }
+                    }
+                </div>
             </div>
         }
-
-
     </div>
 
 }
