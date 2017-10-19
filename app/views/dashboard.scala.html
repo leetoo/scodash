@@ -33,12 +33,12 @@
     <div id="dashboard" class="col-md-10 col-md-offset-1" data-ws-url="@routes.ApplicationScala.ws(dashboard.writeHash).webSocketURL">
 
         @dashboard.items.values.map { item =>
-            <div class="row dashboard-comma-row">
+            <div id="@{item.id}" class="item row dashboard-comma-row">
                 <div class="col-md-2">@{item.name}</div>
                 <div class="col-md-2 buttons-area">
-                    <button class="minus-button">-</button>
+                    <button class="minus-button" onclick="decItem('@{item.id}'')">-</button>
                     <button class="score-button">@{item.score}</button>
-                    <button class="plus-button">+</button>
+                    <button class="plus-button" onclick="incItem('@{item.id}'')">+</button>
                 </div>
                 <div class="col-md-7">
                     @for(i <- 1 to item.score/5) {
@@ -49,6 +49,7 @@
                         case 2 => { <img src="@routes.Assets.at("images/2-carky.png")"> }
                         case 3 => { <img src="@routes.Assets.at("images/3-carky.png")"> }
                         case 4 => { <img src="@routes.Assets.at("images/4-carky.png")"> }
+                        case _ => {}
                     }
                 </div>
             </div>

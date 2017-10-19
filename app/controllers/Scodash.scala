@@ -17,7 +17,7 @@ object Scodash {
   object Command {
     case class FindDashboard(id: String)
     case class CreateNewDashboard(name: String, description: String, style: String, items: Map[String, ItemFO] = Map(), ownerName: String, ownerEmail: String)
-    case class CreateUser(id: String, webOutActor: ActorRef)
+    case class CreateUser(id: String, webOutActor: ActorRef, hash: String)
   }
 
 
@@ -55,8 +55,8 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       val command = CreateDashboard(fo)
       forwardCommand(id, command)
 
-    case CreateUser(id, webOutActor) =>
-      val user = context.actorOf(User.props(id, webOutActor), User.Name)
+    case CreateUser(id, webOutActor, hash) =>
+      val user = context.actorOf(User.props(id, webOutActor), id)
       sender ! user
 
     case EventEnvelope(offset, pid, seq, event) =>

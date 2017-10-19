@@ -3,6 +3,7 @@ $ ->
   if wsUrl
     ws = new WebSocket wsUrl
     ws.onmessage = (event) ->
+      alert('message from server!')
       message = JSON.parse event.data
       console.log message.type
       switch message.type
@@ -11,3 +12,5 @@ $ ->
 
   updateDashboard = (dashboard) ->
     alert(dashboard)
+
+  incItem = (id) ->

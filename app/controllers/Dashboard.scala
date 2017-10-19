@@ -6,7 +6,7 @@ import akka.actor.{ActorRef, Props}
 
 import scala.collection.mutable
 
-case class ItemFO(name: String, var score: Int = 0) {
+case class ItemFO(id: Int, name: String, var score: Int = 0) {
 //  def this(name: String) {
 //    this(name, 0)
 //  }
