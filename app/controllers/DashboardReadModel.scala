@@ -13,7 +13,7 @@ trait DashboardReadModel{
 }
 
 object DashboardViewBuilder{
-  val Name = "dashboard-view-builder"
+  final val Name = "dashboard-view-builder"
   case class DashboardRM(id: String, name: String, description: String, style: String,
                          items: Map[String, ItemFO] = Map(), ownerName: String,
                          ownerEmail: String, readonlyHash: String,
@@ -40,7 +40,7 @@ class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[Dashboard
 
 
 object DashboardView{
-  val Name = "dashboard-view"
+  final val Name = "dashboard-view"
   case class FindDashboardByWriteHash(writeHash:String)
   case class FindDashboardByReadonlyHash(readonlyHash:String)
   def props = Props[DashboardView]

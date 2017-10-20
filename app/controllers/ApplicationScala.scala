@@ -8,6 +8,7 @@ import akka.stream.{ActorMaterializer, Materializer, OverflowStrategy}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.util.Timeout
 import com.google.inject.Inject
+import com.google.inject.name.Named
 import controllers.Forms.CreateDashboardItems
 import controllers.Scodash.Command.CreateNewDashboard
 import org.json4s.native.Serialization.write
@@ -23,8 +24,13 @@ import play.api.mvc._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-
-class ApplicationScala @Inject() (system: ActorSystem, implicit val mat: Materializer) extends Controller {
+class ApplicationScala @Inject() (
+  @Named(Scodash.Name) scodashActor: ActorRef,
+  @Named(DashboardView.Name) dashboardViewActor: ActorRef,
+  @Named(DashboardViewBuilder.Name) scodashViewBuilder: ActorRef,
+  system: ActorSystem,
+  implicit val mat: Materializer)
+    extends Controller {
 
   // Use a direct reference to SLF4J
   private val logger = org.slf4j.LoggerFactory.getLogger("controllers.ApplicationScala")
@@ -33,11 +39,6 @@ class ApplicationScala @Inject() (system: ActorSystem, implicit val mat: Materia
 
   implicit val timeout: Timeout = 5.seconds
   implicit lazy val formats = DefaultFormats
-
-  val scodashActor = system.actorOf(Scodash.props, Scodash.Name)
-  val dashboardView = system.actorOf(DashboardView.props, DashboardView.Name)
-  val dashboardViewBuilder = system.actorOf(DashboardViewBuilder.props, DashboardViewBuilder.Name)
-
 
   def index() = Action {
     Ok(views.html.index());
@@ -156,7 +157,7 @@ class ApplicationScala @Inject() (system: ActorSystem, implicit val mat: Materia
 
 
   def dashboard(hash: String) = Action.async { implicit request =>
-    (dashboardView ? DashboardView.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+    (dashboardViewActor ? DashboardView.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
       result => {
         val dashboardFO = result.value.head.extract[DashboardFO]
         Ok(views.html.dashboard(dashboardFO))
@@ -227,7 +228,7 @@ class ApplicationScala @Inject() (system: ActorSystem, implicit val mat: Materia
     val (webSocketOut: ActorRef, webSocketIn: Publisher[JsValue]) = createWebSocketConnections()
 
     // Create a user actor off the request id and attach it to the source
-    val userActorFuture = createUserActor(request.id.toString, webSocketOut)
+    val userActorFuture = createUserActor(request.id.toString, webSocketOut, hash)
 
     // Once we have an actor available, create a flow...
     userActorFuture.map { userActor =>
@@ -289,7 +290,7 @@ class ApplicationScala @Inject() (system: ActorSystem, implicit val mat: Materia
     val flowWatch: Flow[JsValue, JsValue, NotUsed] = flow.watchTermination() { (_, termination) =>
       termination.foreach { done =>
         logger.info(s"Terminating actor $userActor")
-        (dashboardView ? DashboardView.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+        (dashboardViewActor ? DashboardView.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
           result => {
             val dashboardFO = result.value.head.extract[DashboardFO]
             (scodashActor ? (Scodash.Command.FindDashboard(dashboardFO.id))).mapTo[ActorRef].map {
@@ -313,11 +314,11 @@ class ApplicationScala @Inject() (system: ActorSystem, implicit val mat: Materia
     * @param webSocketOut the "write" side of the websocket, that the user actor sends JsValue to.
     * @return a user actor for this ws connection.
     */
-  def createUserActor(name: String, webSocketOut: ActorRef): Future[ActorRef] = {
+  def createUserActor(name: String, webSocketOut: ActorRef, hash: String): Future[ActorRef] = {
     // Use guice assisted injection to instantiate and configure the child actor.
     val userActorFuture = {
       implicit val timeout = Timeout(100.millis)
-      (scodashActor ? Scodash.Command.CreateUser(name, webSocketOut)).mapTo[ActorRef]
+      (scodashActor ? Scodash.Command.CreateUser(name, webSocketOut, hash)).mapTo[ActorRef]
     }
     userActorFuture
   }

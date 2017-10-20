@@ -23,7 +23,7 @@ object Scodash {
 
   def props = Props[Scodash]
 
-  val Name = "scodash"
+  final val Name = "scodash"
 }
 
 class Scodash extends Aggregate[DashboardFO, Dashboard] {
