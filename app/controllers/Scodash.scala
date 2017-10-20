@@ -6,11 +6,17 @@ import akka.actor.{ActorRef, Props}
 import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.{EventEnvelope, PersistenceQuery}
 import akka.stream.ActorMaterializer
+import com.google.inject.Inject
+import com.google.inject.name.Named
 import controllers.Dashboard.Command.CreateDashboard
 import controllers.PersistentEntity.GetState
 import controllers.Scodash.Command.{CreateNewDashboard, CreateUser, FindDashboard}
 import org.apache.commons.lang3.RandomStringUtils
+import org.json4s.{DefaultFormats, JObject}
+import akka.pattern.ask
+import akka.util.Timeout
 
+import scala.concurrent.duration._
 import scala.collection.mutable
 
 object Scodash {
@@ -24,9 +30,13 @@ object Scodash {
   def props = Props[Scodash]
 
   final val Name = "scodash"
+
 }
 
 class Scodash extends Aggregate[DashboardFO, Dashboard] {
+
+  implicit val timeout: Timeout = 5.seconds
+  implicit lazy val formats = DefaultFormats
 
   import context.dispatcher
 
@@ -39,6 +49,9 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       eventsByTag("dashboardcreated", o.getOrElse(0L)).
       runForeach(e => self ! e)
   }
+
+  @Named(DashboardView.Name)
+  val dashboardViewActor:ActorRef
 
   override def receive = {
     case FindDashboard(id) =>
@@ -57,6 +70,12 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
 
     case CreateUser(id, webOutActor, hash) =>
       val user = context.actorOf(User.props(id, webOutActor), id)
+      (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+        result => {
+          val dashboardFO = result.value.head.extract[DashboardFO]
+          forwardCommand(dashboardFO.id, Dashboard.Command.Watch(webOutActor) )
+        }
+      }
       sender ! user
 
     case EventEnvelope(offset, pid, seq, event) =>

@@ -41,9 +41,11 @@ class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[Dashboard
 
 object DashboardView{
   final val Name = "dashboard-view"
-  case class FindDashboardByWriteHash(writeHash:String)
-  case class FindDashboardByReadonlyHash(readonlyHash:String)
   def props = Props[DashboardView]
+  object Command {
+    case class FindDashboardByReadonlyHash(readonlyHash:String)
+    case class FindDashboardByWriteHash(writeHash:String)
+  }
 }
 
 class DashboardView extends DashboardReadModel with AbstractBaseActor with ElasticsearchSupport{
@@ -52,10 +54,10 @@ class DashboardView extends DashboardReadModel with AbstractBaseActor with Elast
   import context.dispatcher
 
   def receive = {
-    case FindDashboardByWriteHash(writeHash) =>
+    case Command.FindDashboardByWriteHash(writeHash) =>
       val results = queryElasticsearch(s"writeHash:$writeHash")
       pipeResponse(results)
-    case FindDashboardByReadonlyHash(readonlyHash) =>
+    case Command.FindDashboardByReadonlyHash(readonlyHash) =>
       val results = queryElasticsearch(s"readonlyHash:$readonlyHash")
       pipeResponse(results)
 

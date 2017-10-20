@@ -157,7 +157,7 @@ class ApplicationScala @Inject() (
 
 
   def dashboard(hash: String) = Action.async { implicit request =>
-    (dashboardViewActor ? DashboardView.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+    (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
       result => {
         val dashboardFO = result.value.head.extract[DashboardFO]
         Ok(views.html.dashboard(dashboardFO))
@@ -290,7 +290,7 @@ class ApplicationScala @Inject() (
     val flowWatch: Flow[JsValue, JsValue, NotUsed] = flow.watchTermination() { (_, termination) =>
       termination.foreach { done =>
         logger.info(s"Terminating actor $userActor")
-        (dashboardViewActor ? DashboardView.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+        (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
           result => {
             val dashboardFO = result.value.head.extract[DashboardFO]
             (scodashActor ? (Scodash.Command.FindDashboard(dashboardFO.id))).mapTo[ActorRef].map {
