@@ -7,9 +7,6 @@ import akka.actor.{ActorRef, Props}
 import scala.collection.mutable
 
 case class ItemFO(id: Int, name: String, var score: Int = 0) {
-//  def this(name: String) {
-//    this(name, 0)
-//  }
   def increment(): Unit = score = score + 1
   def decrement(): Unit = if (score > 0) score = score - 1
 }
@@ -154,7 +151,6 @@ object Dashboard {
     case class CreateDashboard(dashboard: DashboardFO)
     case class Watch(watcher: ActorRef)
     case class Unwatch(watcher: ActorRef)
-    case class Data(items: mutable.Map[String, ItemFO])
     case class IncrementItem(name: String)
     case class DecrementItem(name: String)
     case class AddItem(name: String)

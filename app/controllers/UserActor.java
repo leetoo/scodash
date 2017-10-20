@@ -158,18 +158,18 @@ public class UserActor extends UntypedActor {
             out.tell(message, self());
         }
 
-        if (msg instanceof Dashboard$Command$Data) {
-            Dashboard$Command$Data data = (Dashboard$Command$Data)msg;
-            ArrayNode items = Json.newArray();
-            for (ItemFO item : JavaConverters.mapAsJavaMapConverter(data.items()).asJava().values()) {
-                items.addObject().put("name", item.name()).put("score", item.score());
-            }
-
-            ObjectNode message = Json.newObject();
-            message.set("type", Json.toJson("data"));
-            message.set("items", items);
-            out.tell(message, self());
-        }
+//        if (msg instanceof Dashboard$Command$Data) {
+//            Dashboard$Command$Data data = (Dashboard$Command$Data)msg;
+//            ArrayNode items = Json.newArray();
+//            for (ItemFO item : JavaConverters.mapAsJavaMapConverter(data.items()).asJava().values()) {
+//                items.addObject().put("name", item.name()).put("score", item.score());
+//            }
+//
+//            ObjectNode message = Json.newObject();
+//            message.set("type", Json.toJson("data"));
+//            message.set("items", items);
+//            out.tell(message, self());
+//        }
 
         if (msg instanceof JsonNode) {
             // From browser

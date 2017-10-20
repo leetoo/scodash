@@ -10,7 +10,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import controllers.Dashboard.Command.CreateDashboard
 import controllers.PersistentEntity.GetState
-import controllers.Scodash.Command.{CreateNewDashboard, CreateUser, FindDashboard}
+import controllers.Scodash.Command.{CreateNewDashboard, CreateDashboardUser, FindDashboard}
 import org.apache.commons.lang3.RandomStringUtils
 import org.json4s.{DefaultFormats, JObject}
 import akka.pattern.ask
@@ -23,7 +23,7 @@ object Scodash {
   object Command {
     case class FindDashboard(id: String)
     case class CreateNewDashboard(name: String, description: String, style: String, items: Map[String, ItemFO] = Map(), ownerName: String, ownerEmail: String)
-    case class CreateUser(id: String, webOutActor: ActorRef, hash: String)
+    case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String)
   }
 
 
@@ -50,8 +50,8 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       runForeach(e => self ! e)
   }
 
-  @Named(DashboardView.Name)
-  val dashboardViewActor:ActorRef
+  //@Inject(DashboardView.Name)
+  //val dashboardViewActor:ActorRef
 
   override def receive = {
     case FindDashboard(id) =>
@@ -68,14 +68,9 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       val command = CreateDashboard(fo)
       forwardCommand(id, command)
 
-    case CreateUser(id, webOutActor, hash) =>
+    case CreateDashboardUser(id, webOutActor, dashboardId) =>
       val user = context.actorOf(User.props(id, webOutActor), id)
-      (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
-        result => {
-          val dashboardFO = result.value.head.extract[DashboardFO]
-          forwardCommand(dashboardFO.id, Dashboard.Command.Watch(webOutActor) )
-        }
-      }
+      forwardCommand(dashboardId, Dashboard.Command.Watch(user))
       sender ! user
 
     case EventEnvelope(offset, pid, seq, event) =>

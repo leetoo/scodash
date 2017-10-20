@@ -310,16 +310,35 @@ class ApplicationScala @Inject() (
   /**
     * Creates a user actor with a given name, using the websocket out actor for output.
     *
-    * @param name         the name of the user actor.
+    * @param userId         the name of the user actor.
     * @param webSocketOut the "write" side of the websocket, that the user actor sends JsValue to.
     * @return a user actor for this ws connection.
     */
-  def createUserActor(name: String, webSocketOut: ActorRef, hash: String): Future[ActorRef] = {
-    // Use guice assisted injection to instantiate and configure the child actor.
+  def createUserActor(userId: String, webSocketOut: ActorRef, hash: String): Future[ActorRef] = {
+    //val userActorFuture =
+//      (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+//        case result =>
+//          val dashboardFO = result.value.head.extract[DashboardFO]
+//          val userActorFuture = (scodashActor ? Scodash.Command.CreateDashboardUser(userId, webSocketOut, dashboardFO.id))
+//      }
+
+    //}
+    //Future.successful(scodashActor)
     val userActorFuture = {
-      implicit val timeout = Timeout(100.millis)
-      (scodashActor ? Scodash.Command.CreateUser(name, webSocketOut, hash)).mapTo[ActorRef]
+      getDashboard(hash).flatMap { dashboard =>
+        (scodashActor ? Scodash.Command.CreateDashboardUser(userId, webSocketOut, dashboard.id)).mapTo[ActorRef]
+      }
     }
     userActorFuture
+
+
+
+  }
+
+  def getDashboard(hash: String): Future[DashboardFO] = {
+    (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map(
+      result => result.value.head.extract[DashboardFO]
+    )
+
   }
 }
