@@ -9,8 +9,8 @@ case class UserFO(id: String)
 
 class User(id: String, out: ActorRef) extends AbstractBaseActor {
 
-  implicit private val DashoboardWrites = Json.writes[DashboardFO]
   implicit private val ItemWrites = Json.writes[ItemFO]
+  implicit private val DashoboardWrites = Json.writes[DashboardFO]
 
   override def receive = {
 //    case addItem: Dashboard.Command.AddItem =>

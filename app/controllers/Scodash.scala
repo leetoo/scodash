@@ -22,7 +22,7 @@ import scala.collection.mutable
 object Scodash {
   object Command {
     case class FindDashboard(id: String)
-    case class CreateNewDashboard(name: String, description: String, style: String, items: Map[String, ItemFO] = Map(), ownerName: String, ownerEmail: String)
+    case class CreateNewDashboard(name: String, description: String, style: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String)
     case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String)
   }
 

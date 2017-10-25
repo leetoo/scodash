@@ -12,10 +12,10 @@ case class ItemFO(id: Int, name: String, var score: Int = 0) {
 }
 
 object DashboardFO {
-  def empty = DashboardFO("", "", "", "", Map.empty[String, ItemFO], "", "", "", "")
+  def empty = DashboardFO("", "", "", "", Set.empty[ItemFO], "", "", "", "")
 }
 
-case class DashboardFO(id: String, name: String, description: String, style: String, items: Map[String, ItemFO] = Map(), ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
+case class DashboardFO(id: String, name: String, description: String, style: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
   override def assignId(id: String) = this.copy(id = id)
   override def markDeleted = this.copy(deleted = false)
 }

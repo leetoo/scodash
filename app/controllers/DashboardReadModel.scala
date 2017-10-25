@@ -15,7 +15,7 @@ trait DashboardReadModel{
 object DashboardViewBuilder{
   final val Name = "dashboard-view-builder"
   case class DashboardRM(id: String, name: String, description: String, style: String,
-                         items: Map[String, ItemFO] = Map(), ownerName: String,
+                         items: Set[ItemFO] = Set(), ownerName: String,
                          ownerEmail: String, readonlyHash: String,
                          writeHash: String,deleted: Boolean = false) extends  ReadModelObject
   def props = Props[DashboardViewBuilder]

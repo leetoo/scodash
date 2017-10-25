@@ -146,7 +146,7 @@ class ApplicationScala @Inject() (
           sessDash.name,
           sessDash.description,
           sessDash.style,
-          sessDash.items.zipWithIndex.map { case (name, id) => name -> ItemFO(id, name)}.toMap[String, ItemFO],
+          sessDash.items,
           ownerData.ownerName,
           ownerData.ownerEmail)).mapTo[FullResult[DashboardFO]].map {
           r => Ok(views.html.createdDashboard(Forms.CreatedDashboard(r.value.name, r.value.writeHash, r.value.readonlyHash)))
