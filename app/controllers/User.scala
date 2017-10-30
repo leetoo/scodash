@@ -1,11 +1,12 @@
 package controllers
 
 import akka.actor.{ActorRef, Props}
+import com.google.inject.name.Named
 import play.api.libs.json._
 
 case class UserFO(id: String)
 
-class User(id: String, out: ActorRef) extends AbstractBaseActor {
+class User(id: String, out: ActorRef, @Named("scodashActor") scodashActor: ActorRef) extends AbstractBaseActor {
 
   implicit private val ItemWrites = Json.writes[ItemFO]
   implicit private val DashoboardWrites = Json.writes[DashboardFO]
@@ -24,6 +25,7 @@ class User(id: String, out: ActorRef) extends AbstractBaseActor {
         case JsString("increment") => {
           log.info("increment:")
           log.info(jsObj.toString())
+          scodashActor !
         }
         case JsString("decrement") =>
           log.info("decrement")
