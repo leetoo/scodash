@@ -14,9 +14,18 @@ $ ->
       itemRow = $("<div>").addClass("item row dashboard-comma-row")
       itemRow.append($("<div>").addClass("col-md-2").text(item.name))
       buttonArea = $("<div>").addClass("col-md-2 buttons-area")
-      buttonArea.append($("<button>").addClass("minus-button").text("-"))
+      minusBtn = $("<button>").addClass("minus-button").text("-")
+
+
+      buttonArea.append(minusBtn)
       buttonArea.append($("<button>").addClass("score-button").text(item.score))
-      buttonArea.append($("<button>").addClass("plus-button").text("+"))
+      plusBtn = $("<button>").addClass("plus-button").text("+")
+      plusBtn.click
+        data: {hash: dashboard.writeHash, itemId: item.id}
+        handler: (event) ->
+          event.preventDefault()
+          ws.send(JSON.stringify({operation: 'increment', hash: event.data.hash, itemId: event.data.itemId}))
+      buttonArea.append(plusBtn)
       itemRow.append(buttonArea)
       itemRow.append($("<div>").addClass("col-md-7"))
       $("#dashboard").append(itemRow)

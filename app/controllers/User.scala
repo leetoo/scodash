@@ -1,8 +1,6 @@
 package controllers
 
 import akka.actor.{ActorRef, Props}
-import org.json4s.DefaultFormats
-
 import play.api.libs.json._
 
 case class UserFO(id: String)
@@ -21,6 +19,16 @@ class User(id: String, out: ActorRef) extends AbstractBaseActor {
 //      out ! message
     case dashboard: DashboardFO =>
       out ! Json.toJson(dashboard)
+    case jsObj: JsObject =>
+      jsObj.value("operation") match {
+        case JsString("increment") => {
+          log.info("increment:")
+          log.info(jsObj.toString())
+        }
+        case JsString("decrement") =>
+          log.info("decrement")
+      }
+
     case cmd:Any =>
       log.warning("Unexpected user command {}", cmd)
 
