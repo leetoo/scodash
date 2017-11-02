@@ -133,7 +133,7 @@ public class UserActor extends UntypedActor {
             ObjectNode message =
                     Json.newObject()
                             .put("type", "decrementitem")
-                            .put("name", decrementItem.name());
+                            .put("name", decrementItem.id());
             logger.debug("onReceive: " + message);
             out.tell(message, self());
         }
@@ -143,7 +143,7 @@ public class UserActor extends UntypedActor {
             ObjectNode message =
                     Json.newObject()
                             .put("type", "incrementitem")
-                            .put("name", incrementItem.name());
+                            .put("name", incrementItem.id());
             logger.debug("onReceive: " + message);
             out.tell(message, self());
         }

@@ -1,8 +1,11 @@
 package controllers
 
 import akka.actor.{Actor, ActorLogging}
+import akka.util.Timeout
+import org.json4s.DefaultFormats
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 /**
   * Base actor definition for other actors in the scodash app to extend from
@@ -10,6 +13,9 @@ import scala.concurrent.Future
 trait AbstractBaseActor extends Actor with ActorLogging {
   import akka.pattern.pipe
   import context.dispatcher
+
+  implicit val timeout: Timeout = 5.seconds
+  implicit lazy val formats = DefaultFormats
 
   //PF to be used with the .recover combinator to convert an exception on a failed Future into a
   //Failure ServiceResult

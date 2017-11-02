@@ -35,9 +35,6 @@ object Scodash {
 
 class Scodash extends Aggregate[DashboardFO, Dashboard] {
 
-  implicit val timeout: Timeout = 5.seconds
-  implicit lazy val formats = DefaultFormats
-
   import context.dispatcher
 
   val projection = ResumableProjection("scodash", context.system)
