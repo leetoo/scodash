@@ -10,7 +10,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import controllers.Dashboard.Command.CreateDashboard
 import controllers.PersistentEntity.GetState
-import controllers.Scodash.Command.{CreateNewDashboard, CreateDashboardUser, FindDashboard}
+import controllers.Scodash.Command._
 import org.apache.commons.lang3.RandomStringUtils
 import org.json4s.{DefaultFormats, JObject}
 import akka.pattern.ask
@@ -22,6 +22,8 @@ import scala.collection.mutable
 object Scodash {
   object Command {
     case class FindDashboard(id: String)
+    case class FindDashboardByWriteHash(hash: String)
+    case class FindDashboardByReadHash(hash: String)
     case class CreateNewDashboard(name: String, description: String, style: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String)
     case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String)
   }
@@ -36,6 +38,8 @@ object Scodash {
 class Scodash extends Aggregate[DashboardFO, Dashboard] {
 
   import context.dispatcher
+
+  implicit val timeout: Timeout = 5.seconds
 
   val projection = ResumableProjection("scodash", context.system)
   implicit val mater = ActorMaterializer()
@@ -66,7 +70,8 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       forwardCommand(id, command)
 
     case CreateDashboardUser(id, webOutActor, dashboardId) =>
-      val user = context.actorOf(User.props(id, webOutActor), id)
+      val dashboardActor = lookupOrCreateChild(dashboardId)
+      val user = context.actorOf(User.props(id, webOutActor, dashboardActor), id)
       forwardCommand(dashboardId, Dashboard.Command.Watch(user))
       sender ! user
 

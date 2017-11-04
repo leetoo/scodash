@@ -25,7 +25,7 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
   import Dashboard._
 
   def initialState = DashboardFO.empty
-  final val watchers: Set[ActorRef] = Set();
+  final val watchers: mutable.Set[ActorRef] = mutable.Set();
 
 
   override def additionalCommandHandling: Receive = {
@@ -37,10 +37,17 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
         persist(DashboardCreated(dashboard))(handleEventAndRespond())
       }
     case Watch(watcher) =>
-      watchers + watcher
+      watchers += watcher
       watcher ! state
     case Unwatch(watcher) =>
-      watchers - watcher
+      watchers -= watcher
+    case IncrementItem(id) =>
+      state.items.find(item => item.id.toString == id).map(_.increment())
+      watchers.foreach(w => w ! state)
+    case DecrementItem(id) =>
+      state.items.find(item => item.id.toString == id).map(_.decrement())
+      watchers.foreach(w => w ! state)
+
   }
 
   override def isCreateMessage(cmd: Any) = cmd match {
@@ -153,12 +160,6 @@ object Dashboard {
     case class Unwatch(watcher: ActorRef)
     case class IncrementItem(id: String)
     case class DecrementItem(id: String)
-    case class AddItem(name: String)
-    case class RemoveItem(name: String)
-    case class GetWriteHash()
-    case class GetReadonlyHash()
-    case class GetName()
-    case class GetDashboard()
   }
 
   object Event {

@@ -2,24 +2,26 @@ package controllers
 
 import akka.pattern.ask
 import akka.actor.{ActorRef, Props}
+import akka.util.Timeout
 import com.google.inject.Inject
+import com.google.inject.assistedinject.Assisted
 import com.google.inject.name.Named
 import org.json4s.{DefaultFormats, JObject}
 import play.api.libs.json.{JsString, _}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 case class UserFO(id: String)
 
-class User @Inject() (
-                       id: String,
-                       out: ActorRef,
-                       @Named(Scodash.Name) scodashActor: ActorRef,
-                       @Named(DashboardView.Name) dashboardViewActor: ActorRef) extends AbstractBaseActor {
+class User (id: String, outActor: ActorRef, dashboardActor: ActorRef) extends AbstractBaseActor {
 
   implicit private val ItemWrites = Json.writes[ItemFO]
   implicit private val DashoboardWrites = Json.writes[DashboardFO]
+
+  implicit val timeout: Timeout = 5.seconds
+  implicit lazy val formats = DefaultFormats
 
   override def receive = {
 //    case addItem: Dashboard.Command.AddItem =>
@@ -29,7 +31,7 @@ class User @Inject() (
 //      val message = Json.newObject.put("type", "removeitem").put("name", removeItem.name)
 //      out ! message
     case dashboard: DashboardFO =>
-      out ! Json.toJson(dashboard)
+      outActor ! Json.toJson(dashboard)
     case jsObj: JsObject =>
       val hash = jsObj.value("hash").toString()
       val itemId = jsObj.value("itemId").toString()
@@ -50,20 +52,21 @@ class User @Inject() (
   }
 
   private def sendCmdToDashboard(hash: String, cmd: Any) = {
-    (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
-      result => {
-        val dashboardFO = result.value.head.extract[DashboardFO]
-        (scodashActor ? Scodash.Command.FindDashboard(dashboardFO.id)).mapTo[ActorRef].map {
-          dasboardActor => dasboardActor ! cmd
-        }
-      }
-    }
+//    (scodashActor ? Scodash.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+//      result => {
+//        val dashboardFO = result.value.head.extract[DashboardFO]
+//        (scodashActor ? Scodash.Command.FindDashboard(dashboardFO.id)).mapTo[ActorRef].map {
+//          dasboardActor => dasboardActor ! cmd
+//        }
+//      }
+//    }
+    dashboardActor ! cmd
   }
 }
 
 object User {
   val Name = "user"
-  def props(id: String, out: ActorRef) = Props(classOf[User], id, out)
+  def props(id: String, outActor: ActorRef, dashboardActor: ActorRef) = Props(classOf[User], id, outActor, dashboardActor)
 
 }
 

@@ -118,45 +118,6 @@ public class UserActor extends UntypedActor {
 //            out.tell(message, self());
 //        }
 
-        if (msg instanceof Dashboard$Command$AddItem) {
-            Dashboard$Command$AddItem addItem = (Dashboard$Command$AddItem) msg;
-            ObjectNode message =
-                    Json.newObject()
-                        .put("type", "additem")
-                        .put("name", addItem.name());
-            logger.debug("onReceive: " + message);
-            out.tell(message, self());
-        }
-
-        if (msg instanceof Dashboard$Command$DecrementItem) {
-            Dashboard$Command$DecrementItem decrementItem = (Dashboard$Command$DecrementItem) msg;
-            ObjectNode message =
-                    Json.newObject()
-                            .put("type", "decrementitem")
-                            .put("name", decrementItem.id());
-            logger.debug("onReceive: " + message);
-            out.tell(message, self());
-        }
-
-        if (msg instanceof Dashboard$Command$IncrementItem) {
-            Dashboard$Command$IncrementItem incrementItem = (Dashboard$Command$IncrementItem) msg;
-            ObjectNode message =
-                    Json.newObject()
-                            .put("type", "incrementitem")
-                            .put("name", incrementItem.id());
-            logger.debug("onReceive: " + message);
-            out.tell(message, self());
-        }
-
-        if (msg instanceof Dashboard$Command$RemoveItem) {
-            Dashboard$Command$RemoveItem removeItem = (Dashboard$Command$RemoveItem) msg;
-            ObjectNode message =
-                    Json.newObject()
-                            .put("type", "removeitem")
-                            .put("name", removeItem.name());
-            logger.debug("onReceive: " + message);
-            out.tell(message, self());
-        }
 
 //        if (msg instanceof Dashboard$Command$Data) {
 //            Dashboard$Command$Data data = (Dashboard$Command$Data)msg;
@@ -179,11 +140,11 @@ public class UserActor extends UntypedActor {
             final String operation = json.get("operation").textValue();
             final String item = json.get("name").textValue();
             if ("increment".equals(operation)) {
-                dashboardActor.tell(new Dashboard$Command$IncrementItem(item), self());
+                //dashboardActor.tell(new Dashboard$Command$IncrementItem(item), self());
             } else if ("decrement".equals(operation)) {
-                dashboardActor.tell(new Dashboard$Command$DecrementItem(item), self());
+                //dashboardActor.tell(new Dashboard$Command$DecrementItem(item), self());
             } else if ("remove".equals(operation)) {
-                dashboardActor.tell(new Dashboard$Command$RemoveItem(item), self());
+                //dashboardActor.tell(new Dashboard$Command$RemoveItem(item), self());
             } else {
                 logger.error("No operation in JSON");
             }

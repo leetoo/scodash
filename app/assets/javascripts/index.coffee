@@ -3,7 +3,6 @@ $ ->
   if wsUrl
     ws = new WebSocket wsUrl
     ws.onmessage = (event) ->
-      alert('message from server!')
       data = JSON.parse event.data
       console.log data
       updateDashboard(data)
@@ -24,10 +23,10 @@ $ ->
       buttonArea.append($("<button>").addClass("score-button").text(item.score))
       plusBtn = $("<button>").addClass("plus-button").text("+")
       plusBtn.click
-      data: {itemId: item.id, hash: dashboard.writeHash}
-      handler: (event) ->
-        event.preventDefault()
-        ws.send(JSON.stringify({operation: 'increment', itemId:  event.data.itemId, hash: event.data.hash}))
+        data: {itemId: item.id, hash: dashboard.writeHash}
+        handler: (event) ->
+          event.preventDefault()
+          ws.send(JSON.stringify({operation: 'increment', itemId:  event.data.itemId, hash: event.data.hash}))
 
       buttonArea.append(plusBtn)
       itemRow.append(buttonArea)

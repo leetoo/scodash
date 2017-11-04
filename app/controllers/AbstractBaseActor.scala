@@ -14,9 +14,6 @@ trait AbstractBaseActor extends Actor with ActorLogging {
   import akka.pattern.pipe
   import context.dispatcher
 
-  implicit val timeout: Timeout = 5.seconds
-  implicit lazy val formats = DefaultFormats
-
   //PF to be used with the .recover combinator to convert an exception on a failed Future into a
   //Failure ServiceResult
   private val toFailure:PartialFunction[Throwable, ServiceResult[Nothing]] = {
