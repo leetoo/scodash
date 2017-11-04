@@ -2,7 +2,7 @@ package controllers
 
 import akka.actor.{ActorRef, Props}
 import controllers.Dashboard.Command._
-import controllers.Dashboard.Event.{DashboardCreated, ItemDecremented, ItemIncremented}
+import controllers.Dashboard.Event.{DashboardCreated, ItemUpdated}
 
 import scala.collection.mutable
 
@@ -42,12 +42,17 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
     case Unwatch(watcher) =>
       watchers -= watcher
     case IncrementItem(id) =>
-      persist(ItemIncremented(id))(handleEventAndRespond())
-      watchers.foreach(w => w ! state)
+      state.items.find(item => item.id.toString == id).map { item =>
+        item.increment()
+        persist(ItemUpdated(id, item.score.toString))(handleEventAndRespond())
+        watchers.foreach(w => w ! state)
+      }
     case DecrementItem(id) =>
-      persist(ItemDecremented(id))(handleEventAndRespond())
-      watchers.foreach(w => w ! state)
-
+      state.items.find(item => item.id.toString == id).map { item =>
+        item.decrement()
+        persist(ItemUpdated(id, item.score.toString))(handleEventAndRespond())
+        watchers.foreach(w => w ! state)
+      }
   }
 
   override def isCreateMessage(cmd: Any) = cmd match {
@@ -58,10 +63,7 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
   def handleEvent(event:EntityEvent):Unit = event match {
     case DashboardCreated(dashboard) =>
       state = dashboard
-    case ItemIncremented(id) =>
-      state.items.find(item => item.id.toString == id).map(_.increment())
-    case ItemDecremented(id) =>
-      state.items.find(item => item.id.toString == id).map(_.decrement())
+    case ItemUpdated(id, score) =>
   }
 
 //  private def handleIncrementItemCommand(command: IncrementItem): Unit = {
@@ -169,8 +171,7 @@ object Dashboard {
   object Event {
     trait DasboardEvent extends EntityEvent{override def entityType: String = EntityType}
     case class DashboardCreated(dashboard: DashboardFO) extends DasboardEvent
-    case class ItemIncremented(id: String) extends DasboardEvent
-    case class ItemDecremented(id: String) extends DasboardEvent
+    case class ItemUpdated(itemId: String, score: String) extends DasboardEvent
   }
 
   def props(id: String) = Props(classOf[Dashboard], id)
