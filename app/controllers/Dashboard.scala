@@ -1,8 +1,8 @@
 package controllers
 
-import Dashboard.Command._
-import Dashboard.Event.DashboardCreated
 import akka.actor.{ActorRef, Props}
+import controllers.Dashboard.Command._
+import controllers.Dashboard.Event.{DashboardCreated, ItemDecremented, ItemIncremented}
 
 import scala.collection.mutable
 
@@ -42,10 +42,10 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
     case Unwatch(watcher) =>
       watchers -= watcher
     case IncrementItem(id) =>
-      state.items.find(item => item.id.toString == id).map(_.increment())
+      persist(ItemIncremented(id))(handleEventAndRespond())
       watchers.foreach(w => w ! state)
     case DecrementItem(id) =>
-      state.items.find(item => item.id.toString == id).map(_.decrement())
+      persist(ItemDecremented(id))(handleEventAndRespond())
       watchers.foreach(w => w ! state)
 
   }
@@ -58,6 +58,10 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
   def handleEvent(event:EntityEvent):Unit = event match {
     case DashboardCreated(dashboard) =>
       state = dashboard
+    case ItemIncremented(id) =>
+      state.items.find(item => item.id.toString == id).map(_.increment())
+    case ItemDecremented(id) =>
+      state.items.find(item => item.id.toString == id).map(_.decrement())
   }
 
 //  private def handleIncrementItemCommand(command: IncrementItem): Unit = {
@@ -165,6 +169,8 @@ object Dashboard {
   object Event {
     trait DasboardEvent extends EntityEvent{override def entityType: String = EntityType}
     case class DashboardCreated(dashboard: DashboardFO) extends DasboardEvent
+    case class ItemIncremented(id: String) extends DasboardEvent
+    case class ItemDecremented(id: String) extends DasboardEvent
   }
 
   def props(id: String) = Props(classOf[Dashboard], id)
