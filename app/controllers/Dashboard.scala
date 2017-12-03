@@ -2,7 +2,7 @@ package controllers
 
 import akka.actor.{ActorRef, Props}
 import controllers.Dashboard.Command._
-import controllers.Dashboard.Event.{DashboardCreated, ItemUpdated}
+import controllers.Dashboard.Event.{DashboardCreated, DashboardUpdated}
 
 import scala.collection.mutable
 
@@ -44,13 +44,13 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
     case IncrementItem(id) =>
       state.items.find(item => item.id.toString == id).map { item =>
         item.increment()
-        persist(ItemUpdated(id, item.score.toString))(handleEventAndRespond())
+        persist(DashboardUpdated(state))(handleEventAndRespond())
         watchers.foreach(w => w ! state)
       }
     case DecrementItem(id) =>
       state.items.find(item => item.id.toString == id).map { item =>
         item.decrement()
-        persist(ItemUpdated(id, item.score.toString))(handleEventAndRespond())
+        persist(DashboardUpdated(state))(handleEventAndRespond())
         watchers.foreach(w => w ! state)
       }
   }
@@ -63,7 +63,8 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
   def handleEvent(event:EntityEvent):Unit = event match {
     case DashboardCreated(dashboard) =>
       state = dashboard
-    case ItemUpdated(id, score) =>
+    case DashboardUpdated(dashboard) =>
+      state = dashboard
   }
 
 //  private def handleIncrementItemCommand(command: IncrementItem): Unit = {
@@ -171,7 +172,7 @@ object Dashboard {
   object Event {
     trait DasboardEvent extends EntityEvent{override def entityType: String = EntityType}
     case class DashboardCreated(dashboard: DashboardFO) extends DasboardEvent
-    case class ItemUpdated(itemId: String, score: String) extends DasboardEvent
+    case class DashboardUpdated(dashboard: DashboardFO) extends DasboardEvent
   }
 
   def props(id: String) = Props(classOf[Dashboard], id)

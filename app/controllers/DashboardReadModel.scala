@@ -35,8 +35,10 @@ class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[Dashboard
       val dashboardRM = DashboardRM(dashboard.id, dashboard.name, dashboard.description, dashboard.style,
         dashboard.items, dashboard.ownerName, dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash, dashboard.deleted )
       InsertAction(dashboard.id, dashboardRM)
-    case ItemUpdated(id, score) =>
-      UpdateAction(dashboardId, s"items[id='${id}'].score = score", Map("score" -> score))
+    case DashboardUpdated(dashboard) =>
+      val dashboardRM = DashboardRM(dashboard.id, dashboard.name, dashboard.description, dashboard.style,
+        dashboard.items, dashboard.ownerName, dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash, dashboard.deleted )
+      InsertAction(dashboard.id, dashboardRM)
   }
 }
 
