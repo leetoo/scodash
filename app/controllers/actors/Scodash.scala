@@ -1,4 +1,4 @@
-package controllers
+package controllers.actors
 
 import java.util.UUID
 
@@ -6,18 +6,14 @@ import akka.actor.{ActorRef, Props}
 import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.{EventEnvelope, PersistenceQuery}
 import akka.stream.ActorMaterializer
-import com.google.inject.Inject
-import com.google.inject.name.Named
+import akka.util.Timeout
 import controllers.Dashboard.Command.CreateDashboard
 import controllers.PersistentEntity.GetState
-import controllers.Scodash.Command._
+import controllers._
+import controllers.actors.Scodash.Command.{CreateDashboardUser, CreateNewDashboard, FindDashboard}
 import org.apache.commons.lang3.RandomStringUtils
-import org.json4s.{DefaultFormats, JObject}
-import akka.pattern.ask
-import akka.util.Timeout
 
 import scala.concurrent.duration._
-import scala.collection.mutable
 
 object Scodash {
   object Command {

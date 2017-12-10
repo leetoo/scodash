@@ -10,7 +10,8 @@ import akka.util.Timeout
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import controllers.Forms.CreateDashboardItems
-import controllers.Scodash.Command.CreateNewDashboard
+import controllers.actors.Scodash
+import controllers.actors.Scodash.Command.CreateNewDashboard
 import org.json4s.native.Serialization.write
 import org.json4s.native._
 import org.json4s.{DefaultFormats, _}

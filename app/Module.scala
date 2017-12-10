@@ -1,7 +1,8 @@
 
 import com.google.inject.AbstractModule
 import com.google.inject.name.Named
-import controllers.{DashboardView, DashboardViewBuilder, Scodash}
+import controllers.actors.Scodash
+import controllers.{DashboardView, DashboardViewBuilder}
 import play.api.libs.concurrent.AkkaGuiceSupport
 
 class Module extends AbstractModule with AkkaGuiceSupport {

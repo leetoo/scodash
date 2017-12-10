@@ -1,16 +1,11 @@
-package controllers
+package controllers.actors
 
-import akka.pattern.ask
 import akka.actor.{ActorRef, Props}
 import akka.util.Timeout
-import com.google.inject.Inject
-import com.google.inject.assistedinject.Assisted
-import com.google.inject.name.Named
-import org.json4s.{DefaultFormats, JObject}
+import controllers._
+import org.json4s.DefaultFormats
 import play.api.libs.json.{JsString, _}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.duration._
 
 case class UserFO(id: String)
