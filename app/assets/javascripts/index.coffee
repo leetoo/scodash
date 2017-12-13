@@ -5,10 +5,13 @@ $ ->
     ws.onmessage = (event) ->
       data = JSON.parse event.data
       console.log data
-      updateDashboard(data)
+      updateCommas(data)
+      updateChart(data)
 
-  updateDashboard = (dashboard) ->
-    $("#dashboard").empty()
+
+
+  updateCommas = (dashboard) ->
+    $("#commas").empty()
     for item in dashboard.items
       itemRow = $("<div>").addClass("item row dashboard-comma-row")
       itemRow.append($("<div>").addClass("col-md-2").text(item.name))
@@ -48,16 +51,87 @@ $ ->
       commasArea.append(img)
 
       itemRow.append(commasArea)
-      $("#dashboard").append(itemRow)
+      $("#commas").append(itemRow)
+
+  updateChart = (dashboard) ->
+#    $("#chart").empty()
+    scoreArray = []
+    colorArray = []
+    nameArray = []
+    for item, index in dashboard.items
+      scoreArray[index] = item.score
+      colorArray[index] = randomColors[index]
+      nameArray[index] = item.name
+    ctx = $("#chart")
+    chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: scoreArray,
+          backgroundColor: colorArray
+        }],
+        labels: nameArray
+      },
+      options: {
+        animation: {
+          duration: 0
+        }
+      }
+    })
+
+randomColors = [
+  '#FF6633',
+  '#3366E6',
+  '#80B300',
+  '#E6B333',
+  '#FF33FF',
+  '#B33300',
+  '#FFB399',
+  '#E6331A',
+  '#99FF99',
+  '#00B3E6',
+  '#CCCC00',
+  '#B34D4D',
+  '#809900',
+  '#999966',
+  '#E6B3B3',
+  '#6680B3',
+  '#FFFF99',
+  '#FF3380',
+  '#66991A',
+  '#FF99E6',
+  '#CCFF1A',
+  '#FF1A66',
+  '#33FFCC',
+  '#66994D',
+  '#B366CC',
+  '#4D8000',
+  '#CC80CC',
+  '#66664D',
+  '#991AFF',
+  '#E666FF',
+  '#4DB3FF',
+  '#1AB399',
+  '#E666B3',
+  '#33991A',
+  '#CC9999',
+  '#B3B31A',
+  '#00E680',
+  '#4D8066',
+  '#809980',
+  '#E6FF80',
+  '#6666FF'
+  '#1AFF33',
+  '#999933',
+  '#66E64D',
+  '#4D80CC',
+  '#9900B3',
+  '#E64D66',
+  '#4DB380',
+  '#FF4D4D',
+  '#99E6E6',
+]
 
 
 
-#      @*<div id="@{item.id}" class="item row dashboard-comma-row">*@
-#      @*<div class="col-md-2">@{item.name}</div>*@
-#                @*<div class="col-md-2 buttons-area">*@
-#                    @*<button class="minus-button" onclick="decItem('@{item.id}'')">-</button>*@
-#      @*<button class="score-button">@{item.score}</button>*@
-#                    @*<button class="plus-button" onclick="incItem('@{item.id}'')">+</button>*@
-#      @*</div>*@
-#                @*<div class="col-md-7">*@
 

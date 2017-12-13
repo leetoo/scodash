@@ -4,11 +4,15 @@
 
     <div class="row bottom-border">
         <div class="row">
-            <div class="col-md-12 text-center"><h1>@{dashboard.name}</h1></div>
+            <div class="col-md-12 text-center"><h1>@{
+                dashboard.name
+            }</h1></div>
         </div>
 
         <div class="row">
-            <div class="col-md-12 text-center">@{dashboard.description}</div>
+            <div class="col-md-12 text-center">@{
+                dashboard.description
+            }</div>
         </div>
         <br/>
     </div>
@@ -25,37 +29,18 @@
         <div class="col-md-2 col-md-offset-4">
             <select class="form-control">
                 <option>A-Z</option>
-                <option>Order</option>
+                <option>Score</option>
             </select>
         </div>
     </div>
 
-    <div id="dashboard" class="col-md-10 col-md-offset-1" data-ws-url="@routes.ApplicationScala.ws(dashboard.writeHash).webSocketURL">
 
-        @*@dashboard.items.map { item =>*@
-            @*<div id="@{item.id}" class="item row dashboard-comma-row">*@
-                @*<div class="col-md-2">@{item.name}</div>*@
-                @*<div class="col-md-2 buttons-area">*@
-                    @*<button class="minus-button" onclick="decItem('@{item.id}'')">-</button>*@
-                    @*<button class="score-button">@{item.score}</button>*@
-                    @*<button class="plus-button" onclick="incItem('@{item.id}'')">+</button>*@
-                @*</div>*@
-                @*<div class="col-md-7">*@
-                    @*@for(i <- 1 to item.score/5) {*@
-                        @*<img src="@routes.Assets.at("images/5-carek.png")">*@
-                    @*}*@
-                    @*@(item.score % 5) match {*@
-                        @*case 1 => { <img src="@routes.Assets.at("images/1-carka.png")"> }*@
-                        @*case 2 => { <img src="@routes.Assets.at("images/2-carky.png")"> }*@
-                        @*case 3 => { <img src="@routes.Assets.at("images/3-carky.png")"> }*@
-                        @*case 4 => { <img src="@routes.Assets.at("images/4-carky.png")"> }*@
-                        @*case _ => {}*@
-                    @*}*@
-                @*</div>*@
-            @*</div>*@
-        @*}*@
-
-
+    <div id="dashboard" data-ws-url="@routes.ApplicationScala.ws(dashboard.writeHash).webSocketURL">
+        <div id="commas" class="col-md-10 col-md-offset-1" >
+        </div>
+        <div class="col-md-offset-1" >
+            <canvas id="chart" width="100" height="100"></canvas>
+        </div>
     </div>
-
 }
+
