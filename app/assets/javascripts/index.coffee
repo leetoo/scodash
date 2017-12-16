@@ -5,14 +5,24 @@ $ ->
     ws.onmessage = (event) ->
       data = JSON.parse event.data
       console.log data
+      initVisibility()
       updateCommas(data)
       updateChart(data)
 
+  initVisibility = () ->
+    $("#commas").css "display", "block"
+    $("#chart").css "display", "none"
 
-  $('input:radio[name=dashboard-type]:checked').change ->
-    alert('change')
 
+  $('input:radio[name=dashboard-type]').change ->
 
+    $("#commas").css "display", "none"
+    $("#chart").css "display", "none"
+    type = $(this).data('type')
+    if ( type == 'commas-type')
+      $("#commas").css "display", "block"
+    if ( type == 'chart-type')
+      $("#chart").css "display", "block"
 
 
   updateCommas = (dashboard) ->
@@ -66,7 +76,7 @@ $ ->
       scoreArray[index] = item.score
       colorArray[index] = randomColors[index]
       nameArray[index] = item.name
-    ctx = $("#chart")
+    ctx = $("#chart-canvas")
     chart = new Chart(ctx, {
       type: 'doughnut',
       data: {
