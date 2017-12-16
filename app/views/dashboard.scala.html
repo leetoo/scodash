@@ -18,12 +18,17 @@
     </div>
 
     <div class="row bottom-border-thin dashboard-header">
-
         <div class="col-md-4 col-md-offset-1">
-            <div class="btn-group" role="group" aria-label="...">
-                <button type="button" class="btn-type-1 btn btn-default"></button>
-                <button type="button" class="btn-type-2 btn btn-default"></button>
-                <button type="button" class="btn-type-3 btn btn-default"></button>
+            <div class="btn-group" data-toggle="buttons">
+                <label class="btn-type-1 btn btn-default active">
+                    <input type="radio" name="dashboard-type" id="commas-type" autocomplete="off" checked>
+                </label>
+                <label class="btn-type-2 btn btn-default">
+                    <input type="radio" name="dashboard-type" id="chart-type" autocomplete="off">
+                </label>
+                <label class="btn-type-3 btn btn-default">
+                    <input type="radio" name="dashboard-type" id="sport-type" autocomplete="off">
+                </label>
             </div>
         </div>
         <div class="col-md-2 col-md-offset-4">
@@ -39,7 +44,7 @@
         <div id="commas" class="col-md-10 col-md-offset-1" >
         </div>
         <div class="col-md-offset-1" >
-            <canvas id="chart" width="100" height="100"></canvas>
+            <canvas id="chart" width="300px" height="300px" style="display: block; width: 300px; height: 300px;"></canvas>
         </div>
     </div>
 }

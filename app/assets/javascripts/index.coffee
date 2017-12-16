@@ -9,13 +9,18 @@ $ ->
       updateChart(data)
 
 
+  $('input:radio[name=dashboard-type]:checked').change ->
+    alert('change')
+
+
+
 
   updateCommas = (dashboard) ->
     $("#commas").empty()
     for item in dashboard.items
       itemRow = $("<div>").addClass("item row dashboard-comma-row")
-      itemRow.append($("<div>").addClass("col-md-2").text(item.name))
-      buttonArea = $("<div>").addClass("col-md-2 buttons-area")
+      itemRow.append($("<div>").addClass("col-md-2 vertical-center").text(item.name))
+      buttonArea = $("<div>").addClass("col-md-2 buttons-area vertical-center")
       minusBtn = $("<button>").addClass("minus-button").text("-")
       minusBtn.click
         data: {itemId: item.id, hash: dashboard.writeHash}
@@ -34,10 +39,9 @@ $ ->
       buttonArea.append(plusBtn)
       itemRow.append(buttonArea)
 
-      commasArea = $("<div>").addClass("col-md-7")
+      commasArea = $("<div>").addClass("col-md-7 vertical-center")
 
       scoreFives = item.score // 5
-      console.log('scoreFives:' + scoreFives)
       for fives in [1 .. scoreFives] by 1
         commasArea.append($("<img>").attr('src', '/assets/images/5-carek.png'))
 
@@ -75,7 +79,8 @@ $ ->
       options: {
         animation: {
           duration: 0
-        }
+        },
+        responsive: false
       }
     })
 
