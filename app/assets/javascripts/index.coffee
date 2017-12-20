@@ -68,7 +68,10 @@ $ ->
       $("#commas").append(itemRow)
 
   updateChart = (dashboard) ->
-#    $("#chart").empty()
+    $("#chart-canvas").remove()
+    canvas = $("<canvas>").attr("id", "chart-canvas").width(250).height(250)
+    $("#chart").append(canvas)
+
     scoreArray = []
     colorArray = []
     nameArray = []
@@ -90,7 +93,10 @@ $ ->
         animation: {
           duration: 0
         },
-        responsive: false
+        responsive: false,
+        legend: {
+          position: "bottom"
+        }
       }
     })
 
