@@ -69,7 +69,10 @@ $ ->
 
   updateChart = (dashboard) ->
     $("#chart-canvas").remove()
-    canvas = $("<canvas>").attr("id", "chart-canvas").width(250).height(250)
+    canvas = $("<canvas>")
+      .attr("id", "chart-canvas")
+      .attr("width", 250)
+      .attr("height", 250)
     $("#chart").append(canvas)
 
     scoreArray = []
