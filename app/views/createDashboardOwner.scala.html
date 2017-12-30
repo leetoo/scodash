@@ -27,7 +27,7 @@
 
     <div class="padding-15 row">
         <div class="col-md-offset-4 col-md-4">
-            @helper.form(action = routes.ApplicationScala.processDashboardOwner, 'class -> "form-horizontal") {
+            @helper.form(action = routes.Application.processDashboardOwner, 'class -> "form-horizontal") {
                 @helper.inputText(
                     dashboardForm3("name"), '_label -> "Name", 'class -> "form-control", 'placeholder -> "Name"
                 )
