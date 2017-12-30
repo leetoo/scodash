@@ -12,6 +12,7 @@ import com.google.inject.name.Named
 import controllers.Forms.CreateDashboardItems
 import controllers.actors.Scodash
 import controllers.actors.Scodash.Command.CreateNewDashboard
+import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.write
 import org.json4s.native._
 import org.json4s.{DefaultFormats, _}
@@ -39,7 +40,7 @@ class ApplicationScala @Inject() (
   val SESSION_DASHBOARD = "dashboard"
 
   implicit val timeout: Timeout = 5.seconds
-  implicit lazy val formats = DefaultFormats
+  implicit lazy val formats = DefaultFormats ++ JodaTimeSerializers.all
 
   def index() = Action {
     Ok(views.html.index());

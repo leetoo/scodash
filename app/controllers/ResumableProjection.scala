@@ -1,12 +1,11 @@
 package controllers
 
-import java.util.concurrent.atomic.AtomicBoolean
-
 import akka.actor._
-import akka.event.Logging
-import com.datastax.driver.core._
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+
+import ExecutionContext.Implicits.global
 /**
   * Interface into a projection's offset storage system so that it can be properly resumed
   */
@@ -15,62 +14,46 @@ abstract class ResumableProjection(identifier:String) {
   def fetchLatestOffset:Future[Option[Long]]
 }
 
-object ResumableProjection{
+object ResumableProjection {
+
   def apply(identifier:String, system:ActorSystem) =
-    new CassandraResumableProjection(identifier, system)
+    new PostgresResumableProjection(identifier, system)
 }
 
-class CassandraResumableProjection(identifier:String, system:ActorSystem) extends ResumableProjection(identifier){
-  val projectionStorage = CassandraProjectionStorage(system)
+class PostgresResumableProjection(identifier:String, system:ActorSystem) extends ResumableProjection(identifier){
+  val projectionStorage = PostgresProjectionStorage(system)
 
   def storeLatestOffset(offset:Long):Future[Boolean] = {
     projectionStorage.updateOffset(identifier, offset + 1)
   }
+
   def fetchLatestOffset:Future[Option[Long]] = {
     projectionStorage.fetchLatestOffset(identifier)
   }
 }
 
-class CassandraProjectionStorageExt(system:ActorSystem) extends Extension {
-  import akka.persistence.cassandra.listenableFutureToFuture
-  import system.dispatcher
+class PostgresProjectionStorageExt(system:ActorSystem, offsetStore: OffsetStore) extends Extension {
 
-  val cassandraConfig = system.settings.config.getConfig("cassandra")
-  implicit val log = Logging(system.eventStream, "CassandraProjectionStorage")
+  def updateOffset(identifier:String, offset:Long): Future[Boolean] = {
+    offsetStore.save(identifier, offset) map { _ => true }
+  }
 
-  var initialized = new AtomicBoolean(false)
-  val createKeyspaceStmt = """
-      CREATE KEYSPACE IF NOT EXISTS scodash
-      WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }
-    """
-
-  val createTableStmt = """
-      CREATE TABLE IF NOT EXISTS scodash.projectionoffsets (
-        identifier varchar primary key, offset bigint)
-  """
-
-  val init: Session => Future[Unit] = (session: Session) => for {
-    _ <- session.executeAsync(createKeyspaceStmt)
-    _ <- session.executeAsync(createTableStmt)
-  } yield ()
-
-  val session = new CassandraSession(system, cassandraConfig, init)
-
-  def updateOffset(identifier:String, offset:Long): Future[Boolean] = (for {
-    session <- session.underlying()
-    _ <- session.executeAsync(s"update scodash.projectionoffsets set offset = $offset where identifier = '$identifier'")
-  } yield true) recover { case t => false }
-
-  def fetchLatestOffset(identifier:String): Future[Option[Long]] = for {
-    session <- session.underlying()
-    rs <- session.executeAsync(s"select offset from scodash.projectionoffsets where identifier = '$identifier'")
-  } yield {
-    import collection.JavaConversions._
-    rs.all().headOption.map(_.getLong(0))
+  def fetchLatestOffset(identifier:String): Future[Option[Long]] = {
+    offsetStore.load(identifier) map  { res => Option(res)}
   }
 }
-object CassandraProjectionStorage extends ExtensionId[CassandraProjectionStorageExt] with ExtensionIdProvider {
-  override def lookup = CassandraProjectionStorage
+object PostgresProjectionStorage extends ExtensionId[PostgresProjectionStorageExt] with ExtensionIdProvider {
+
+  val dataSource: HikariDataSource = {
+    val config = new HikariConfig()
+    config.setJdbcUrl("jdbc:postgresql://localhost:5432/postgres")
+    config.setUsername("postgres")
+    config.setPassword("password")
+    config.setDriverClassName("org.postgresql.Driver")
+    new HikariDataSource(config)
+  }
+
+  override def lookup = PostgresProjectionStorage
   override def createExtension(system: ExtendedActorSystem) =
-    new CassandraProjectionStorageExt(system)
+    new PostgresProjectionStorageExt(system, new PostgresOffsetStore(dataSource))
 }

@@ -4,6 +4,7 @@ import akka.actor.{ActorRef, Props}
 import akka.util.Timeout
 import controllers._
 import org.json4s.DefaultFormats
+import org.json4s.ext.JodaTimeSerializers
 import play.api.libs.json.{JsString, _}
 
 import scala.concurrent.duration._
@@ -16,7 +17,7 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef) extends Ab
   implicit private val DashoboardWrites = Json.writes[DashboardFO]
 
   implicit val timeout: Timeout = 5.seconds
-  implicit lazy val formats = DefaultFormats
+  implicit lazy val formats = DefaultFormats ++ JodaTimeSerializers.all
 
   override def receive = {
 //    case addItem: Dashboard.Command.AddItem =>

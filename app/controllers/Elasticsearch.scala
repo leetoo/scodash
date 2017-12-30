@@ -1,20 +1,14 @@
 package controllers
 
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
+import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
+import com.typesafe.config.Config
 import dispatch._
 import org.json4s._
-import org.json4s.native.Serialization
+import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.{read, write}
-import akka.pattern.pipe
-import akka.actor.Stash
-import scala.concurrent.ExecutionContext
-import com.typesafe.config.Config
-import akka.actor.Extension
-import akka.actor.ExtensionIdProvider
-import akka.actor.ExtensionId
-import akka.actor.ExtendedActorSystem
+
+import scala.concurrent.{ExecutionContext, Future}
 
 object ElasticsearchApi {
   trait EsResponse
@@ -30,7 +24,7 @@ object ElasticsearchApi {
 
   case class DeleteResult(acknowledged:Boolean) extends EsResponse
 
-  implicit val formats = Serialization.formats(NoTypeHints)
+  implicit lazy val formats = DefaultFormats ++ JodaTimeSerializers.all
 }
 
 trait ElasticsearchSupport{ me:AbstractBaseActor =>

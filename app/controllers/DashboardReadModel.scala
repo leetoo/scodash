@@ -1,11 +1,10 @@
 package controllers
 
-import java.util.Date
+import java.time.{LocalDateTime, ZonedDateTime}
 
 import akka.actor.Props
 import akka.persistence.query.EventEnvelope
-
-import scala.collection.mutable
+import org.joda.time.DateTime
 
 trait DashboardReadModel{
   def indexRoot = "scodash"
@@ -17,15 +16,15 @@ object DashboardViewBuilder{
   case class DashboardRM(id: String, name: String, description: String, style: String,
                          items: Set[ItemFO] = Set(), ownerName: String,
                          ownerEmail: String, readonlyHash: String,
-                         writeHash: String,deleted: Boolean = false) extends  ReadModelObject
+                         writeHash: String, created: Long,
+                         updated:Long, deleted: Boolean = false) extends  ReadModelObject
   def props = Props[DashboardViewBuilder]
 }
 
 class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[DashboardViewBuilder.DashboardRM]{
-  import ViewBuilder._
-  import DashboardViewBuilder._
   import Dashboard.Event._
-  import context.dispatcher
+  import DashboardViewBuilder._
+  import ViewBuilder._
 
   def projectionId = "dashboard-view-builder"
 
@@ -33,11 +32,13 @@ class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[Dashboard
     case DashboardCreated(dashboard) =>
       log.info("Saving a new dashboard entity into the elasticsearch index: {}", dashboard)
       val dashboardRM = DashboardRM(dashboard.id, dashboard.name, dashboard.description, dashboard.style,
-        dashboard.items, dashboard.ownerName, dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash, dashboard.deleted )
+        dashboard.items, dashboard.ownerName, dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash,
+        dashboard.created, dashboard.updated, dashboard.deleted )
       InsertAction(dashboard.id, dashboardRM)
     case DashboardUpdated(dashboard) =>
       val dashboardRM = DashboardRM(dashboard.id, dashboard.name, dashboard.description, dashboard.style,
-        dashboard.items, dashboard.ownerName, dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash, dashboard.deleted )
+        dashboard.items, dashboard.ownerName, dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash,
+        dashboard.created, dashboard.updated, dashboard.deleted )
       InsertAction(dashboard.id, dashboardRM)
   }
 }
@@ -54,7 +55,6 @@ object DashboardView{
 
 class DashboardView extends DashboardReadModel with AbstractBaseActor with ElasticsearchSupport{
   import DashboardView._
-  import ElasticsearchApi._
   import context.dispatcher
 
   def receive = {

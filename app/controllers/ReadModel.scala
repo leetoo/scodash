@@ -1,18 +1,14 @@
 package controllers
 
-import akka.actor.Stash
-import akka.persistence.query.PersistenceQuery
-import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
-import akka.stream.ActorMaterializer
 import java.util.Date
+
+import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
+import akka.persistence.query.{EventEnvelope, PersistenceQuery}
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
+import akka.stream.scaladsl.{Flow, Sink, Source}
+
 import scala.concurrent.Future
-import akka.stream.scaladsl.Sink
-import akka.stream.scaladsl.Flow
-import akka.stream.scaladsl.Source
-import akka.persistence.query.EventEnvelope
-import akka.stream.Supervision
 import scala.util.control.NonFatal
-import akka.stream.ActorMaterializerSettings
 
 trait ReadModelObject extends AnyRef{
   def id:String
@@ -36,14 +32,13 @@ object ViewBuilder{
 }
 
 trait ViewBuilder[RM <: ReadModelObject] extends AbstractBaseActor with ElasticsearchSupport{
-  import context.dispatcher
-  import ViewBuilder._
   import ElasticsearchApi._
+  import ViewBuilder._
   import akka.pattern.pipe
+  import context.dispatcher
 
   //Set up the persistence query to listen for events for the target entity type
-  val journal = PersistenceQuery(context.system).
-    readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
+  val journal: JdbcReadJournal = PersistenceQuery(context.system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
 
   val decider: Supervision.Decider = {
     case NonFatal(ex) =>

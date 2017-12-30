@@ -1,8 +1,12 @@
 package controllers
 
+import java.time.format.DateTimeFormatter
+import java.time.{Instant, ZoneId, ZonedDateTime}
+
 import akka.actor.{ActorRef, Props}
 import controllers.Dashboard.Command._
 import controllers.Dashboard.Event.{DashboardCreated, DashboardUpdated}
+import org.joda.time.DateTime
 
 import scala.collection.mutable
 
@@ -12,12 +16,18 @@ case class ItemFO(id: Int, name: String, var score: Int = 0) {
 }
 
 object DashboardFO {
-  def empty = DashboardFO("", "", "", "", Set.empty[ItemFO], "", "", "", "")
+  def empty = DashboardFO("", "", "", "", Set.empty[ItemFO], "", "", "", "", -1, -1)
 }
 
-case class DashboardFO(id: String, name: String, description: String, style: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
+case class DashboardFO(id: String, name: String, description: String, style: String, items: Set[ItemFO] = Set(),
+                       ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,
+                       created:Long, updated:Long, deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
   override def assignId(id: String) = this.copy(id = id)
   override def markDeleted = this.copy(deleted = false)
+  def createdFormatterd = Instant.ofEpochMilli(created).atZone(ZoneId.systemDefault).toLocalDate
+  def updatedFormatterd = Instant.ofEpochMilli(created).atZone(ZoneId.systemDefault).toLocalDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+
+
 }
 
 class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {

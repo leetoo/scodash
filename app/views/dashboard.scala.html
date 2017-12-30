@@ -4,9 +4,9 @@
 
     <div class="row bottom-border">
         <div class="row">
-            <div class="col-md-12 text-center"><h1>@{
+            <div class="col-md-12 text-center"><h2>@{
                 dashboard.name
-            }</h1></div>
+            }</h2></div>
         </div>
 
         <div class="row">
@@ -41,11 +41,20 @@
 
 
     <div id="dashboard" data-ws-url="@routes.ApplicationScala.ws(dashboard.writeHash).webSocketURL">
-        <div id="commas" class="col-md-10 col-md-offset-1" >
-        </div>
-        <div id="chart" class="col-md-offset-1 text-center" >
-            @*<canvas id="chart-canvas" width="300px" height="300px" style="display: block; width: 300px; height: 300px;"></canvas>*@
+        <div class="row bottom-border">
+            <div id="commas" class="col-md-10 col-md-offset-1" >
+            </div>
+            <div id="chart" class="col-md-offset-1 text-center" >
+            </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-md-12 footer">
+            <div class="text-center">Dashboard <b>@dashboard.name</b> created by <b>@dashboard.ownerName</b> on @dashboard.createdFormatterd</div>
+            <div class="text-center">Last update at @dashboard.updatedFormatterd</div>
+        </div>
+    </div>
+
 }
 
