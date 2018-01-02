@@ -11,6 +11,7 @@ import org.json4s.native.Serialization.{read, write}
 import scala.concurrent.{ExecutionContext, Future}
 
 object ElasticsearchApi {
+
   trait EsResponse
   case class ShardData(total:Int, failed:Int, successful:Int)
   case class IndexingResult(_shards:ShardData, _index:String, _type:String, _id:String, _version:Int, created:Option[Boolean]) extends EsResponse
@@ -30,6 +31,8 @@ object ElasticsearchApi {
 trait ElasticsearchSupport{ me:AbstractBaseActor =>
   import ElasticsearchApi._
 
+//  private val logger = org.slf4j.LoggerFactory.getLogger("controllers.ElasticsearchApi")
+
   val esSettings = ElasticsearchSettings(context.system)
 
   def indexRoot:String
@@ -40,6 +43,8 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
 
   def queryElasticsearch(query:String)(implicit ec:ExecutionContext):Future[List[JObject]] = {
     val req = url(s"$baseUrl/_search") <<? Map("q" -> query)
+
+    log.debug("Requesting ES: {}", req)
     callElasticsearch[QueryResponse](req).
       map(_.hits.hits.map(_._source))
   }

@@ -1,13 +1,15 @@
 $ ->
   wsUrl = $("#dashboard").data("ws-url")
   if wsUrl
-    ws = new WebSocket wsUrl
-    ws.onmessage = (event) ->
+    window.ws = new WebSocket wsUrl
+    window.ws.onmessage = (event) ->
       data = JSON.parse event.data
       console.log data
       initVisibility()
       updateCommas(data)
       updateChart(data)
+    window.ws.onclose = (event) ->
+      alert ('ws closed')
 
   initVisibility = () ->
     $("#commas").css "display", "block"

@@ -160,9 +160,23 @@ class Application @Inject()(
 
   def dashboard(hash: String) = Action.async { implicit request =>
     (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
-      result => {
-        val dashboardFO = result.value.head.extract[DashboardFO]
-        Ok(views.html.dashboard(dashboardFO))
+      roRes => {
+        val roList = roRes.value
+        if (roList.isEmpty) {
+          (dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)).mapTo[FullResult[List[JObject]]].map {
+            wRes => {
+              val wList = wRes.value
+              if (!wList.isEmpty) {
+                val dashboardFO = roList.head.extract[DashboardFO]
+                Ok(views.html.dashboard(dashboardFO))
+              }
+            }
+          }
+          Ok(views.html.noDashboard())
+        } else {
+          val dashboardFO = roList.head.extract[DashboardFO]
+          Ok(views.html.dashboard(dashboardFO))
+        }
       }
     }
   }
