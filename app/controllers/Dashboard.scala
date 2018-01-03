@@ -26,8 +26,8 @@ case class DashboardFO(id: String, name: String, description: String, style: Str
   override def markDeleted = this.copy(deleted = false)
   def createdFormatterd = Instant.ofEpochMilli(created).atZone(ZoneId.systemDefault).toLocalDate
   def updatedFormatterd = Instant.ofEpochMilli(created).atZone(ZoneId.systemDefault).toLocalDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-
-
+  def removeReadOnlyHash = this.copy(readonlyHash = "")
+  def removeWriteHash = this.copy(writeHash = "")
 }
 
 class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {

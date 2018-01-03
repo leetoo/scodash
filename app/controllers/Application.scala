@@ -157,29 +157,54 @@ class Application @Inject()(
     )
   }
 
-
   def dashboard(hash: String) = Action.async { implicit request =>
-    (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
-      roRes => {
-        val roList = roRes.value
-        if (roList.isEmpty) {
-          (dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)).mapTo[FullResult[List[JObject]]].map {
-            wRes => {
-              val wList = wRes.value
-              if (!wList.isEmpty) {
-                val dashboardFO = roList.head.extract[DashboardFO]
-                Ok(views.html.dashboard(dashboardFO))
-              }
-            }
-          }
-          Ok(views.html.noDashboard())
-        } else {
-          val dashboardFO = roList.head.extract[DashboardFO]
-          Ok(views.html.dashboard(dashboardFO))
-        }
+    val writeFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
+    val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
+
+    for {
+      writeDash <- writeFut
+      readDash <- readFut
+    } yield {
+      val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
+      val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
+      if (!writeRes.isEmpty) {
+        val dashboard = writeRes.head.extract[DashboardFO].removeReadOnlyHash
+        Ok(views.html.dashboard(dashboard))
+      } else if (!readRes.isEmpty) {
+        val dashboard = readRes.head.extract[DashboardFO].removeWriteHash
+        Ok(views.html.dashboard(dashboard))
+      } else {
+        Ok(views.html.noDashboard())
       }
     }
   }
+
+//  def dashboard(hash: String) = Action.async { implicit request =>
+//    val wrtFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
+//    val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
+//    Ok(views.html.noDashboard())
+
+//    (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+//      roRes => {
+//        val roList = roRes.value
+//        if (roList.isEmpty) {
+//          (dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)).mapTo[FullResult[List[JObject]]].map {
+//            wRes => {
+//              val wList = wRes.value
+//              if (!wList.isEmpty) {
+//                val dashboardFO = roList.head.extract[DashboardFO]
+//                Ok(views.html.dashboard(dashboardFO))
+//              }
+//            }
+//          }
+//          Ok(views.html.noDashboard())
+//        } else {
+//          val dashboardFO = roList.head.extract[DashboardFO]
+//          Ok(views.html.dashboard(dashboardFO))
+//        }
+//      }
+//    }
+//  }
 
   /**
     * Creates a websocket.  `acceptOrResult` is preferable here because it returns a
