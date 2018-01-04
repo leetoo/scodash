@@ -1,12 +1,11 @@
 package controllers
 
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, ZoneId, ZonedDateTime}
+import java.time.{Instant, ZoneId}
 
 import akka.actor.{ActorRef, Props}
 import controllers.Dashboard.Command._
 import controllers.Dashboard.Event.{DashboardCreated, DashboardUpdated}
-import org.joda.time.DateTime
 
 import scala.collection.mutable
 
@@ -17,6 +16,7 @@ case class ItemFO(id: Int, name: String, var score: Int = 0) {
 
 object DashboardFO {
   def empty = DashboardFO("", "", "", "", Set.empty[ItemFO], "", "", "", "", -1, -1)
+
 }
 
 case class DashboardFO(id: String, name: String, description: String, style: String, items: Set[ItemFO] = Set(),
@@ -77,94 +77,6 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
       state = dashboard
   }
 
-//  private def handleIncrementItemCommand(command: IncrementItem): Unit = {
-//    val item: ItemFO = dashboard.items(command.name)
-//    if (item != null) {
-//      item.increment()
-//    }
-//    notifyWatchers()
-//  }
-//
-//  private def handleDecremenItemCommand (command: DecrementItem): Unit = {
-//    val item: ItemFO = dashboard.items(command.name)
-//    if (item != null) {
-//      item.decrement ()
-//    }
-//    notifyWatchers ()
-//  }
-//
-//  private def handleWatchCommand (command: Watch): Unit = {
-//    val data: DashboardFO.Data = new DashboardFO.Data(dashboard.items)
-//    sender.tell (data, self)
-//    watchers.+(sender)
-//  }
-//
-//  private def handleDataCommand (command: Data): Unit = {
-//    val data: DashboardFO.Data = new DashboardFO.Data (dashboard.items)
-//    sender.tell (data, self)
-//  }
-//
-//  private def handleUnwatchCommand (command: Unwatch): Unit = {
-//    watchers.-(sender())
-//  }
-//
-//  private def handleGetWriteHashCommand (command: GetWriteHash): Unit = {
-//    sender().tell (dashboard.writeHash, self)
-//  }
-//
-//  private def handleGetReadonlyHashCommand (command: GetReadonlyHash): Unit = {
-//    sender().tell (dashboard.readonlyHash, self)
-//  }
-//
-//  private def handleGetNameCommand (command: GetName): Unit = {
-//    sender().tell (dashboard.name, self)
-//  }
-//
-//  private def handlerGetDashboard(command: GetDashboard): Unit = {
-//    sender().tell(dashboard, self)
-//  }
-//
-//  private def handleAddItemCommand (command: AddItem): Unit = {
-//    val addItem: DashboardFO.AddItem = command.asInstanceOf[DashboardFO.AddItem]
-//    dashboard.items + addItem.name
-//    notifyWatchers ()
-//  }
-//
-//  private def handleRemoveItemCommand (command: RemoveItem): Unit = {
-//    val removeItem: DashboardFO.RemoveItem = command.asInstanceOf[DashboardFO.RemoveItem]
-//    dashboard.items - removeItem.name
-//    notifyWatchers ()
-//  }
-//
-//  private def notifyWatchers (): Unit = {
-//    for (watcher:ActorRef <- watchers) {
-//      watcher.tell(new DashboardFO.Data (dashboard.items), self);
-//    }
-//  }
-//
-//  override def receiveRecover: Receive = {
-//    case SnapshotOffer(_, snapshot: DashboardFO) =>
-//      dashboard = snapshot
-//  }
-//
-//  override def receiveCommand: Receive = {
-//    case cmd:DashboardFO.RemoveItem => handleRemoveItemCommand(cmd)
-//    case cmd:DashboardFO.AddItem => handleAddItemCommand(cmd)
-//    case cmd:DashboardFO.DecrementItem => handleDecremenItemCommand(cmd)
-//    case cmd:DashboardFO.IncrementItem => handleIncrementItemCommand(cmd)
-//    case cmd:DashboardFO.Data => handleDataCommand(cmd)
-//    case cmd:DashboardFO.GetName => handleGetNameCommand(cmd)
-//    case cmd:DashboardFO.GetReadonlyHash => handleGetReadonlyHashCommand(cmd)
-//    case cmd:DashboardFO.GetWriteHash => handleGetWriteHashCommand(cmd)
-//    case cmd:DashboardFO.GetDashboard => handlerGetDashboard(cmd)
-//
-//    saveSnapshot(dashboard)
-//  }
-//
-//  override def persistenceId: String = dashboard.writeHash
-
-
-
 }
 
 object Dashboard {
@@ -184,6 +96,8 @@ object Dashboard {
     case class DashboardCreated(dashboard: DashboardFO) extends DasboardEvent
     case class DashboardUpdated(dashboard: DashboardFO) extends DasboardEvent
   }
+
+
 
   def props(id: String) = Props(classOf[Dashboard], id)
 

@@ -23,7 +23,7 @@ object Scodash {
     case class FindDashboardByWriteHash(hash: String)
     case class FindDashboardByReadHash(hash: String)
     case class CreateNewDashboard(name: String, description: String, style: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String)
-    case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String)
+    case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String, mode: DashboardAccessMode)
   }
 
 
@@ -48,9 +48,6 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       runForeach(e => self ! e)
   }
 
-  //@Inject(DashboardView.Name)
-  //val dashboardViewActor:ActorRef
-
   override def receive = {
     case FindDashboard(id) =>
       log.info("Finding dashboard {}", id)
@@ -66,9 +63,9 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       val command = CreateDashboard(fo)
       forwardCommand(id, command)
 
-    case CreateDashboardUser(id, webOutActor, dashboardId) =>
+    case CreateDashboardUser(id, webOutActor, dashboardId, mode) =>
       val dashboardActor = lookupOrCreateChild(dashboardId)
-      val user = context.actorOf(User.props(id, webOutActor, dashboardActor), id)
+      val user = context.actorOf(User.props(id, webOutActor, dashboardActor, mode), id)
       forwardCommand(dashboardId, Dashboard.Command.Watch(user))
       sender ! user
 

@@ -356,15 +356,6 @@ class Application @Inject()(
     * @return a user actor for this ws connection.
     */
   def createUserActor(userId: String, webSocketOut: ActorRef, hash: String): Future[ActorRef] = {
-    //val userActorFuture =
-//      (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
-//        case result =>
-//          val dashboardFO = result.value.head.extract[DashboardFO]
-//          val userActorFuture = (scodashActor ? Scodash.Command.CreateDashboardUser(userId, webSocketOut, dashboardFO.id))
-//      }
-
-    //}
-    //Future.successful(scodashActor)
     val userActorFuture = {
       getDashboard(hash).flatMap { dashboard =>
         (scodashActor ? Scodash.Command.CreateDashboardUser(userId, webSocketOut, dashboard.id)).mapTo[ActorRef]
@@ -377,9 +368,23 @@ class Application @Inject()(
   }
 
   def getDashboard(hash: String): Future[DashboardFO] = {
-    (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map(
-      result => result.value.head.extract[DashboardFO]
-    )
+    val writeFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
+    val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
+
+    for {
+      writeDash <- writeFut
+      readDash <- readFut
+    } yield {
+      val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
+      val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
+      if (!writeRes.isEmpty) {
+        writeRes.head.extract[DashboardFO].removeReadOnlyHash
+      } else if (!readRes.isEmpty) {
+        readRes.head.extract[DashboardFO].removeWriteHash
+      } else {
+        null
+      }
+    }
 
   }
 }

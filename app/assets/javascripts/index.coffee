@@ -32,23 +32,30 @@ $ ->
     for item in dashboard.items
       itemRow = $("<div>").addClass("item row dashboard-comma-row")
       itemRow.append($("<div>").addClass("col-md-2 vertical-center").text(item.name))
-      buttonArea = $("<div>").addClass("col-md-2 buttons-area vertical-center")
-      minusBtn = $("<button>").addClass("minus-button").text("-")
-      minusBtn.click
-        data: {itemId: item.id, hash: dashboard.writeHash}
-        handler: (event) ->
-          event.preventDefault()
-          ws.send(JSON.stringify({operation: 'decrement', itemId:  event.data.itemId, hash: event.data.hash}))
-      buttonArea.append(minusBtn)
-      buttonArea.append($("<button>").addClass("score-button").text(item.score))
-      plusBtn = $("<button>").addClass("plus-button").text("+")
-      plusBtn.click
-        data: {itemId: item.id, hash: dashboard.writeHash}
-        handler: (event) ->
-          event.preventDefault()
-          ws.send(JSON.stringify({operation: 'increment', itemId:  event.data.itemId, hash: event.data.hash}))
 
-      buttonArea.append(plusBtn)
+      buttonArea = $("<div>").addClass("col-md-2 buttons-area vertical-center")
+
+      if !!dashboard.writeHash
+        minusBtn = $("<button>").addClass("minus-button").text("-")
+        minusBtn.click
+          data: {itemId: item.id, hash: dashboard.writeHash}
+          handler: (event) ->
+            event.preventDefault()
+            ws.send(JSON.stringify({operation: 'decrement', itemId:  event.data.itemId, hash: event.data.hash}))
+        buttonArea.append(minusBtn)
+
+      buttonArea.append($("<button>").addClass("score-button").text(item.score))
+
+      if !!dashboard.writeHash
+        plusBtn = $("<button>").addClass("plus-button").text("+")
+        plusBtn.click
+          data: {itemId: item.id, hash: dashboard.writeHash}
+          handler: (event) ->
+            event.preventDefault()
+            ws.send(JSON.stringify({operation: 'increment', itemId:  event.data.itemId, hash: event.data.hash}))
+
+        buttonArea.append(plusBtn)
+
       itemRow.append(buttonArea)
 
       commasArea = $("<div>").addClass("col-md-7 vertical-center")
