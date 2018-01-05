@@ -10,7 +10,7 @@ import akka.util.Timeout
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import controllers.Forms.CreateDashboardItems
-import controllers.actors.Scodash
+import controllers.actors.{DashboardAccessMode, Scodash}
 import controllers.actors.Scodash.Command.CreateNewDashboard
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.write
@@ -357,9 +357,14 @@ class Application @Inject()(
     */
   def createUserActor(userId: String, webSocketOut: ActorRef, hash: String): Future[ActorRef] = {
     val userActorFuture = {
-      getDashboard(hash).flatMap { dashboard =>
-        (scodashActor ? Scodash.Command.CreateDashboardUser(userId, webSocketOut, dashboard.id)).mapTo[ActorRef]
+      getDashboard(hash).flatMap{case(dashboard, accessMode) =>
+        (scodashActor ? Scodash.Command.CreateDashboardUser(userId, webSocketOut, dashboard.id, accessMode)).mapTo[ActorRef]
       }
+
+
+//      getDashboard(hash).flatMap { (dashboard, accessMode) =>
+//        (scodashActor ? Scodash.Command.CreateDashboardUser(userId, webSocketOut, dashboard.id, accessMode)).mapTo[ActorRef]
+//      }
     }
     userActorFuture
 
@@ -367,7 +372,7 @@ class Application @Inject()(
 
   }
 
-  def getDashboard(hash: String): Future[DashboardFO] = {
+  def getDashboard(hash: String): Future[(DashboardFO, DashboardAccessMode.Value)] = {
     val writeFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
     val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
 
@@ -378,9 +383,9 @@ class Application @Inject()(
       val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
       val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
       if (!writeRes.isEmpty) {
-        writeRes.head.extract[DashboardFO].removeReadOnlyHash
+        (writeRes.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
       } else if (!readRes.isEmpty) {
-        readRes.head.extract[DashboardFO].removeWriteHash
+        (readRes.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
       } else {
         null
       }

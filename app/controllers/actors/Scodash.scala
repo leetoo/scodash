@@ -23,7 +23,7 @@ object Scodash {
     case class FindDashboardByWriteHash(hash: String)
     case class FindDashboardByReadHash(hash: String)
     case class CreateNewDashboard(name: String, description: String, style: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String)
-    case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String, mode: DashboardAccessMode)
+    case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String, mode: DashboardAccessMode.Value)
   }
 
 

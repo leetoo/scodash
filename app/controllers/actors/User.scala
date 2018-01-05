@@ -3,7 +3,7 @@ package controllers.actors
 
 import akka.actor.{ActorRef, Props}
 import akka.util.Timeout
-import controllers.{DashboardAccessMode, _}
+import controllers.{AbstractBaseActor, Dashboard, DashboardFO, ItemFO}
 import org.json4s.DefaultFormats
 import org.json4s.ext.JodaTimeSerializers
 import play.api.libs.json.{JsString, _}
@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 
 case class UserFO(id: String)
 
-class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: DashboardAccessMode) extends AbstractBaseActor {
+class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: DashboardAccessMode.Value) extends AbstractBaseActor {
 
   implicit private val ItemWrites = Json.writes[ItemFO]
   implicit private val DashoboardWrites = Json.writes[DashboardFO]
@@ -22,9 +22,10 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
 
   override def receive = {
     case dashboard: DashboardFO =>
-      outActor ! mode match {
-        case DashboardAccessMode.READONLY => Json.toJson(dashboard)
-      }
+      outActor ! (mode match {
+        case DashboardAccessMode.READONLY => Json.toJson(dashboard.removeWriteHash)
+        case DashboardAccessMode.WRITE => Json.toJson(dashboard.removeReadOnlyHash)
+      })
 
     case jsObj: JsObject =>
       val hash = jsObj.value("hash").toString()
@@ -60,7 +61,7 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
 
 object User {
   val Name = "user"
-  def props(id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dashboard.AccessMode) = Props(classOf[User], id, outActor, dashboardActor, mode)
+  def props(id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: DashboardAccessMode.Value) = Props(classOf[User], id, outActor, dashboardActor, mode)
 
 }
 
