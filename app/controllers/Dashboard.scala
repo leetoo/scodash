@@ -24,10 +24,9 @@ case class DashboardFO(id: String, name: String, description: String, style: Str
                        created:Long, updated:Long, deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
   override def assignId(id: String) = this.copy(id = id)
   override def markDeleted = this.copy(deleted = false)
-  def createdFormatterd = Instant.ofEpochMilli(created).atZone(ZoneId.systemDefault).toLocalDate
-  def updatedFormatterd = Instant.ofEpochMilli(created).atZone(ZoneId.systemDefault).toLocalDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
   def removeReadOnlyHash = this.copy(readonlyHash = "")
   def removeWriteHash = this.copy(writeHash = "")
+  def updatedNow = this.copy(updated = System.currentTimeMillis())
 }
 
 class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
@@ -51,17 +50,23 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
       watcher ! state
     case Unwatch(watcher) =>
       watchers -= watcher
-    case IncrementItem(id) =>
-      state.items.find(item => item.id.toString == id).map { item =>
-        item.increment()
-        persist(DashboardUpdated(state))(handleEventAndRespond())
-        watchers.foreach(w => w ! state)
+    case IncrementItem(id, hash) =>
+      if (hash == state.writeHash) {
+        state = state.updatedNow
+        state.items.find(item => item.id.toString == id).map { item =>
+          item.increment()
+          persist(DashboardUpdated(state))(handleEventAndRespond())
+          watchers.foreach(w => w ! state)
+        }
       }
-    case DecrementItem(id) =>
-      state.items.find(item => item.id.toString == id).map { item =>
-        item.decrement()
-        persist(DashboardUpdated(state))(handleEventAndRespond())
-        watchers.foreach(w => w ! state)
+    case DecrementItem(id, hash) =>
+      if (hash == state.writeHash) {
+        state = state.updatedNow
+        state.items.find(item => item.id.toString == id).map { item =>
+          item.decrement()
+          persist(DashboardUpdated(state))(handleEventAndRespond())
+          watchers.foreach(w => w ! state)
+        }
       }
   }
 
@@ -87,8 +92,8 @@ object Dashboard {
     case class CreateDashboard(dashboard: DashboardFO)
     case class Watch(watcher: ActorRef)
     case class Unwatch(watcher: ActorRef)
-    case class IncrementItem(id: String)
-    case class DecrementItem(id: String)
+    case class IncrementItem(id: String, hash: String)
+    case class DecrementItem(id: String, hash: String)
   }
 
   object Event {

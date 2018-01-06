@@ -28,15 +28,15 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
       })
 
     case jsObj: JsObject =>
-      val hash = jsObj.value("hash").toString()
+      val hash = jsObj.value("hash").asInstanceOf[JsString].value
       val itemId = jsObj.value("itemId").toString()
       jsObj.value("operation") match {
         case JsString("increment") =>
           log.info("Increment item {} of dashboard {}", itemId, hash)
-          sendCmdToDashboard(hash, Dashboard.Command.IncrementItem(itemId))
+          sendCmdToDashboard(hash, Dashboard.Command.IncrementItem(itemId, hash))
         case JsString("decrement") =>
           log.info("Decrement item {} of dashboard {}", itemId, hash)
-          sendCmdToDashboard(hash, Dashboard.Command.DecrementItem(itemId))
+          sendCmdToDashboard(hash, Dashboard.Command.DecrementItem(itemId, hash))
         case _ =>
           log.warning("Unexpected user command {}", jsObj)
       }
@@ -47,14 +47,6 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
   }
 
   private def sendCmdToDashboard(hash: String, cmd: Any) = {
-//    (scodashActor ? Scodash.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
-//      result => {
-//        val dashboardFO = result.value.head.extract[DashboardFO]
-//        (scodashActor ? Scodash.Command.FindDashboard(dashboardFO.id)).mapTo[ActorRef].map {
-//          dasboardActor => dasboardActor ! cmd
-//        }
-//      }
-//    }
     dashboardActor ! cmd
   }
 }

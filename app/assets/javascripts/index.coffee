@@ -8,6 +8,7 @@ $ ->
       initVisibility()
       updateCommas(data)
       updateChart(data)
+      updateDate(data)
     window.ws.onclose = (event) ->
       alert ('ws closed')
 
@@ -111,6 +112,13 @@ $ ->
         }
       }
     })
+
+  updateDate = (dashboard) ->
+    updatedDate = new Date(dashboard.updated)
+    $("#updated").text((updatedDate.toLocaleString()))
+    createdDate = new Date(dashboard.created)
+    $("#created").text((createdDate.toLocaleDateString()))
+
 
 randomColors = [
   '#FF6633',
