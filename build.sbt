@@ -29,7 +29,8 @@ libraryDependencies ++= Seq(
   "com.github.dnvriend" %% "akka-persistence-jdbc" % "2.8.0",
   "org.postgresql" % "postgresql" % "9.4.1208",
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
-  "com.google.protobuf" % "protobuf-java"  % "2.5.0"
+  "com.google.protobuf" % "protobuf-java"  % "2.5.0",
+  "org.apache.commons" % "commons-lang3" % "3.7"
 )
 
 libraryDependencies += "org.webjars" % "jquery" % "3.2.1"

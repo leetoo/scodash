@@ -12,6 +12,7 @@ import com.google.inject.name.Named
 import controllers.Forms.CreateDashboardItems
 import controllers.actors.{DashboardAccessMode, Scodash}
 import controllers.actors.Scodash.Command.CreateNewDashboard
+import org.apache.commons.lang3.StringUtils
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.write
 import org.json4s.native._
@@ -106,8 +107,12 @@ class Application @Inject()(
       },
       formData => {
         val sessDash = JsonMethods.parse(request.session.get(SESSION_DASHBOARD).get).extract[Forms.Dashboard]
-        val updatedDashboard = sessDash.updateItems(sessDash.items + formData.itemName)
-        Ok(views.html.createDashboardItems(dashboardItemsForm.fill(new Forms.CreateDashboardItems(updatedDashboard)))).withSession(SESSION_DASHBOARD -> write(updatedDashboard))
+        if (StringUtils.isNotBlank(formData.itemName)) {
+          val updatedDashboard = sessDash.updateItems(sessDash.items + formData.itemName)
+          Ok(views.html.createDashboardItems(dashboardItemsForm.fill(new Forms.CreateDashboardItems(updatedDashboard)))).withSession(SESSION_DASHBOARD -> write(updatedDashboard))
+        } else {
+          Ok(views.html.createDashboardItems(dashboardItemsForm.fill(new Forms.CreateDashboardItems(sessDash))))
+        }
       }
     )
   }
