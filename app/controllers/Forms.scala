@@ -1,5 +1,8 @@
 package controllers
 
+import play.data.validation.Constraints
+
+
 object Forms {
 
   case class NewDashboard(name: String, description: String, style: String) {

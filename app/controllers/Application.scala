@@ -48,9 +48,9 @@ class Application @Inject()(
 
   val newDashboardForm = Form(
     mapping(
-      "name" -> text,
-      "description" -> text,
-      "style" -> text
+      "name" -> nonEmptyText,
+      "description" -> nonEmptyText,
+      "style" -> nonEmptyText
     )(Forms.NewDashboard.apply)(Forms.NewDashboard.unapply)
   )
 
@@ -65,14 +65,14 @@ class Application @Inject()(
 
   val dashboardItemsForm = Form(
     mapping(
-      "items" -> set(text)
+      "items" -> set(nonEmptyText)
     )(Forms.CreateDashboardItems.apply)(Forms.CreateDashboardItems.unapply)
   )
 
   def processNewDashboard() = Action { implicit request =>
     newDashboardForm.bindFromRequest.fold(
       formWithErrors => {
-        BadRequest(views.html.createDashboardNew(newDashboardForm))
+        BadRequest(views.html.createDashboardNew(formWithErrors))
       },
       dashboardData => {
         var dashboard = new Forms.Dashboard()
@@ -128,7 +128,7 @@ class Application @Inject()(
 
   val dashboardOwnerForm = Form(
     mapping(
-      "name" -> text,
+      "name" -> nonEmptyText,
       "email" -> email
     )(Forms.DashboardOwner.apply)(Forms.DashboardOwner.unapply)
   )
