@@ -56,5 +56,16 @@
         </div>
     </div>
 
+    <script language="JavaScript">
+        var hashes = localStorage.getItem("hashes");
+        if (hashes == null) {
+            hashesArr = [];
+        } else {
+            hashesArr = JSON.parse(hashes)
+        }
+        hashesArr.push('@{if (dashboard.writeHash.isEmpty) dashboard.readonlyHash else dashboard.writeHash}')
+        localStorage.setItem("hashes", JSON.stringify(hashesArr));
+    </script>
+
 }
 
