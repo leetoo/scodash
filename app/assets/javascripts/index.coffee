@@ -1,6 +1,25 @@
+window.initRecent = () ->
+  alert('recent')
+  hashes = localStorage.getItem("hashes");
+  if hashes == null
+    hashesArr = []
+  else
+    hashesArr = JSON.parse(hashes)
+
+  for hash in hashesArr
+    $.get '/dashboardData/' + hash, (data) ->
+
+      anchor = $("<a>").attr({ href: data.readOnlyHash}).html(readOnlyHash)
+      div = $("<div>").append(anchor)
+    #alert anchor
+      $("#recent-dashboards").append(div)
+
+
 $ ->
+  initRecent()
   wsUrl = $("#dashboard").data("ws-url")
   if wsUrl
+
     window.ws = new WebSocket wsUrl
     window.ws.onmessage = (event) ->
       data = JSON.parse event.data
@@ -11,6 +30,9 @@ $ ->
       updateDate(data)
     window.ws.onclose = (event) ->
       alert ('ws closed')
+
+      # $("#recent-dashboard").append(anchor)
+
 
   initVisibility = () ->
     $("#commas").css "display", "block"

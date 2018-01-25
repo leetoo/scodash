@@ -10,8 +10,8 @@ import akka.util.Timeout
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import controllers.Forms.CreateDashboardItems
-import controllers.actors.{DashboardAccessMode, Scodash}
 import controllers.actors.Scodash.Command.CreateNewDashboard
+import controllers.actors.{DashboardAccessMode, Scodash}
 import org.apache.commons.lang3.StringUtils
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.write
@@ -184,7 +184,28 @@ class Application @Inject()(
     }
   }
 
-//  def dashboard(hash: String) = Action.async { implicit request =>
+  def dashboardData(hash: String) = Action.async { implicit request =>
+    val writeFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
+    val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
+
+    for {
+      writeDash <- writeFut
+      readDash <- readFut
+    } yield {
+      val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
+      val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
+      if (!writeRes.isEmpty) {
+        Ok(writeRes.head)
+      } else if (!readRes.isEmpty) {
+        Ok(readRes.head)
+      } else {
+        NoContent
+      }
+    }
+  }
+
+
+  //  def dashboard(hash: String) = Action.async { implicit request =>
 //    val wrtFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
 //    val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
 //    Ok(views.html.noDashboard())

@@ -3,24 +3,11 @@
 @mainBasic("ScoDash") {
 
     <div class="col-md-10 col-md-offset-1">
-        <div id="recent-dashboard"></div>
+        <div id="recent-dashboards"></div>
     </div>
 
     <script language="JavaScript">
-            $( document ).ready(function() {
-                var hashes = localStorage.getItem("hashes");
-                if (hashes == null) {
-                    hashesArr = [];
-                } else {
-                    hashesArr = JSON.parse(hashes)
-                }
-                for (var i = 0; i < hashesArr.length; i++) {
-                    var hash = hashesArr[i];
-                    var anchor = $("a").attr({ href: hash}).html(hash);
-                    alert(anchor)
-                    //$("#recent-dashboard").append(anchor)
-                }
-            });
+;
     </script>
 
 }
