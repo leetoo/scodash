@@ -1,5 +1,4 @@
 window.initRecent = () ->
-  alert('recent')
   hashes = localStorage.getItem("hashes");
   if hashes == null
     hashesArr = []
@@ -8,12 +7,10 @@ window.initRecent = () ->
 
   for hash in hashesArr
     $.get '/dashboardData/' + hash, (data) ->
-
-      anchor = $("<a>").attr({ href: data.readOnlyHash}).html(readOnlyHash)
+      dashboard = JSON.parse(data)
+      anchor = $("<a>", {href: window.location.href + "dashboard/" + hash}).html(dashboard.name + " - " + dashboard.description)
       div = $("<div>").append(anchor)
-    #alert anchor
       $("#recent-dashboards").append(div)
-
 
 $ ->
   initRecent()

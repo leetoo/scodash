@@ -21,7 +21,10 @@ import org.reactivestreams.Publisher
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json._
+import play.api.libs.json.JsValue
+//import play.api.libs.json.Json
+//import play.api.libs.json._
+//import play.api.libs.functional.syntax._
 import play.api.mvc._
 
 import scala.concurrent.Future
@@ -42,6 +45,9 @@ class Application @Inject()(
 
   implicit val timeout: Timeout = 5.seconds
   implicit lazy val formats = DefaultFormats ++ JodaTimeSerializers.all
+//  implicit private val ItemWrites = Json.writes[ItemFO]
+//  implicit private val DashoboardWrites = Json.writes[DashboardFO]
+
 
   def index() = Action {
     Ok(views.html.index());
@@ -163,44 +169,34 @@ class Application @Inject()(
   }
 
   def dashboard(hash: String) = Action.async { implicit request =>
-    val writeFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
-    val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
-
-    for {
-      writeDash <- writeFut
-      readDash <- readFut
-    } yield {
-      val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
-      val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
-      if (!writeRes.isEmpty) {
-        val dashboard = writeRes.head.extract[DashboardFO].removeReadOnlyHash
-        Ok(views.html.dashboard(dashboard))
-      } else if (!readRes.isEmpty) {
-        val dashboard = readRes.head.extract[DashboardFO].removeWriteHash
-        Ok(views.html.dashboard(dashboard))
-      } else {
-        Ok(views.html.noDashboard())
-      }
+//    val writeFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
+//    val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
+//
+//    for {
+//      writeDash <- writeFut
+//      readDash <- readFut
+//    } yield {
+//      val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
+//      val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
+//      if (!writeRes.isEmpty) {
+//        val dashboard = writeRes.head.extract[DashboardFO].removeReadOnlyHash
+//        Ok(views.html.dashboard(dashboard))
+//      } else if (!readRes.isEmpty) {
+//        val dashboard = readRes.head.extract[DashboardFO].removeWriteHash
+//        Ok(views.html.dashboard(dashboard))
+//      } else {
+//        Ok(views.html.noDashboard())
+//      }
+//    }
+    getDashboard(hash).flatMap{ case(dashboard, accessMode) =>
+      Future(Ok(views.html.dashboard(dashboard)))
     }
   }
 
   def dashboardData(hash: String) = Action.async { implicit request =>
-    val writeFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
-    val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
-
-    for {
-      writeDash <- writeFut
-      readDash <- readFut
-    } yield {
-      val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
-      val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
-      if (!writeRes.isEmpty) {
-        Ok(writeRes.head)
-      } else if (!readRes.isEmpty) {
-        Ok(readRes.head)
-      } else {
-        NoContent
-      }
+    getDashboard(hash).flatMap{ case(dashboard, accessMode) =>
+      val json = write(dashboard)
+      Future(Ok(json))
     }
   }
 
@@ -388,9 +384,6 @@ class Application @Inject()(
       }
 
 
-//      getDashboard(hash).flatMap { (dashboard, accessMode) =>
-//        (scodashActor ? Scodash.Command.CreateDashboardUser(userId, webSocketOut, dashboard.id, accessMode)).mapTo[ActorRef]
-//      }
     }
     userActorFuture
 
