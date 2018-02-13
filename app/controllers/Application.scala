@@ -200,33 +200,14 @@ class Application @Inject()(
     }
   }
 
-
-  //  def dashboard(hash: String) = Action.async { implicit request =>
-//    val wrtFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
-//    val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
-//    Ok(views.html.noDashboard())
-
-//    (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
-//      roRes => {
-//        val roList = roRes.value
-//        if (roList.isEmpty) {
-//          (dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)).mapTo[FullResult[List[JObject]]].map {
-//            wRes => {
-//              val wList = wRes.value
-//              if (!wList.isEmpty) {
-//                val dashboardFO = roList.head.extract[DashboardFO]
-//                Ok(views.html.dashboard(dashboardFO))
-//              }
-//            }
-//          }
-//          Ok(views.html.noDashboard())
-//        } else {
-//          val dashboardFO = roList.head.extract[DashboardFO]
-//          Ok(views.html.dashboard(dashboardFO))
-//        }
-//      }
+  def dashboardsData(hashesStr: String) = Action.async { implicit request =>
+    val hashes = JsonMethods.parse(hashesStr)
+    Future(Ok("{}"))
+//    getDashboard(hashes(0)).flatMap{ case(dashboard, accessMode) =>
+//      val json = write(dashboard)
+//      Future(Ok(json))
 //    }
-//  }
+  }
 
   /**
     * Creates a websocket.  `acceptOrResult` is preferable here because it returns a

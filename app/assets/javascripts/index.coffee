@@ -4,18 +4,26 @@ window.initRecent = () ->
     hashesArr = []
   else
     hashesArr = JSON.parse(hashes)
-
-  getDashboardFromServer = (hash) ->
-    $.ajax '/dashboardData/' + hash,
+    $.ajax '/dashboardsData/' + hashesArr,
       type: 'GET'
       success: (data) ->
-        dashboard = JSON.parse(data)
-        anchor = $("<a>", {href: window.location.href + "dashboard/" + hash}).html(dashboard.name + " - " + dashboard.description)
-        div = $("<div>").append(anchor)
-        $("#recent-dashboards").append(div)
+        dashboards = JSON.parse(data)
+        alert(dashboards)
+#        anchor = $("<a>", {href: window.location.href + "dashboard/" + hash}).html(dashboard.name + " - " + dashboard.description)
+#        div = $("<div>").append(anchor)
+#        $("#recent-dashboards").append(div)
 
-  for hash in hashesArr
-    getDashboardFromServer(hash)
+#  getDashboardFromServer = (hash) ->
+#    $.ajax '/dashboardData/' + hash,
+#      type: 'GET'
+#      success: (data) ->
+#        dashboard = JSON.parse(data)
+#        anchor = $("<a>", {href: window.location.href + "dashboard/" + hash}).html(dashboard.name + " - " + dashboard.description)
+#        div = $("<div>").append(anchor)
+#        $("#recent-dashboards").append(div)
+#
+#  for hash in hashesArr
+#    getDashboardFromServer(hash)
 
 $ ->
   initRecent()
