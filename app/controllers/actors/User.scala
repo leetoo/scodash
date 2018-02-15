@@ -29,12 +29,13 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
 
     case jsObj: JsObject =>
       val hash = jsObj.value("hash").asInstanceOf[JsString].value
-      val itemId = jsObj.value("itemId").toString()
       jsObj.value("operation") match {
         case JsString("increment") =>
+          val itemId = jsObj.value("itemId").toString()
           log.info("Increment item {} of dashboard {}", itemId, hash)
           sendCmdToDashboard(hash, Dashboard.Command.IncrementItem(itemId, hash))
         case JsString("decrement") =>
+          val itemId = jsObj.value("itemId").toString()
           log.info("Decrement item {} of dashboard {}", itemId, hash)
           sendCmdToDashboard(hash, Dashboard.Command.DecrementItem(itemId, hash))
         case _ =>

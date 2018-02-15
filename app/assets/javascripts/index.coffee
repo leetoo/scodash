@@ -14,8 +14,19 @@ window.initRecent = () ->
           div = $("<div>").append(anchor)
           $("#recent-dashboards").append(div)
 
+
+window.initSorting = () ->
+  sorting = $("#sorting")
+  sorting.change
+    data: {hash: sorting.data('hash')}
+    handler: (event) ->
+      event.preventDefault()
+      ws.send(JSON.stringify({operation: 'sort', hash: event.data.hash}))
+
+
 $ ->
   initRecent()
+  initSorting()
   wsUrl = $("#dashboard").data("ws-url")
   if wsUrl
 
