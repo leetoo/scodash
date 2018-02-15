@@ -8,22 +8,11 @@ window.initRecent = () ->
       type: 'GET'
       success: (data) ->
         dashboards = JSON.parse(data)
-        alert(dashboards)
-#        anchor = $("<a>", {href: window.location.href + "dashboard/" + hash}).html(dashboard.name + " - " + dashboard.description)
-#        div = $("<div>").append(anchor)
-#        $("#recent-dashboards").append(div)
-
-#  getDashboardFromServer = (hash) ->
-#    $.ajax '/dashboardData/' + hash,
-#      type: 'GET'
-#      success: (data) ->
-#        dashboard = JSON.parse(data)
-#        anchor = $("<a>", {href: window.location.href + "dashboard/" + hash}).html(dashboard.name + " - " + dashboard.description)
-#        div = $("<div>").append(anchor)
-#        $("#recent-dashboards").append(div)
-#
-#  for hash in hashesArr
-#    getDashboardFromServer(hash)
+        i = 0
+        for dashboard in dashboards
+          anchor = $("<a>", {href: window.location.href + "dashboard/" + hashesArr[i++]}).html(dashboard.name + " - " + dashboard.description)
+          div = $("<div>").append(anchor)
+          $("#recent-dashboards").append(div)
 
 $ ->
   initRecent()

@@ -202,14 +202,10 @@ class Application @Inject()(
 
   def dashboardsData(hashesStr: String) = Action.async { implicit request =>
     val hashes = hashesStr.split(",")
-    val dashboards = hashes.map(hash => getDashboard(hash))
-    val x = Future.sequence(dashboards.toList)
-    Future(Ok("{}"))
-
-//    getDashboard(hashes(0)).flatMap{ case(dashboard, accessMode) =>
-//      val json = write(dashboard)
-//      Future(Ok(json))
-//    }
+    Future.sequence(hashes.map(hash => getDashboard(hash)).toList).flatMap(ds => {
+      val json = write(ds.map(_._1))
+      Future(Ok(json))
+    })
   }
 
   /**
