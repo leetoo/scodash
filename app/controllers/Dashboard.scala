@@ -65,6 +65,9 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
           watchers.foreach(w => w ! state)
         }
       }
+    case SortingChanged() =>
+      sender() ! state
+
   }
 
   override def isCreateMessage(cmd: Any) = cmd match {
@@ -91,6 +94,7 @@ object Dashboard {
     case class Unwatch(watcher: ActorRef)
     case class IncrementItem(id: String, hash: String)
     case class DecrementItem(id: String, hash: String)
+    case class SortingChanged()
   }
 
   object Event {

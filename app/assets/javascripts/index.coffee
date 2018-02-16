@@ -21,7 +21,7 @@ window.initSorting = () ->
     data: {hash: sorting.data('hash')}
     handler: (event) ->
       event.preventDefault()
-      ws.send(JSON.stringify({operation: 'sort', hash: event.data.hash}))
+      ws.send(JSON.stringify({operation: 'sort', hash: event.data.hash, sorting: this.value}))
 
 
 $ ->
