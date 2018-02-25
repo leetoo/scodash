@@ -181,7 +181,7 @@ class Application @Inject()(
   def dashboardsData(hashesStr: String) = Action.async { implicit request =>
     val hashes = hashesStr.split(",")
     Future.sequence(hashes.map(hash => getDashboard(hash)).toList).flatMap(ds => {
-      val json = write(ds.map(_._1))
+      val json = write(ds.filter(_ != null).map(_._1))
       Future(Ok(json))
     })
   }

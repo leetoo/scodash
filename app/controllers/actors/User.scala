@@ -44,7 +44,7 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
           val newSorting = jsObj.value("sorting").toString()
           log.info("Sort dashboard {} by {}", hash, newSorting)
           sorting = DashboardSorting.values.find(_.toString == newSorting).getOrElse(DashboardSorting.AZ)
-          sendCmdToDashboard(hash, Dashboard.Command.SortingChanged()
+          sendCmdToDashboard(hash, Dashboard.Command.SortingChanged())
         case _ =>
           log.warning("Unexpected user command {}", jsObj)
       }

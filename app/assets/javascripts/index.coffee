@@ -1,4 +1,5 @@
 window.initRecent = () ->
+  $("#recent-dashboards-section").css "display", "none"
   hashes = localStorage.getItem("hashes");
   if hashes == null
     hashesArr = []
@@ -10,9 +11,14 @@ window.initRecent = () ->
         dashboards = JSON.parse(data)
         i = 0
         for dashboard in dashboards
-          anchor = $("<a>", {href: window.location.href + "dashboard/" + hashesArr[i++]}).html(dashboard.name + " - " + dashboard.description)
+          hash = dashboard.readonlyHash
+          if !!dashboard.writeHash
+            hash = dashboard.writeHash
+          anchor = $("<a>", {href: window.location.href + "dashboard/" + hash}).html(dashboard.name + " - " + dashboard.description)
           div = $("<div>").append(anchor)
           $("#recent-dashboards").append(div)
+          $("#recent-dashboards-section").css "display", "block"
+
 
 
 window.initSorting = () ->
