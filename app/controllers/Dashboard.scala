@@ -26,7 +26,8 @@ case class DashboardFO(id: String, name: String, description: String, style: Str
   def removeReadOnlyHash = this.copy(readonlyHash = "")
   def removeWriteHash = this.copy(writeHash = "")
   def updatedNow = this.copy(updated = System.currentTimeMillis())
-  def sort = this.copy(items = items.toSeq.sortWith((it1, it2) => it1.score > it2.score).toSet)
+  def sortByScore = this.copy(items = items.toSeq.sortWith((it1, it2) => it1.score > it2.score).toSet)
+  def sortByAZ = this.copy(items = items.toSeq.sortWith((it1, it2) => it1.name > it2.name).toSet)
 }
 
 class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {

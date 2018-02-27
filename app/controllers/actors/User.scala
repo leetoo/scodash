@@ -24,11 +24,15 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
 
   override def receive = {
     case dashboard: DashboardFO =>
-      outActor ! (mode match {
-        case DashboardAccessMode.READONLY => Json.toJson(dashboard.removeWriteHash)
-        case DashboardAccessMode.WRITE => Json.toJson(dashboard.removeReadOnlyHash)
+      var dashUpdated = (mode match {
+        case DashboardAccessMode.READONLY => dashboard.removeWriteHash
+        case DashboardAccessMode.WRITE => dashboard.removeReadOnlyHash
       })
-
+      dashUpdated = sorting match {
+        case DashboardSorting.SCORE => dashUpdated.sortByScore
+        case DashboardSorting.AZ => dashUpdated.sortByAZ
+      }
+      outActor ! Json.toJson(dashUpdated)
     case jsObj: JsObject =>
       val hash = jsObj.value("hash").asInstanceOf[JsString].value
       jsObj.value("operation") match {
