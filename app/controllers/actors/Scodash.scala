@@ -15,6 +15,7 @@ import controllers.actors.Scodash.Command.{CreateDashboardUser, CreateNewDashboa
 import org.apache.commons.lang3.RandomStringUtils
 import org.joda.time.DateTime
 
+import scala.collection.immutable.ListSet
 import scala.concurrent.duration._
 
 object Scodash {
@@ -22,7 +23,7 @@ object Scodash {
     case class FindDashboard(id: String)
     case class FindDashboardByWriteHash(hash: String)
     case class FindDashboardByReadHash(hash: String)
-    case class CreateNewDashboard(name: String, description: String, style: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String)
+    case class CreateNewDashboard(name: String, description: String, style: String, items: ListSet[ItemFO] = ListSet(), ownerName: String, ownerEmail: String)
     case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String, mode: DashboardAccessMode.Value)
   }
 
