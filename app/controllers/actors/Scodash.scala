@@ -23,7 +23,7 @@ object Scodash {
     case class FindDashboard(id: String)
     case class FindDashboardByWriteHash(hash: String)
     case class FindDashboardByReadHash(hash: String)
-    case class CreateNewDashboard(name: String, description: String, style: String, items: ListSet[ItemFO] = ListSet(), ownerName: String, ownerEmail: String)
+    case class CreateNewDashboard(name: String, description: String, style: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String)
     case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String, mode: DashboardAccessMode.Value)
   }
 
@@ -60,7 +60,7 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       val id = UUID.randomUUID().toString
       val readonlyHash = RandomStringUtils.randomAlphanumeric(8)
       val writeHash = RandomStringUtils.randomAlphanumeric(8)
-      val fo = DashboardFO(id, name, description, style, items, ownerName, ownerEmail, readonlyHash, writeHash, System.currentTimeMillis(), System.currentTimeMillis())
+      val fo = DashboardFO(id, name, description, style, ListSet() ++ items, ownerName, ownerEmail, readonlyHash, writeHash, System.currentTimeMillis(), System.currentTimeMillis())
       val command = CreateDashboard(fo)
       forwardCommand(id, command)
 
