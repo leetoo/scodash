@@ -4,7 +4,6 @@ import akka.actor.{ActorRef, Props}
 import controllers.Dashboard.Command._
 import controllers.Dashboard.Event.{DashboardCreated, DashboardUpdated}
 
-import scala.collection.immutable.{ListSet, SortedSet, TreeSet}
 import scala.collection.mutable
 
 case class ItemFO(id: Int, name: String, var score: Int = 0) {
@@ -13,12 +12,12 @@ case class ItemFO(id: Int, name: String, var score: Int = 0) {
 }
 
 object DashboardFO {
-  def empty = DashboardFO("", "", "", "", ListSet.empty[ItemFO], "", "", "", "", -1, -1)
+  def empty = DashboardFO("", "", "", "", List.empty[ItemFO], "", "", "", "", -1, -1)
 
 }
 
 @SerialVersionUID(1L)
-case class DashboardFO(id: String, name: String, description: String, style: String, items: ListSet[ItemFO] = ListSet[ItemFO](),
+case class DashboardFO(id: String, name: String, description: String, style: String, items: List[ItemFO] = List[ItemFO](),
                        ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,
                        created:Long, updated:Long, deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
   override def assignId(id: String) = this.copy(id = id)
@@ -26,8 +25,8 @@ case class DashboardFO(id: String, name: String, description: String, style: Str
   def removeReadOnlyHash = this.copy(readonlyHash = "")
   def removeWriteHash = this.copy(writeHash = "")
   def updatedNow = this.copy(updated = System.currentTimeMillis())
-  def sortByScore = this.copy(items = ListSet() ++ (items.toSeq.sortWith((it1, it2) => it1.score > it2.score)))
-  def sortByAZ = this.copy(items = ListSet() ++ (items.toSeq.sortWith((it1, it2) => it1.name > it2.name)))
+  def sortByScore = this.copy(items = List() ++ (items.toSeq.sortWith((it1, it2) => it1.score > it2.score)))
+  def sortByAZ = this.copy(items = List() ++ (items.toSeq.sortWith((it1, it2) => it1.name < it2.name)))
 }
 
 class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {

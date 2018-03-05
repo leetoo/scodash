@@ -1,10 +1,7 @@
 package controllers
 
-import java.time.{LocalDateTime, ZonedDateTime}
-
 import akka.actor.Props
 import akka.persistence.query.EventEnvelope
-import org.joda.time.DateTime
 
 trait DashboardReadModel{
   def indexRoot = "scodash"
@@ -14,7 +11,7 @@ trait DashboardReadModel{
 object DashboardViewBuilder{
   final val Name = "dashboard-view-builder"
   case class DashboardRM(id: String, name: String, description: String, style: String,
-                         items: Set[ItemFO] = Set(), ownerName: String,
+                         items: List[ItemFO] = List(), ownerName: String,
                          ownerEmail: String, readonlyHash: String,
                          writeHash: String, created: Long,
                          updated:Long, deleted: Boolean = false) extends  ReadModelObject

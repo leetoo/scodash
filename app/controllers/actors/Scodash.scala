@@ -1,7 +1,6 @@
 package controllers.actors
 
-import java.time.{LocalDateTime, ZonedDateTime}
-import java.util.{Date, UUID}
+import java.util.UUID
 
 import akka.actor.{ActorRef, Props}
 import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
@@ -13,9 +12,7 @@ import controllers.PersistentEntity.GetState
 import controllers._
 import controllers.actors.Scodash.Command.{CreateDashboardUser, CreateNewDashboard, FindDashboard}
 import org.apache.commons.lang3.RandomStringUtils
-import org.joda.time.DateTime
 
-import scala.collection.immutable.ListSet
 import scala.concurrent.duration._
 
 object Scodash {
@@ -60,7 +57,7 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       val id = UUID.randomUUID().toString
       val readonlyHash = RandomStringUtils.randomAlphanumeric(8)
       val writeHash = RandomStringUtils.randomAlphanumeric(8)
-      val fo = DashboardFO(id, name, description, style, ListSet() ++ items, ownerName, ownerEmail, readonlyHash, writeHash, System.currentTimeMillis(), System.currentTimeMillis())
+      val fo = DashboardFO(id, name, description, style, List() ++ items, ownerName, ownerEmail, readonlyHash, writeHash, System.currentTimeMillis(), System.currentTimeMillis())
       val command = CreateDashboard(fo)
       forwardCommand(id, command)
 
