@@ -45,7 +45,7 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
           log.info("Decrement item {} of dashboard {}", itemId, hash)
           sendCmdToDashboard(hash, Dashboard.Command.DecrementItem(itemId, hash))
         case JsString("sort") =>
-          val newSorting = jsObj.value("sorting").toString()
+          val newSorting = jsObj.value("sorting").asInstanceOf[JsString].value.toUpperCase
           log.info("Sort dashboard {} by {}", hash, newSorting)
           sorting = DashboardSorting.values.find(_.toString == newSorting).getOrElse(DashboardSorting.AZ)
           sendCmdToDashboard(hash, Dashboard.Command.SortingChanged())
