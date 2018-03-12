@@ -10,7 +10,7 @@ trait DashboardReadModel{
 
 object DashboardViewBuilder{
   final val Name = "dashboard-view-builder"
-  case class DashboardRM(id: String, name: String, description: String, style: String,
+  case class DashboardRM(id: String, name: String, description: String,
                          items: List[ItemFO] = List(), ownerName: String,
                          ownerEmail: String, readonlyHash: String,
                          writeHash: String, created: Long,
@@ -18,7 +18,7 @@ object DashboardViewBuilder{
   def props = Props[DashboardViewBuilder]
 }
 
-class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[DashboardViewBuilder.DashboardRM]{
+class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[DashboardViewBuilder.DashboardRM] {
   import Dashboard.Event._
   import DashboardViewBuilder._
   import ViewBuilder._
@@ -28,12 +28,12 @@ class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[Dashboard
   def actionFor(dashboardId:String, env:EventEnvelope) = env.event match {
     case DashboardCreated(dashboard) =>
       log.info("Saving a new dashboard entity into the elasticsearch index: {}", dashboard)
-      val dashboardRM = DashboardRM(dashboard.id, dashboard.name, dashboard.description, dashboard.style,
+      val dashboardRM = DashboardRM(dashboard.id, dashboard.name, dashboard.description,
         dashboard.items, dashboard.ownerName, dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash,
         dashboard.created, dashboard.updated, dashboard.deleted )
       InsertAction(dashboard.id, dashboardRM)
     case DashboardUpdated(dashboard) =>
-      val dashboardRM = DashboardRM(dashboard.id, dashboard.name, dashboard.description, dashboard.style,
+      val dashboardRM = DashboardRM(dashboard.id, dashboard.name, dashboard.description,
         dashboard.items, dashboard.ownerName, dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash,
         dashboard.created, dashboard.updated, dashboard.deleted )
       InsertAction(dashboard.id, dashboardRM)

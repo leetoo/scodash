@@ -12,12 +12,12 @@ case class ItemFO(id: Int, name: String, var score: Int = 0) {
 }
 
 object DashboardFO {
-  def empty = DashboardFO("", "", "", "", List.empty[ItemFO], "", "", "", "", -1, -1)
+  def empty = DashboardFO("", "", "", List.empty[ItemFO], "", "", "", "", -1, -1)
 
 }
 
 @SerialVersionUID(1L)
-case class DashboardFO(id: String, name: String, description: String, style: String, items: List[ItemFO] = List[ItemFO](),
+case class DashboardFO(id: String, name: String, description: String, items: List[ItemFO] = List[ItemFO](),
                        ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,
                        created:Long, updated:Long, deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
   override def assignId(id: String) = this.copy(id = id)
@@ -29,7 +29,7 @@ case class DashboardFO(id: String, name: String, description: String, style: Str
   def sortByAZ = this.copy(items = List() ++ (items.sortWith((it1, it2) => it1.name < it2.name)))
 }
 
-class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
+class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) with EmailSupport {
 
   import Dashboard._
 
@@ -44,6 +44,7 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) {
         sender() ! Failure(FailureType.Validation, DashboardAlreadyCreated)
       } else {
         persist(DashboardCreated(dashboard))(handleEventAndRespond())
+        sendEmailNewDashboard(dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash, dashboard.name, dashboard.ownerName  )
       }
     case Watch(watcher) =>
       watchers += watcher

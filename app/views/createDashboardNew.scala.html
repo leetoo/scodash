@@ -34,7 +34,7 @@
                 @helper.textarea(
                     dashboardForm1("description"), '_label -> "Description", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Dashboard description"
                 )
-                <div class="form-group">
+@*                <div class="form-group">
                     <label>Dashboard type</label>&nbsp;<span class="label-comment">(you can change it anytime later)</span>
                     <div data-toggle="buttons">
                         <div class="btn btn-default btn-checkbox btn-checkbox-comma @{if (dashboardForm1("style").value.getOrElse("") == "comma") "active" else ""}">
@@ -47,7 +47,7 @@
                             <input type="radio" name="style" id="style" value="score" @{if (dashboardForm1("style").value.getOrElse("") == "score") "checked" else ""} data-toggle="button">Score card
                         </div>
                     </div>
-                </div>
+                </div>*@
                 <div class="form-group pull-right">
                     <button type="submit" class="btn btn-primary">Next</button>
                 </div>

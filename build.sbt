@@ -30,8 +30,13 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "9.4.1208",
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
   "com.google.protobuf" % "protobuf-java"  % "2.5.0",
-  "org.apache.commons" % "commons-lang3" % "3.7"
+  "org.apache.commons" % "commons-lang3" % "3.7",
+  "com.sendgrid" % "sendgrid-java" % "4.0.1"
 )
+
+//libraryDependencies ++= Seq(
+//  "com.sendgrid" % "sendgrid-java" % "4.0.1"
+//)
 
 libraryDependencies += "org.webjars" % "jquery" % "3.2.1"
 

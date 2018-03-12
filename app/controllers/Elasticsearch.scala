@@ -31,8 +31,6 @@ object ElasticsearchApi {
 trait ElasticsearchSupport{ me:AbstractBaseActor =>
   import ElasticsearchApi._
 
-//  private val logger = org.slf4j.LoggerFactory.getLogger("controllers.ElasticsearchApi")
-
   val esSettings = ElasticsearchSettings(context.system)
 
   def indexRoot:String

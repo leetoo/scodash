@@ -53,8 +53,7 @@ class Application @Inject()(
   val newDashboardForm = Form(
     mapping(
       "name" -> nonEmptyText,
-      "description" -> nonEmptyText,
-      "style" -> nonEmptyText
+      "description" -> nonEmptyText
     )(Forms.NewDashboard.apply)(Forms.NewDashboard.unapply)
   )
 
@@ -84,7 +83,7 @@ class Application @Inject()(
           case Some(sessDash) => dashboard = JsonMethods.parse(sessDash).extract[Forms.Dashboard]
           case _ =>
         }
-        val updatedDashboard = dashboard.updateNameDescStyle(dashboardData.name, dashboardData.description, dashboardData.style)
+        val updatedDashboard = dashboard.updateNameDescStyle(dashboardData.name, dashboardData.description)
         Ok(views.html.createDashboardItems(dashboardItemsForm.fill(new CreateDashboardItems(updatedDashboard)))).withSession(SESSION_DASHBOARD -> write(updatedDashboard))
       }
     )
@@ -155,7 +154,6 @@ class Application @Inject()(
         (scodashActor ? CreateNewDashboard(
           sessDash.name,
           sessDash.description,
-          sessDash.style,
           sessDash.items.zipWithIndex.map { case (name, id) => ItemFO(id, name) } ,
           ownerData.ownerName,
           ownerData.ownerEmail)).mapTo[FullResult[DashboardFO]].map {

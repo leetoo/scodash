@@ -1,14 +1,10 @@
 package controllers
 
-import play.data.validation.Constraints
-
-import scala.collection.immutable.ListSet
-
 
 object Forms {
 
-  case class NewDashboard(name: String, description: String, style: String) {
-    def this() = this("","","")
+  case class NewDashboard(name: String, description: String) {
+    def this() = this("","")
   }
 
   case class CreateDashboardItems(items: Set[String]) {
@@ -25,13 +21,13 @@ object Forms {
     def this() = this("","")
   }
 
-  case class Dashboard(name: String, description: String, style: String, items: Set[String], ownerName: String, ownerEmail: String) {
+  case class Dashboard(name: String, description: String, items: Set[String], ownerName: String, ownerEmail: String) {
 
-    def this() = this("","","", Set(),"","")
-    def this(name: String, description: String, style: String) = this(name, description, style, Set(), "", "")
-    def this(name: String, description: String, style: String, items: Set[String]) = this(name, description, style, items, "", "")
+    def this() = this("","", Set(),"","")
+    def this(name: String, description: String, style: String) = this(name, description, Set(), "", "")
+    def this(name: String, description: String, style: String, items: Set[String]) = this(name, description, items, "", "")
 
-    def updateNameDescStyle(name: String, description: String, style: String) = this.copy(name = name, description = description, style = style)
+    def updateNameDescStyle(name: String, description: String) = this.copy(name = name, description = description)
     def updateItems(items: Set[String]) = this.copy(items = items)
   }
 }
