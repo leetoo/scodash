@@ -18,7 +18,7 @@ trait EmailSupport{ me:PersistentActor =>
     val to = new Email(toAddress);
     val readUrl = s"${emailSettings.baseUrl}$readHash"
     val writeUrl = s"${emailSettings.baseUrl}$writeHash"
-    val content = new Content("text/plain", s"Hell ${ownerName}, \n\rYou can share your dashboard $dashName with your friend vie these links:\n\rRead-only " +
+    val content = new Content("text/plain", s"Hello ${ownerName}, \n\rYou can share your dashboard $dashName with your friends via these links:\n\rRead-only " +
       s"mode: $readUrl\n\rWrite " +
       s"mode: $writeUrl\n\r\n\rEnjoy scoring!");
     val mail = new Mail(from, subject, to, content);
