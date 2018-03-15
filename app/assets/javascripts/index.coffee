@@ -1,3 +1,5 @@
+window.currentDashboardType = 'COMMA'
+
 window.initRecent = () ->
   $("#recent-dashboards-section").css "display", "none"
   hashes = localStorage.getItem("hashes");
@@ -35,7 +37,6 @@ $ ->
   initSorting()
   wsUrl = $("#dashboard").data("ws-url")
   if wsUrl
-
     window.ws = new WebSocket wsUrl
     window.ws.onmessage = (event) ->
       data = JSON.parse event.data
@@ -45,14 +46,16 @@ $ ->
       updateChart(data)
       updateDate(data)
     window.ws.onclose = (event) ->
-      alert ('ws closed')
-
-      # $("#recent-dashboard").append(anchor)
-
+      console.log 'ws closed'
 
   initVisibility = () ->
-    $("#commas").css "display", "block"
-    $("#chart").css "display", "none"
+    if (window.currentDashboardType == 'COMMA')
+      $("#commas").css "display", "block"
+      $("#chart").css "display", "none"
+    else
+      $("#commas").css "display", "none"
+      $("#chart").css "display", "block"
+
 
 
   $('input:radio[name=dashboard-type]').change ->
@@ -62,8 +65,10 @@ $ ->
     type = $(this).data('type')
     if ( type == 'commas-type')
       $("#commas").css "display", "block"
+      window.currentDashboardType = 'COMMA'
     if ( type == 'chart-type')
       $("#chart").css "display", "block"
+      window.currentDashboardType = 'CHART'
 
 
   updateCommas = (dashboard) ->
