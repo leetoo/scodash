@@ -34,6 +34,7 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) with Email
   import Dashboard._
 
   def initialState = DashboardFO.empty
+  override def snapshotAfterCount = Some(5)
   final val watchers: mutable.Set[ActorRef] = mutable.Set();
 
 

@@ -3,6 +3,7 @@ package controllers
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{ActorLogging, Props, ReceiveTimeout}
+import akka.cluster.sharding.ShardRegion.Passivate
 import akka.persistence._
 import com.typesafe.config.Config
 
@@ -105,10 +106,16 @@ abstract class PersistentEntity[FO <: EntityFieldsObject[String, FO]: ClassTag](
     */
   def standardCommandHandling:Receive = {
 
-    //Have been idle too long, time to start passivation process
+    //Have been idle too long, time to start the passivation process
     case ReceiveTimeout =>
       log.info("{} entity with id {} is being passivated due to inactivity", entityType, id)
+      context.parent ! Passivate(stopMessage = StopEntity)
+
+    //Finishes the two part passivation process by stopping the entity
+    case StopEntity =>
+      log.info("{} entity with id {} is now being stopped due to inactivity", entityType, id)
       context stop self
+
 
     //Don't allow actions on deleted entities or a non-create request
     //when in the initial state
@@ -307,3 +314,5 @@ trait EntityFieldsObject[K, FO] extends Serializable{
   def deleted:Boolean
   def markDeleted:FO
 }
+
+case object StopEntity

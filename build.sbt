@@ -16,6 +16,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+  "com.typesafe.akka" %% "akka-cluster-sharding" % akkaVersion excludeAll(ExclusionRule("io.netty")),
   "com.typesafe.akka" %% "akka-persistence" % akkaVersion excludeAll(ExclusionRule("io.netty")),
   "ch.qos.logback" % "logback-classic" % "1.0.9",
   "com.typesafe.slick" %% "slick" % "3.1.1",
