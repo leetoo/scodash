@@ -68,9 +68,8 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
 }
 
 class ElasticsearchSettingsImpl(conf:Config) extends Extension{
-  val esConfig = conf.getConfig("elasticsearch")
-  val host = esConfig.getString("host")
-  val port = esConfig.getInt("port")
+  val host = sys.env("ELASTIC_HOST")
+  val port = sys.env("ELASTIC_PORT")
   val rootUrl = s"http://$host:$port"
 }
 object ElasticsearchSettings extends ExtensionId[ElasticsearchSettingsImpl] with ExtensionIdProvider {
