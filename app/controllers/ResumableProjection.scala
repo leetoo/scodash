@@ -46,9 +46,9 @@ object PostgresProjectionStorage extends ExtensionId[PostgresProjectionStorageEx
 
   val dataSource: HikariDataSource = {
     val config = new HikariConfig()
-    config.setJdbcUrl("jdbc:postgresql://localhost:5432/postgres")
-    config.setUsername("postgres")
-    config.setPassword("password")
+    config.setJdbcUrl(sys.env("SLICK_DB_URL"))
+    config.setUsername(sys.env("SLICK_DB_USER"))
+    config.setPassword(sys.env("SLICK_DB_PASSWORD"))
     config.setDriverClassName("org.postgresql.Driver")
     new HikariDataSource(config)
   }

@@ -39,13 +39,14 @@ trait EmailSupport{ me:PersistentActor =>
     }
 
   }
-
 }
 
 class EmailSettingsImpl(conf:Config) extends Extension{
-  val apiKey = sys.env("SENDGRID_API_KEY")
-  val baseUrl = sys.env("EMAIL_BASE_URL")
+  val emailConfig = conf.getConfig("email")
+  val apiKey = emailConfig.getString("sendgrid.api.key")
+  val baseUrl = emailConfig.getString("base.url")
 }
+
 object EmailSettings extends ExtensionId[EmailSettingsImpl] with ExtensionIdProvider {
   override def lookup = EmailSettings
   override def createExtension(system: ExtendedActorSystem) =
