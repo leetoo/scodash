@@ -69,9 +69,10 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
 
 class ElasticsearchSettingsImpl(conf:Config) extends Extension{
   val esConfig = conf.getConfig("elasticsearch")
+  val protocol = esConfig.getString("protocol")
   val host = esConfig.getString("host")
   val port = esConfig.getInt("port")
-  val rootUrl = s"http://$host:$port"
+  val rootUrl = s"$protocol://$host:$port"
 }
 object ElasticsearchSettings extends ExtensionId[ElasticsearchSettingsImpl] with ExtensionIdProvider {
   override def lookup = ElasticsearchSettings
