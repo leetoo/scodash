@@ -50,6 +50,7 @@ object PostgresProjectionStorage extends ExtensionId[PostgresProjectionStorageEx
     config.setUsername(sys.env("SLICK_DB_USER"))
     config.setPassword(sys.env("SLICK_DB_PASSWORD"))
     config.setDriverClassName("org.postgresql.Driver")
+    config.setMaximumPoolSize(1);
     new HikariDataSource(config)
   }
 
