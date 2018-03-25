@@ -43,6 +43,7 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
     val req = url(s"$baseUrl/_search") <<? Map("q" -> query)
 
     log.debug("Requesting ES: {}", req)
+    System.out.println("Requesting ES:" + req)
     callElasticsearch[QueryResponse](req).
       map(_.hits.hits.map(_._source))
   }
