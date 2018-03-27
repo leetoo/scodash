@@ -4,6 +4,7 @@ package controllers
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
 import com.typesafe.config.Config
 import dispatch._
+import org.apache.commons.lang3.StringUtils
 import org.json4s._
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.{read, write}
@@ -78,8 +79,12 @@ class ElasticsearchSettingsImpl(conf:Config) extends Extension{
   val esConfig = conf.getConfig("elasticsearch")
   val protocol = esConfig.getString("protocol")
   val host = esConfig.getString("host")
-  val port = esConfig.getInt("port")
-  val rootUrl = s"$protocol://$host:$port"
+  val port = esConfig.getString("port")
+  if (StringUtils.isNotBlank(port)) {
+    val rootUrl = s"$protocol://$host:$port"
+  } else {
+    val rootUrl = s"$protocol://$host"
+  }
 }
 object ElasticsearchSettings extends ExtensionId[ElasticsearchSettingsImpl] with ExtensionIdProvider {
   override def lookup = ElasticsearchSettings
