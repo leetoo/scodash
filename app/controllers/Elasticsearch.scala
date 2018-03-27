@@ -45,9 +45,6 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
 
   def queryElasticsearch(query:String)(implicit ec:ExecutionContext):Future[List[JObject]] = {
 
-    logger.debug(s"$baseUrl/_search")
-    logger.debug(s"q:$query")
-
     val req = url(s"$baseUrl/_search") <<? Map("q" -> query)
 
     callElasticsearch[QueryResponse](req).
@@ -60,7 +57,6 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
       case None => urlBase
       case Some(v) => s"$urlBase/_update?version=$v"
     }
-    logger.debug(requestUrl)
     val req = url(requestUrl) << write(request)
     callElasticsearch[IndexingResult](req)
   }
@@ -71,7 +67,7 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
   }
 
   def callElasticsearch[RT : Manifest](req:Req)(implicit ec:ExecutionContext):Future[RT] = {
-    Http(req OK as.String).map(resp => read[RT](resp))
+    Http(req as(esSettings.username, esSettings.password) OK as.String).map(resp => read[RT](resp))
   }
 }
 
@@ -81,6 +77,8 @@ class ElasticsearchSettingsImpl(conf:Config) extends Extension{
   val host = esConfig.getString("host")
   val port = esConfig.getString("port")
   val rootUrl = if (StringUtils.isNotBlank(port)) s"$protocol://$host:$port" else s"$protocol://$host"
+  val username = esConfig.getString("username")
+  val password = esConfig.getString("password")
 }
 
 object ElasticsearchSettings extends ExtensionId[ElasticsearchSettingsImpl] with ExtensionIdProvider {

@@ -35,10 +35,6 @@ libraryDependencies ++= Seq(
   "com.sendgrid" % "sendgrid-java" % "4.0.1"
 )
 
-//libraryDependencies ++= Seq(
-//  "com.sendgrid" % "sendgrid-java" % "4.0.1"
-//)
-
 libraryDependencies += "org.webjars" % "jquery" % "3.2.1"
 
 libraryDependencies += "org.webjars" % "bootstrap" % "3.3.7"
