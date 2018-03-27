@@ -59,6 +59,7 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
       case None => urlBase
       case Some(v) => s"$urlBase/_update?version=$v"
     }
+    logger.debug(requestUrl)
     val req = url(requestUrl) << write(request)
     callElasticsearch[IndexingResult](req)
   }
