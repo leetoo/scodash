@@ -7,10 +7,13 @@ import dispatch._
 import org.json4s._
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.{read, write}
+import play.api.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
 object ElasticsearchApi {
+
+  val logger: Logger = Logger(this.getClass)
 
   trait EsResponse
   case class ShardData(total:Int, failed:Int, successful:Int)
@@ -40,10 +43,12 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
   def baseUrl = s"${esSettings.rootUrl}/${indexRoot}/$entityType"
 
   def queryElasticsearch(query:String)(implicit ec:ExecutionContext):Future[List[JObject]] = {
+
+    logger.debug(s"$baseUrl/_search")
+    logger.debug(s"q:$query")
+
     val req = url(s"$baseUrl/_search") <<? Map("q" -> query)
 
-    log.debug("Requesting ES: {}", req)
-    System.out.println("Requesting ES:" + req)
     callElasticsearch[QueryResponse](req).
       map(_.hits.hits.map(_._source))
   }

@@ -26,7 +26,7 @@
     <logger name="actors.StockActor" level="INFO"/>
 
     <!-- controllers -->
-    <logger name="controllers" level="INFO"/>
+    <logger name="controllers" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
