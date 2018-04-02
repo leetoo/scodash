@@ -57,7 +57,9 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
       case None => urlBase
       case Some(v) => s"$urlBase/_update?version=$v"
     }
-    val req = url(requestUrl) << write(request)
+    val req = url(requestUrl)
+    req setContentType("application/json", "UTF-8")
+    req << write(request)
     callElasticsearch[IndexingResult](req)
   }
 
