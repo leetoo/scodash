@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-jackson" % json4sVersion,
   "com.github.dnvriend" %% "akka-persistence-jdbc" % "2.8.0",
   "org.postgresql" % "postgresql" % "9.4.1208",
-  "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
+  "net.databinder.dispatch" %% "dispatch-core" % "0.13.2",
   "com.google.protobuf" % "protobuf-java"  % "2.5.0",
   "org.apache.commons" % "commons-lang3" % "3.7",
   "com.sendgrid" % "sendgrid-java" % "4.0.1"

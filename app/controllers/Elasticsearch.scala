@@ -9,6 +9,7 @@ import org.json4s._
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.{read, write}
 import play.api.Logger
+import unfiltered.request.PUT
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,8 +59,11 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
       case Some(v) => s"$urlBase/_update?version=$v"
     }
     val req = url(requestUrl)
-    req setContentType("application/json", "UTF-8")
-    req << write(request)
+    req.
+    //req.setContentType("application/json", "UTF-8")
+    req.setBody(write(request))
+    req.setMethod("PUT")
+    req <<<
     callElasticsearch[IndexingResult](req)
   }
 
