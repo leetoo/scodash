@@ -37,9 +37,11 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
 
   val esSettings = ElasticsearchSettings(context.system)
 
+  def indexRoot:String
+
   def entityType:String
 
-  def baseUrl = s"${esSettings.rootUrl}/${entityType}s"
+  def baseUrl = s"${esSettings.rootUrl}/${indexRoot}/$entityType"
 
   def queryElasticsearch(query:String)(implicit ec:ExecutionContext):Future[List[JObject]] = {
 
@@ -55,14 +57,14 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
       case None => urlBase
       case Some(v) => s"$urlBase/_update?version=$v"
     }
-    val req = url(requestUrl).PUT
+    val req = url(requestUrl)
     req setContentType("application/json", "UTF-8")
     req << write(request)
     callElasticsearch[IndexingResult](req)
   }
 
   def clearIndex(implicit ec:ExecutionContext) = {
-    val req = url(baseUrl).DELETE
+    val req = url(s"${esSettings.rootUrl}/${indexRoot}/").DELETE
     callElasticsearch[DeleteResult](req)
   }
 
