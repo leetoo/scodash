@@ -2,14 +2,14 @@ package controllers
 
 
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{HttpEntity, HttpMethods, HttpRequest, HttpResponse}
 import com.typesafe.config.Config
-import dispatch._
 import org.apache.commons.lang3.StringUtils
 import org.json4s._
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.{read, write}
 import play.api.Logger
-import unfiltered.request.PUT
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,6 +36,8 @@ object ElasticsearchApi {
 trait ElasticsearchSupport{ me:AbstractBaseActor =>
   import ElasticsearchApi._
 
+  //implicit val executionContext = context.system.dispatcher
+
   val esSettings = ElasticsearchSettings(context.system)
 
   def indexRoot:String
@@ -46,8 +48,8 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
 
   def queryElasticsearch(query:String)(implicit ec:ExecutionContext):Future[List[JObject]] = {
 
-    val req = url(s"$baseUrl/_search") <<? Map("q" -> query)
-
+    //val req = url(s"$baseUrl/_search") <<? Map("q" -> query)
+    val req = HttpRequest(uri = s"$baseUrl/_search") // TODO q
     callElasticsearch[QueryResponse](req).
       map(_.hits.hits.map(_._source))
   }
@@ -58,22 +60,39 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
       case None => urlBase
       case Some(v) => s"$urlBase/_update?version=$v"
     }
-    val req = url(requestUrl)
-    req.
+    val req = HttpRequest(uri = requestUrl, method = HttpMethods.PUT, entity = HttpEntity(write(request)))
     //req.setContentType("application/json", "UTF-8")
-    req.setBody(write(request))
-    req.setMethod("PUT")
-    req <<<
+    //req.setBody(write(request))
+    //req.setMethod("PUT")
     callElasticsearch[IndexingResult](req)
+
   }
 
   def clearIndex(implicit ec:ExecutionContext) = {
-    val req = url(s"${esSettings.rootUrl}/${indexRoot}/").DELETE
+    val req = HttpRequest(uri = s"${esSettings.rootUrl}/${indexRoot}/", method = HttpMethods.DELETE)
     callElasticsearch[DeleteResult](req)
   }
 
-  def callElasticsearch[RT : Manifest](req:Req)(implicit ec:ExecutionContext):Future[RT] = {
-    Http(req as(esSettings.username, esSettings.password) OK as.String).map(resp => read[RT](resp))
+  def callElasticsearch[RT : Manifest](req:HttpRequest)(implicit ec:ExecutionContext):Future[RT] = {
+
+    //read("xx")
+
+    val respFut: Future[HttpResponse] = Http(context.system).singleRequest(req)
+    respFut.flatMap[RT]{resp:HttpResponse => Future(read(resp.entity.toString))}
+//    respFut.map(resp => {
+//      resp.entity(as[RT]) {
+//        complete
+//      }
+//    })
+//    respFut
+//      .onComplete {
+//        case Success(res) => println(res)
+//        case Failure(_)   => sys.error("something wrong")
+//      }
+
+
+
+    //Http(req as(esSettings.username, esSettings.password) OK as.String).map(resp => read[RT](resp))
   }
 }
 
