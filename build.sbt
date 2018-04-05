@@ -6,7 +6,7 @@ lazy val `carkovani` = (project in file(".")).enablePlugins(PlayJava)
 
 scalaVersion := "2.11.7"
 
-libraryDependencies ++= Seq( javaJdbc , javaWs , guice)
+libraryDependencies ++= Seq( javaJdbc, guice, ws)
 
 val akkaVersion = "2.5.11"
 

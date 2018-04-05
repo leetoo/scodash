@@ -14,6 +14,8 @@ import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.{read, write}
 import play.api.Logger
 
+import play.api.libs._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 object ElasticsearchApi {
@@ -44,6 +46,8 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
 
   val esSettings = ElasticsearchSettings(context.system)
 
+  //val ws: WSClient
+
   val authHeader = Authorization(BasicHttpCredentials(esSettings.username, esSettings.password))
 
   def indexRoot:String
@@ -51,6 +55,7 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
   def entityType:String
 
   def baseUrl = s"${esSettings.rootUrl}/${indexRoot}/$entityType"
+
 
   //final implicit val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system))
 
@@ -95,11 +100,12 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
 
         entity.dataBytes.runFold(ByteString(""))(_ ++ _)(ActorMaterializer(ActorMaterializerSettings(context.system))).foreach { body =>
           log.info("Got response, body: " + body.utf8String)
+          read[RT]("")
         }
 //        entity.dataBytes.runFold(ByteString(""))(_ ++ _).foreach { body =>
 //          log.info("Got response, body: " + body.utf8String)
 //        }
-        Future(read[RT](""))
+        //Future()
       case resp @ HttpResponse(code, _, _, _) =>
         //log.info("Request failed, response code: " + code)
         //resp.discardEntityBytes()
