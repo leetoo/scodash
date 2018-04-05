@@ -5,6 +5,8 @@ import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvi
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials}
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
+import akka.util.ByteString
 import com.typesafe.config.Config
 import org.apache.commons.lang3.StringUtils
 import org.json4s._
@@ -34,7 +36,8 @@ object ElasticsearchApi {
   implicit lazy val formats = DefaultFormats ++ JodaTimeSerializers.all
 }
 
-trait ElasticsearchSupport{ me:AbstractBaseActor =>
+trait ElasticsearchSupport { me:AbstractBaseActor =>
+
   import ElasticsearchApi._
 
   //implicit val executionContext = context.system.dispatcher
@@ -48,6 +51,9 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
   def entityType:String
 
   def baseUrl = s"${esSettings.rootUrl}/${indexRoot}/$entityType"
+
+  //final implicit val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system))
+
 
   def queryElasticsearch(query:String)(implicit ec:ExecutionContext):Future[List[JObject]] = {
 
@@ -84,7 +90,23 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
     req.withEntity(req.entity withContentType(ContentTypes.`application/json`))
 
     val respFut: Future[HttpResponse] = Http(context.system).singleRequest(reqHeaders)
-    respFut.flatMap[RT]{resp:HttpResponse => Future(read(resp.entity.toString))}
+    respFut.flatMap[RT] { /*resp: HttpResponse => match {*/
+      case HttpResponse(StatusCodes.OK, headers, entity, _) =>
+
+        entity.dataBytes.runFold(ByteString(""))(_ ++ _)(ActorMaterializer(ActorMaterializerSettings(context.system))).foreach { body =>
+          log.info("Got response, body: " + body.utf8String)
+        }
+//        entity.dataBytes.runFold(ByteString(""))(_ ++ _).foreach { body =>
+//          log.info("Got response, body: " + body.utf8String)
+//        }
+        Future(read[RT](""))
+      case resp @ HttpResponse(code, _, _, _) =>
+        //log.info("Request failed, response code: " + code)
+        //resp.discardEntityBytes()
+        Future(read[RT](""))
+    }
+
+      //Future(read(resp.entity.toString))}
 //    respFut.map(resp => {
 //      resp.entity(as[RT]) {
 //        complete
