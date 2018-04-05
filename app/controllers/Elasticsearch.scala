@@ -3,7 +3,8 @@ package controllers
 
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpEntity, HttpMethods, HttpRequest, HttpResponse}
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials}
 import com.typesafe.config.Config
 import org.apache.commons.lang3.StringUtils
 import org.json4s._
@@ -40,6 +41,8 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
 
   val esSettings = ElasticsearchSettings(context.system)
 
+  val authHeader = Authorization(BasicHttpCredentials(esSettings.username, esSettings.password))
+
   def indexRoot:String
 
   def entityType:String
@@ -60,7 +63,7 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
       case None => urlBase
       case Some(v) => s"$urlBase/_update?version=$v"
     }
-    val req = HttpRequest(uri = requestUrl, method = HttpMethods.PUT, entity = HttpEntity(write(request)))
+    val req = HttpRequest(uri = requestUrl, method = HttpMethods.PUT, entity = HttpEntity(write(request)).withContentType(ContentTypes.`application/json`))
     //req.setContentType("application/json", "UTF-8")
     //req.setBody(write(request))
     //req.setMethod("PUT")
@@ -77,7 +80,10 @@ trait ElasticsearchSupport{ me:AbstractBaseActor =>
 
     //read("xx")
 
-    val respFut: Future[HttpResponse] = Http(context.system).singleRequest(req)
+    val reqHeaders = req.withHeaders(List(authHeader))
+    req.withEntity(req.entity withContentType(ContentTypes.`application/json`))
+
+    val respFut: Future[HttpResponse] = Http(context.system).singleRequest(reqHeaders)
     respFut.flatMap[RT]{resp:HttpResponse => Future(read(resp.entity.toString))}
 //    respFut.map(resp => {
 //      resp.entity(as[RT]) {
