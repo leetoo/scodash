@@ -3,10 +3,10 @@ package controllers
 
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
-import akka.util.ByteString
 import com.typesafe.config.Config
 import org.apache.commons.lang3.StringUtils
 import org.json4s._
@@ -14,9 +14,10 @@ import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.{read, write}
 import play.api.Logger
 
-import play.api.libs._
-
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
+import scala.concurrent.duration._
+
 
 object ElasticsearchApi {
 
@@ -42,6 +43,8 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
 
   import ElasticsearchApi._
 
+  val timeout = 300.millis
+
   //implicit val executionContext = context.system.dispatcher
 
   val esSettings = ElasticsearchSettings(context.system)
@@ -59,11 +62,13 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
 
   //final implicit val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system))
 
+  implicit val jsonStreamingSupport: JsonEntityStreamingSupport = EntityStreamingSupport.json()
+
 
   def queryElasticsearch(query:String)(implicit ec:ExecutionContext):Future[List[JObject]] = {
 
     //val req = url(s"$baseUrl/_search") <<? Map("q" -> query)
-    val req = HttpRequest(uri = s"$baseUrl/_search") // TODO q
+    val req = HttpRequest(uri = s"$baseUrl/_search").withUri() // TODO q
     callElasticsearch[QueryResponse](req).
       map(_.hits.hits.map(_._source))
   }
@@ -95,17 +100,12 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
     req.withEntity(req.entity withContentType(ContentTypes.`application/json`))
 
     val respFut: Future[HttpResponse] = Http(context.system).singleRequest(reqHeaders)
-    respFut.flatMap[RT] { /*resp: HttpResponse => match {*/
-      case HttpResponse(StatusCodes.OK, headers, entity, _) =>
 
-        entity.dataBytes.runFold(ByteString(""))(_ ++ _)(ActorMaterializer(ActorMaterializerSettings(context.system))).foreach { body =>
-          log.info("Got response, body: " + body.utf8String)
-          read[RT]("")
-        }
-//        entity.dataBytes.runFold(ByteString(""))(_ ++ _).foreach { body =>
-//          log.info("Got response, body: " + body.utf8String)
-//        }
-        //Future()
+
+    respFut.flatMap[RT] { /*resp: HttpResponse => match {*/
+      case response @ HttpResponse(StatusCodes.OK, headers, entity, _) =>
+        val body:Future[String] = entity.toStrict(timeout)(ActorMaterializer(ActorMaterializerSettings(context.system))).map(_.data).map(_.utf8String)
+        body.flatMap[RT] { body: String => Future(read[RT](body))}
       case resp @ HttpResponse(code, _, _, _) =>
         //log.info("Request failed, response code: " + code)
         //resp.discardEntityBytes()
@@ -120,9 +120,16 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
 //    })
 //    respFut
 //      .onComplete {
-//        case Success(res) => println(res)
-//        case Failure(_)   => sys.error("something wrong")
+//        case scala.util.Success(res) => {
+//          val body = res.entity.dataBytes.map[String](byteString => byteString.utf8String)
+//          read[RT](body)
+//        }
+//        case scala.util.Failure(_)   => {
+//          sys.error("something wrong")
+//        }
 //      }
+
+
 
 
 
