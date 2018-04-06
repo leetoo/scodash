@@ -4,6 +4,7 @@ package controllers
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
+import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
@@ -14,9 +15,8 @@ import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.{read, write}
 import play.api.Logger
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
 
 object ElasticsearchApi {
@@ -68,7 +68,9 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
   def queryElasticsearch(query:String)(implicit ec:ExecutionContext):Future[List[JObject]] = {
 
     //val req = url(s"$baseUrl/_search") <<? Map("q" -> query)
-    val req = HttpRequest(uri = s"$baseUrl/_search").withUri() // TODO q
+
+    //val req = HttpRequest(uri = s"$baseUrl/_search").with // TODO q
+    val req = HttpRequest().withUri(Uri(s"$baseUrl/_search").withQuery(Query(Map("q" -> query))))
     callElasticsearch[QueryResponse](req).
       map(_.hits.hits.map(_._source))
   }
@@ -104,12 +106,11 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
 
     respFut.flatMap[RT] { /*resp: HttpResponse => match {*/
       case response @ HttpResponse(StatusCodes.OK, headers, entity, _) =>
-        val body:Future[String] = entity.toStrict(timeout)(ActorMaterializer(ActorMaterializerSettings(context.system))).map(_.data).map(_.utf8String)
-        body.flatMap[RT] { body: String => Future(read[RT](body))}
+        processEntity(entity)
+      case response @ HttpResponse(StatusCodes.Created, headers, entity, _) =>
+        processEntity(entity)
       case resp @ HttpResponse(code, _, _, _) =>
-        //log.info("Request failed, response code: " + code)
-        //resp.discardEntityBytes()
-        Future(read[RT](""))
+        Future.failed[RT](new IllegalStateException(s"Unexpected HTTP status ${code}"))
     }
 
       //Future(read(resp.entity.toString))}
@@ -134,6 +135,11 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
 
 
     //Http(req as(esSettings.username, esSettings.password) OK as.String).map(resp => read[RT](resp))
+  }
+
+  private def processEntity[RT: Manifest](entity: ResponseEntity)(implicit ec:ExecutionContext) = {
+    val body: Future[String] = entity.toStrict(timeout)(ActorMaterializer(ActorMaterializerSettings(context.system))).map(_.data).map(_.utf8String)
+    body.flatMap[RT] { body: String => Future(read[RT](body)) }
   }
 }
 
