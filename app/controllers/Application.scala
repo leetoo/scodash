@@ -27,13 +27,14 @@ import play.api.mvc._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class Application @Inject()(
+class Application @Inject() (
+  cc: MessagesControllerComponents,
   @Named(Scodash.Name) scodashActor: ActorRef,
   @Named(DashboardView.Name) dashboardViewActor: ActorRef,
   @Named(DashboardViewBuilder.Name) scodashViewBuilder: ActorRef,
   system: ActorSystem,
   implicit val mat: Materializer)
-    extends Controller {
+    extends MessagesAbstractController(cc) {
 
   // Use a direct reference to SLF4J
   private val logger = org.slf4j.LoggerFactory.getLogger("controllers.Application")

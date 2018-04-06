@@ -2,11 +2,11 @@ name := "carkovani"
 
 version := "1.0"
 
-lazy val `carkovani` = (project in file(".")).enablePlugins(PlayJava)
+lazy val `carkovani` = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.11.7"
 
-libraryDependencies ++= Seq( javaJdbc, guice, ws)
+libraryDependencies ++= Seq( javaJdbc, guice, ws, javaWs)
 
 val akkaVersion = "2.5.11"
 
