@@ -238,7 +238,7 @@ class Application @Inject() (
     */
   def originMatches(origin: String): Boolean = {
     val host = sys.env("HOST")
-    origin.contains(host + ":9000") || origin.contains(host + ":19001")
+    origin.contains(host)
   }
 
   /**
