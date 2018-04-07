@@ -1,10 +1,10 @@
-@(dashboardForm1: play.api.data.Form[controllers.Forms.NewDashboard])(implicit request: MessagesRequestHeader))
+@(dashboardForm1: play.api.data.Form[controllers.Forms.NewDashboard])(implicit request: MessagesRequestHeader)
 
 @import helper._
 
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
 
-@mainWizard("ScoDash - create dashboard 1") {
+@mainWizard("ScoDash - new dashboard") {
 
     <div class="padding-15 row vertical-align">
         <div class="col-md-12 text-center">
