@@ -363,6 +363,8 @@ class Application @Inject() (
           if (!writeRes.isEmpty) {
             (writeRes.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
           }
+        case _ =>
+          null
       }
       readDash match  {
         case FullResult(List) =>
@@ -370,6 +372,8 @@ class Application @Inject() (
           if (!readRes.isEmpty) {
             (readRes.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
           }
+        case _ =>
+          null
       }
       null
     }
