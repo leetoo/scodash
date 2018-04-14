@@ -357,15 +357,21 @@ class Application @Inject() (
       writeDash <- writeFut
       readDash <- readFut
     } yield {
-      val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
-      val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
-      if (!writeRes.isEmpty) {
-        (writeRes.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
-      } else if (!readRes.isEmpty) {
-        (readRes.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
-      } else {
-        null
+      writeDash match {
+        case FullResult(List) =>
+          val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
+          if (!writeRes.isEmpty) {
+            (writeRes.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
+          }
       }
+      readDash match  {
+        case FullResult(List) =>
+          val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
+          if (!readRes.isEmpty) {
+            (readRes.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
+          }
+      }
+      null
     }
 
   }
