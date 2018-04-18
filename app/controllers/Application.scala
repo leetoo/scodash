@@ -165,8 +165,11 @@ class Application @Inject() (
   }
 
   def dashboard(hash: String) = Action.async { implicit request =>
-    getDashboard(hash).flatMap{ case Some((dashboard, accessMode)) =>
-      Future(Ok(views.html.dashboard(dashboard)))
+    getDashboard(hash).flatMap{
+      case Some((dashboard, accessMode)) =>
+        Future(Ok(views.html.dashboard(dashboard)))
+      case _ =>
+        Future(Ok(views.html.noDashboard()))
     }
   }
 
@@ -359,20 +362,17 @@ class Application @Inject() (
     } yield {
       writeDash match {
         case writeRes:FullResult[List[JObject]] =>
-          Some(writeRes.value.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
-//          val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
-//          if (!writeRes.isEmpty) {
-//            Some(writeRes.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
-//          }
+          writeRes.value match {
+            case List(_) => Some(writeRes.value.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
+            case _ => None
+          }
         case _ =>
           readDash match {
             case readRes:FullResult[List[JObject]] =>
-              Some(readRes.value.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
-//            case FullResult(List) =>
-//              val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
-//              if (!readRes.isEmpty) {
-//                Some(readRes.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
-//              }
+              readRes.value match {
+                case List(_) => Some(readRes.value.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
+                case _ => None
+              }
             case _ =>
               None
           }

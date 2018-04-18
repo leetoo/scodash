@@ -99,7 +99,7 @@ trait ViewBuilder[RM <: ReadModelObject] extends AbstractBaseActor with Elastics
       }
 
       val offsetDate = new Date(offset)
-      log.info("Starting up view builder for entity {} with offset time of {}", entityType, offsetDate)
+      log.info("Starting up view builder for entity {} with offset of {}", entityType, offset)
       val eventsSource = journal.eventsByTag(entityType, offset)
       eventsSource.
         via(eventsFlow).
