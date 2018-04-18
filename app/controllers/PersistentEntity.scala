@@ -83,7 +83,9 @@ abstract class PersistentEntity[FO <: EntityFieldsObject[String, FO]: ClassTag](
     case ev:EntityEvent =>
       log.info("Recovering persisted event: {}", ev)
       handleEvent(ev)
+      log.debug("BEFORE INC - ENTITY:{} eventsSinceLastSnapshot:{}", persistenceId, eventsSinceLastSnapshot )
       eventsSinceLastSnapshot += 1
+      log.debug("AFTER INC -  ENTITY:{} eventsSinceLastSnapshot:{}", persistenceId, eventsSinceLastSnapshot )
 
     case SnapshotOffer(meta, snapshot:FO) =>
       log.info("Recovering entity with a snapshot: {}", snapshot)
@@ -219,7 +221,9 @@ abstract class PersistentEntity[FO <: EntityFieldsObject[String, FO]: ClassTag](
   def handleEventAndRespond(respectDeleted:Boolean = true)(event:EntityEvent):Unit = {
     handleEvent(event)
     if (snapshotAfterCount.isDefined){
+      log.debug("BEFORE INC - ENTITY:{} eventsSinceLastSnapshot:{}", persistenceId, eventsSinceLastSnapshot )
       eventsSinceLastSnapshot += 1
+      log.debug("AFTER INC -  ENTITY:{} eventsSinceLastSnapshot:{}", persistenceId, eventsSinceLastSnapshot )
       maybeSnapshot
     }
     sender() ! stateResponse(respectDeleted)
@@ -235,6 +239,7 @@ abstract class PersistentEntity[FO <: EntityFieldsObject[String, FO]: ClassTag](
     * Decides if a snapshot is to take place or not after a new event has been processed
     */
   def maybeSnapshot:Unit = {
+    log.debug("maybeSnapshot? snapshotAfterCount: {} eventsSinceLastSnapshot:{}", snapshotAfterCount, eventsSinceLastSnapshot )
     snapshotAfterCount.
       filter(i => eventsSinceLastSnapshot  >= i).
       foreach{ i =>

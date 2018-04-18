@@ -165,13 +165,13 @@ class Application @Inject() (
   }
 
   def dashboard(hash: String) = Action.async { implicit request =>
-    getDashboard(hash).flatMap{ case(dashboard, accessMode) =>
+    getDashboard(hash).flatMap{ case Some((dashboard, accessMode)) =>
       Future(Ok(views.html.dashboard(dashboard)))
     }
   }
 
   def dashboardData(hash: String) = Action.async { implicit request =>
-    getDashboard(hash).flatMap{ case(dashboard, accessMode) =>
+    getDashboard(hash).flatMap{ case Some((dashboard, accessMode)) =>
       val json = write(dashboard)
       Future(Ok(json))
     }
@@ -180,7 +180,7 @@ class Application @Inject() (
   def dashboardsData(hashesStr: String) = Action.async { implicit request =>
     val hashes = hashesStr.split(",")
     Future.sequence(hashes.map(hash => getDashboard(hash)).toList).flatMap(ds => {
-      val json = write(ds.filter(_ != null).map(_._1))
+      val json = write(ds.filter(_.isDefined).map(_.get._1))
       Future(Ok(json))
     })
   }
@@ -224,7 +224,7 @@ class Application @Inject() (
         true
 
       case Some(badOrigin) =>
-        logger.error(s"originCheck: rejecting request because Origin header value ${badOrigin} is not in the same origin")
+        logger.error(s"originCheck: rejecting request because Origin header value $badOrigin is not in the same origin")
         false
 
       case None =>
@@ -337,7 +337,7 @@ class Application @Inject() (
     */
   def createUserActor(userId: String, webSocketOut: ActorRef, hash: String): Future[ActorRef] = {
     val userActorFuture = {
-      getDashboard(hash).flatMap{case(dashboard, accessMode) =>
+      getDashboard(hash).flatMap{case Some((dashboard, accessMode)) =>
         (scodashActor ? Scodash.Command.CreateDashboardUser(userId, webSocketOut, dashboard.id, accessMode)).mapTo[ActorRef]
       }
 
@@ -349,7 +349,7 @@ class Application @Inject() (
 
   }
 
-  def getDashboard(hash: String): Future[(DashboardFO, DashboardAccessMode.Value)] = {
+  def getDashboard(hash: String): Future[Option[(DashboardFO, DashboardAccessMode.Value)]] = {
     val writeFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
     val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
 
@@ -358,24 +358,25 @@ class Application @Inject() (
       readDash <- readFut
     } yield {
       writeDash match {
-        case FullResult(List) =>
-          val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
-          if (!writeRes.isEmpty) {
-            (writeRes.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
-          }
+        case writeRes:FullResult[List[JObject]] =>
+          Some(writeRes.value.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
+//          val writeRes: List[JObject] = writeDash.asInstanceOf[FullResult[List[JObject]]].value
+//          if (!writeRes.isEmpty) {
+//            Some(writeRes.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
+//          }
         case _ =>
-          null
-      }
-      readDash match  {
-        case FullResult(List) =>
-          val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
-          if (!readRes.isEmpty) {
-            (readRes.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
+          readDash match {
+            case readRes:FullResult[List[JObject]] =>
+              Some(readRes.value.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
+//            case FullResult(List) =>
+//              val readRes: List[JObject] = readDash.asInstanceOf[FullResult[List[JObject]]].value
+//              if (!readRes.isEmpty) {
+//                Some(readRes.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
+//              }
+            case _ =>
+              None
           }
-        case _ =>
-          null
       }
-      null
     }
 
   }
