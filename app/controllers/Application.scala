@@ -360,22 +360,23 @@ class Application @Inject() (
       writeDash <- writeFut
       readDash <- readFut
     } yield {
+      val maybeReadDashboard = readDash match {
+        case readRes: FullResult[List[JObject]] =>
+          readRes.value match {
+            case List(_) => Some(readRes.value.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
+            case _ => None
+          }
+        case _ =>
+          None
+      }
       writeDash match {
         case writeRes:FullResult[List[JObject]] =>
           writeRes.value match {
             case List(_) => Some(writeRes.value.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
-            case _ => None
+            case _ => maybeReadDashboard
           }
         case _ =>
-          readDash match {
-            case readRes:FullResult[List[JObject]] =>
-              readRes.value match {
-                case List(_) => Some(readRes.value.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
-                case _ => None
-              }
-            case _ =>
-              None
-          }
+          maybeReadDashboard
       }
     }
 
