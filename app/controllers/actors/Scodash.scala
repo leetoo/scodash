@@ -3,6 +3,7 @@ package controllers.actors
 import java.util.UUID
 
 import akka.actor.{ActorRef, Props}
+import akka.persistence.jdbc.query
 import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
 import akka.persistence.query.{EventEnvelope, PersistenceQuery}
 import akka.stream.ActorMaterializer
@@ -68,7 +69,7 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       sender ! user
 
     case EventEnvelope(offset, pid, seq, event) =>
-      projection.storeLatestOffset(offset)
+      projection.storeLatestOffset(query.OffsetOps(offset).value)
   }
 
   def entityProps(id: String) = Dashboard.props(id)
