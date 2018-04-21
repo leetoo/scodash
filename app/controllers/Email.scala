@@ -6,9 +6,12 @@ import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvi
 import akka.persistence.PersistentActor
 import com.sendgrid._
 import com.typesafe.config.Config
+import play.api.Logger
 
 
 trait EmailSupport{ me:PersistentActor =>
+
+  val logger: Logger = Logger(this.getClass)
 
   val emailSettings = EmailSettings(context.system)
 
@@ -30,12 +33,10 @@ trait EmailSupport{ me:PersistentActor =>
       request.setEndpoint("mail/send")
       request.setBody(mail.build)
       val response = sendGrid.api(request)
-      System.out.println(response.getStatusCode)
-      System.out.println(response.getBody)
-      System.out.println(response.getHeaders)
+      logger.debug(response.getStatusCode.toString)
     } catch {
       case ex: IOException =>
-        throw ex
+        logger.error(s"Failed to send email to ${to}", ex)
     }
 
   }
