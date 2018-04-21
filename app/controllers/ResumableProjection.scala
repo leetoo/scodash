@@ -16,6 +16,8 @@ abstract class ResumableProjection(identifier:String) {
 
 object ResumableProjection {
 
+
+
   def apply(identifier:String, system:ActorSystem) =
     new PostgresResumableProjection(identifier, system)
 }
@@ -24,7 +26,7 @@ class PostgresResumableProjection(identifier:String, system:ActorSystem) extends
   val projectionStorage = PostgresProjectionStorage(system)
 
   def storeLatestOffset(offset:Long):Future[Boolean] = {
-    projectionStorage.updateOffset(identifier, offset + 1)
+    projectionStorage.updateOffset(identifier, offset)
   }
 
   def fetchLatestOffset:Future[Option[Long]] = {
@@ -34,12 +36,16 @@ class PostgresResumableProjection(identifier:String, system:ActorSystem) extends
 
 class PostgresProjectionStorageExt(system:ActorSystem, offsetStore: OffsetStore) extends Extension {
 
+  // Use a direct reference to SLF4J
+  private val log = org.slf4j.LoggerFactory.getLogger("controllers.PostgresProjectionStorageExt")
+
+
   def updateOffset(identifier:String, offset:Long): Future[Boolean] = {
-    offsetStore.save(identifier, offset) map { _ => true }
+    offsetStore.save(identifier, offset) map { _ => log.info(s"updateOffset($identifier, $offset)"); true }
   }
 
   def fetchLatestOffset(identifier:String): Future[Option[Long]] = {
-    offsetStore.load(identifier) map  { res => Option(res)}
+    offsetStore.load(identifier) map  { res => log.info(s"fetchLatestOffset($identifier) = $res"); Option(res)}
   }
 }
 object PostgresProjectionStorage extends ExtensionId[PostgresProjectionStorageExt] with ExtensionIdProvider {

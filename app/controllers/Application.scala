@@ -360,7 +360,7 @@ class Application @Inject() (
       writeDash <- writeFut
       readDash <- readFut
     } yield {
-      val maybeReadDasboard = readDash match {
+      val maybeReadDashboard = readDash match {
         case readRes: FullResult[List[JObject]] =>
           readRes.value match {
             case List(_) => Some(readRes.value.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
@@ -373,11 +373,10 @@ class Application @Inject() (
         case writeRes:FullResult[List[JObject]] =>
           writeRes.value match {
             case List(_) => Some(writeRes.value.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
-            case _ =>
-              maybeReadDasboard
+            case _ => maybeReadDashboard
           }
         case _ =>
-          maybeReadDasboard
+          maybeReadDashboard
       }
     }
 

@@ -2,8 +2,9 @@ package controllers
 
 import java.util.Date
 
+import akka.persistence.jdbc.query
 import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
-import akka.persistence.query.{EventEnvelope, PersistenceQuery}
+import akka.persistence.query.{EventEnvelope, PersistenceQuery, Sequence}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 
@@ -85,7 +86,7 @@ trait ViewBuilder[RM <: ReadModelObject] extends AbstractBaseActor with Elastics
       mapAsync(1){
         case EnvelopeAndFunction(env, f) => f.apply.map(_ => env)
       }.
-      mapAsync(1)(env => resumableProjection.storeLatestOffset(env.offset))
+      mapAsync(1)(env => resumableProjection.storeLatestOffset(query.OffsetOps(env.offset).value))
 
   def projectionId:String
 

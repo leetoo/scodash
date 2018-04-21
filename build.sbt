@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
   "net.databinder" %% "unfiltered-json4s" % "0.8.4",
   "org.json4s" %% "json4s-ext" % json4sVersion,
   "org.json4s" %% "json4s-jackson" % json4sVersion,
-  "com.github.dnvriend" %% "akka-persistence-jdbc" % "2.8.0",
+  "com.github.dnvriend" %% "akka-persistence-jdbc" % "3.3.0",
   "org.postgresql" % "postgresql" % "9.4.1208",
   "com.google.protobuf" % "protobuf-java"  % "2.5.0",
   "org.apache.commons" % "commons-lang3" % "3.7",
