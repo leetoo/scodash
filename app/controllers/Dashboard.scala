@@ -3,6 +3,7 @@ package controllers
 import akka.actor.{ActorRef, Props}
 import controllers.Dashboard.Command._
 import controllers.Dashboard.Event.{DashboardCreated, DashboardUpdated}
+import org.joda.time.DateTime
 
 import scala.collection.mutable
 
@@ -12,19 +13,19 @@ case class ItemFO(id: Int, name: String, var score: Int = 0) {
 }
 
 object DashboardFO {
-  def empty = DashboardFO("", "", "", List.empty[ItemFO], "", "", "", "", -1, -1)
+  def empty = DashboardFO("", "", "", List.empty[ItemFO], "", "", "", "", null, null)
 
 }
 
 @SerialVersionUID(1L)
 case class DashboardFO(id: String, name: String, description: String, items: List[ItemFO] = List[ItemFO](),
                        ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,
-                       created:Long, updated:Long, deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
+                       created:DateTime, updated:DateTime, deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
   override def assignId(id: String) = this.copy(id = id)
   override def markDeleted = this.copy(deleted = false)
   def removeReadOnlyHash = this.copy(readonlyHash = "")
   def removeWriteHash = this.copy(writeHash = "")
-  def updatedNow = this.copy(updated = System.currentTimeMillis())
+  def updatedNow = this.copy(updated = DateTime.now())
   def sortByScore = this.copy(items = List() ++ (items.sortWith((it1, it2) => it1.score > it2.score)))
   def sortByAZ = this.copy(items = List() ++ (items.sortWith((it1, it2) => it1.name < it2.name)))
 }

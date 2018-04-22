@@ -13,6 +13,7 @@ import controllers.PersistentEntity.GetState
 import controllers._
 import controllers.actors.Scodash.Command.{CreateDashboardUser, CreateNewDashboard, FindDashboard}
 import org.apache.commons.lang3.RandomStringUtils
+import org.joda.time.DateTime
 
 import scala.concurrent.duration._
 
@@ -58,7 +59,7 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       val id = UUID.randomUUID().toString
       val readonlyHash = RandomStringUtils.randomAlphanumeric(8)
       val writeHash = RandomStringUtils.randomAlphanumeric(8)
-      val fo = DashboardFO(id, name, description, List() ++ items, ownerName, ownerEmail, readonlyHash, writeHash, System.currentTimeMillis(), System.currentTimeMillis())
+      val fo = DashboardFO(id, name, description, List() ++ items, ownerName, ownerEmail, readonlyHash, writeHash, DateTime.now(), DateTime.now())
       val command = CreateDashboard(fo)
       forwardCommand(id, command)
 

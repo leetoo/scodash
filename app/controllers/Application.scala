@@ -158,7 +158,7 @@ class Application @Inject() (
           sessDash.items.zipWithIndex.map { case (name, id) => ItemFO(id, name) } ,
           ownerData.ownerName,
           ownerData.ownerEmail)).mapTo[FullResult[DashboardFO]].map {
-          r => Ok(views.html.createdDashboard(Forms.CreatedDashboard(r.value.name, r.value.writeHash, r.value.readonlyHash)))
+          r => Ok(views.html.createdDashboard(Forms.CreatedDashboard(r.value.name, r.value.writeHash, r.value.readonlyHash))).withNewSession
         }
       }
     )
