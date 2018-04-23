@@ -46,6 +46,7 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) with Email
         sender() ! Failure(FailureType.Validation, DashboardAlreadyCreated)
       } else {
         persist(DashboardCreated(dashboard))(handleEventAndRespond())
+
         sendEmailNewDashboard(dashboard.ownerEmail, dashboard.readonlyHash, dashboard.writeHash, dashboard.name, dashboard.ownerName  )
       }
     case Watch(watcher) =>

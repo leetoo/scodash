@@ -3,10 +3,6 @@ package controllers.actors
 import java.util.UUID
 
 import akka.actor.{ActorRef, Props}
-import akka.persistence.jdbc.query
-import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
-import akka.persistence.query.{EventEnvelope, PersistenceQuery}
-import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import controllers.Dashboard.Command.CreateDashboard
 import controllers.PersistentEntity.GetState
@@ -35,18 +31,7 @@ object Scodash {
 
 class Scodash extends Aggregate[DashboardFO, Dashboard] {
 
-  import context.dispatcher
-
   implicit val timeout: Timeout = 5.seconds
-
-  val projection = ResumableProjection("scodash", context.system)
-  implicit val mater = ActorMaterializer()
-  val journal: JdbcReadJournal = PersistenceQuery(context.system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
-  projection.fetchLatestOffset.foreach{ o =>
-    journal.
-      eventsByTag("dashboardcreated", o.getOrElse(0L)).
-      runForeach(e => self ! e)
-  }
 
   override def receive = {
     case FindDashboard(id) =>
@@ -69,8 +54,6 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       forwardCommand(dashboardId, Dashboard.Command.Watch(user))
       sender ! user
 
-    case EventEnvelope(offset, pid, seq, event) =>
-      projection.storeLatestOffset(query.OffsetOps(offset).value)
   }
 
   def entityProps(id: String) = Dashboard.props(id)

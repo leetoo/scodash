@@ -28,12 +28,12 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 class Application @Inject() (
-  cc: MessagesControllerComponents,
-  @Named(Scodash.Name) scodashActor: ActorRef,
-  @Named(DashboardView.Name) dashboardViewActor: ActorRef,
-  @Named(DashboardViewBuilder.Name) scodashViewBuilder: ActorRef,
-  system: ActorSystem,
-  implicit val mat: Materializer)
+                              cc: MessagesControllerComponents,
+                              @Named(Scodash.Name) scodashActor: ActorRef,
+                              @Named(DashboardView.Name) dashboardViewActor: ActorRef,
+                              @Named(DashboardViewBuilder.Name) dashboardViewBuilder: ActorRef,
+                              system: ActorSystem,
+                              implicit val mat: Materializer)
     extends MessagesAbstractController(cc) {
 
   // Use a direct reference to SLF4J
