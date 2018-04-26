@@ -14,15 +14,11 @@ import controllers.Forms.CreateDashboardItems
 import controllers.actors.Scodash.Command.CreateNewDashboard
 import controllers.actors.{DashboardAccessMode, Scodash}
 import org.apache.commons.lang3.StringUtils
-import org.json4s.ext.JodaTimeSerializers
-import org.json4s.native.Serialization.write
-import org.json4s.native._
-import org.json4s.{DefaultFormats, _}
 import org.reactivestreams.Publisher
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc._
 
 import scala.concurrent.Future
@@ -35,7 +31,7 @@ class Application @Inject() (
                               @Named(DashboardViewBuilder.Name) dashboardViewBuilder: ActorRef,
                               system: ActorSystem,
                               implicit val mat: Materializer)
-    extends MessagesAbstractController(cc) {
+    extends MessagesAbstractController(cc) with JsonSupport {
 
   // Use a direct reference to SLF4J
   private val logger = org.slf4j.LoggerFactory.getLogger("controllers.Application")
@@ -43,7 +39,7 @@ class Application @Inject() (
   val SESSION_DASHBOARD = "dashboard"
 
   implicit val timeout: Timeout = 5.seconds
-  implicit lazy val formats = DefaultFormats ++ JodaTimeSerializers.all
+  //implicit lazy val formats = DefaultFormats ++ JodaTimeSerializers.all
 //  implicit private val ItemWrites = Json.writes[ItemFO]
 //  implicit private val DashoboardWrites = Json.writes[DashboardFO]
 
@@ -62,7 +58,7 @@ class Application @Inject() (
   def showNewDashboard() = Action { implicit request =>
     request.session.get(SESSION_DASHBOARD) match {
       case Some(sessDash) =>
-        Ok(views.html.createDashboardNew(newDashboardForm.fill(JsonMethods.parse(sessDash).extract[Forms.NewDashboard])))
+        Ok(views.html.createDashboardNew(newDashboardForm.fill(Json.parse(sessDash).validate[Forms.NewDashboard].get)))
       case _ =>
         Ok(views.html.createDashboardNew(newDashboardForm))
     }
@@ -82,18 +78,18 @@ class Application @Inject() (
       dashboardData => {
         var dashboard = new Forms.Dashboard()
         request.session.get(SESSION_DASHBOARD) match {
-          case Some(sessDash) => dashboard = JsonMethods.parse(sessDash).extract[Forms.Dashboard]
+          case Some(sessDash) => dashboard = Json.reads[Forms.Dashboard](Json.parse(sessDash)).get
           case _ =>
         }
         val updatedDashboard = dashboard.updateNameDescStyle(dashboardData.name, dashboardData.description)
-        Ok(views.html.createDashboardItems(dashboardItemsForm.fill(new CreateDashboardItems(updatedDashboard)))).withSession(SESSION_DASHBOARD -> write(updatedDashboard))
+        Ok(views.html.createDashboardItems(dashboardItemsForm.fill(new CreateDashboardItems(updatedDashboard)))).withSession(SESSION_DASHBOARD -> Json.toJson(updatedDashboard).toString())
       }
     )
   }
 
   def showDashboardItems() = Action { implicit request =>
     request.session.get(SESSION_DASHBOARD) match {
-      case Some(sessDash) => Ok(views.html.createDashboardItems(dashboardItemsForm.fill(JsonMethods.parse(sessDash).extract[CreateDashboardItems])))
+      case Some(sessDash) => Ok(views.html.createDashboardItems(dashboardItemsForm.fill(Json.reads[CreateDashboardItems](Json.parse(sessDash)).get)))
       case _ => Ok(views.html.createDashboardItems(dashboardItemsForm))
     }
   }
@@ -110,12 +106,16 @@ class Application @Inject() (
         BadRequest(views.html.createDashboardItems(dashboardItemsForm))
       },
       formData => {
-        val sessDash = JsonMethods.parse(request.session.get(SESSION_DASHBOARD).get).extract[Forms.Dashboard]
+        val sessDash = Json.reads[Forms.Dashboard](Json.parse(request.session.get(SESSION_DASHBOARD).get)).get
         if (StringUtils.isNotBlank(formData.itemName)) {
           val updatedDashboard = sessDash.updateItems(sessDash.items + formData.itemName)
-          Ok(views.html.createDashboardItems(dashboardItemsForm.fill(new Forms.CreateDashboardItems(updatedDashboard)))).withSession(SESSION_DASHBOARD -> write(updatedDashboard))
+          Ok(views.html.createDashboardItems(
+            dashboardItemsForm.fill(
+              new Forms.CreateDashboardItems(updatedDashboard)))).withSession(SESSION_DASHBOARD -> Json.toJson(updatedDashboard).toString())
         } else {
-          Ok(views.html.createDashboardItems(dashboardItemsForm.fill(new Forms.CreateDashboardItems(sessDash))))
+          Ok(views.html.createDashboardItems(
+            dashboardItemsForm.fill(
+              new Forms.CreateDashboardItems(sessDash))))
         }
       }
     )
@@ -127,9 +127,11 @@ class Application @Inject() (
         BadRequest(views.html.createDashboardItems(dashboardItemsForm))
       },
       formData => {
-        val sessDash = JsonMethods.parse(request.session.get(SESSION_DASHBOARD).get).extract[Forms.Dashboard]
+        val sessDash = Json.reads[Forms.Dashboard](Json.parse(request.session.get(SESSION_DASHBOARD).get)).get
         val updatedDashboard = sessDash.updateItems(sessDash.items - formData.itemName)
-        Ok(views.html.createDashboardItems(dashboardItemsForm.fill(new Forms.CreateDashboardItems(updatedDashboard)))).withSession(SESSION_DASHBOARD -> write(updatedDashboard))
+        Ok(views.html.createDashboardItems(
+          dashboardItemsForm.fill(
+            new Forms.CreateDashboardItems(updatedDashboard)))).withSession(SESSION_DASHBOARD -> Json.toJson(updatedDashboard).toString())
       }
     )
 
@@ -152,7 +154,7 @@ class Application @Inject() (
         Future(BadRequest(views.html.createDashboardOwner(formWithErrors)))
       },
       ownerData => {
-        val sessDash = JsonMethods.parse(request.session.get(SESSION_DASHBOARD).get).extract[Forms.Dashboard]
+        val sessDash = Json.reads[Forms.Dashboard](Json.parse(request.session.get(SESSION_DASHBOARD).get)).get
         (scodashActor ? CreateNewDashboard(
           sessDash.name,
           sessDash.description,
@@ -179,7 +181,7 @@ class Application @Inject() (
 
   def dashboardData(hash: String) = Action.async { implicit request =>
     getDashboard(hash).flatMap{ case Some((dashboard, accessMode)) =>
-      val json = write(dashboard)
+      val json = Json.toJson(dashboard).toString()
       Future(Ok(json))
     }
   }
@@ -187,7 +189,7 @@ class Application @Inject() (
   def dashboardsData(hashesStr: String) = Action.async { implicit request =>
     val hashes = hashesStr.split(",")
     Future.sequence(hashes.map(hash => getDashboard(hash)).toList).flatMap(ds => {
-      val json = write(ds.filter(_.isDefined).map(_.get._1))
+      val json = Json.toJson(ds.filter(_.isDefined).map(_.get._1)).toString()
       Future(Ok(json))
     })
   }
@@ -318,9 +320,9 @@ class Application @Inject() (
     val flowWatch: Flow[JsValue, JsValue, NotUsed] = flow.watchTermination() { (_, termination) =>
       termination.foreach { done =>
         logger.info(s"Terminating actor $userActor")
-        (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+        (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JsObject]]].map {
           result => {
-            val dashboardFO = result.value.head.extract[DashboardFO]
+            val dashboardFO = Json.reads[DashboardFO](result.value.head).get
             (scodashActor ? (Scodash.Command.FindDashboard(dashboardFO.id))).mapTo[ActorRef].map {
               dashboardActor =>
                 dashboardActor ! Dashboard.Command.Unwatch
@@ -365,18 +367,18 @@ class Application @Inject() (
       readDash <- readFut
     } yield {
       val maybeReadDashboard = readDash match {
-        case readRes: FullResult[List[JObject]] =>
+        case readRes: FullResult[List[JsObject]] =>
           readRes.value match {
-            case List(_) => Some(readRes.value.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
+            case List(_) => Some(readRes.value.head.validate[DashboardFO].get.removeWriteHash, DashboardAccessMode.READONLY)
             case _ => None
           }
         case _ =>
           None
       }
       writeDash match {
-        case writeRes:FullResult[List[JObject]] =>
+        case writeRes:FullResult[List[JsObject]] =>
           writeRes.value match {
-            case List(_) => Some(writeRes.value.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
+            case List(_) => Some(writeRes.value.head.validate[DashboardFO].get.removeReadOnlyHash, DashboardAccessMode.WRITE)
             case _ => maybeReadDashboard
           }
         case _ =>

@@ -1,4 +1,4 @@
-window.currentDashboardType = 'COMMA'
+window.currentDashboardType = 'COMMAA'
 
 window.initRecent = () ->
   $("#recent-dashboards-section").css "display", "none"
