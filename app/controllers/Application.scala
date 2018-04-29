@@ -78,7 +78,7 @@ class Application @Inject() (
       dashboardData => {
         var dashboard = new Forms.Dashboard()
         request.session.get(SESSION_DASHBOARD) match {
-          case Some(sessDash) => dashboard = Json.parse(sessDash).validate[Forms.Dashboard].get
+          case Some(sessDash) => dashboard = Json.reads[Forms.Dashboard](Json.parse(sessDash)).get
           case _ =>
         }
         val updatedDashboard = dashboard.updateNameDescStyle(dashboardData.name, dashboardData.description)
@@ -89,7 +89,7 @@ class Application @Inject() (
 
   def showDashboardItems() = Action { implicit request =>
     request.session.get(SESSION_DASHBOARD) match {
-      case Some(sessDash) => Ok(views.html.createDashboardItems(dashboardItemsForm.fill(Json.parse(sessDash).validate[Forms.CreateDashboardItems].get)))
+      case Some(sessDash) => Ok(views.html.createDashboardItems(dashboardItemsForm.fill(Json.reads[CreateDashboardItems](Json.parse(sessDash)).get)))
       case _ => Ok(views.html.createDashboardItems(dashboardItemsForm))
     }
   }
@@ -106,7 +106,7 @@ class Application @Inject() (
         BadRequest(views.html.createDashboardItems(dashboardItemsForm))
       },
       formData => {
-        val sessDash = Json.parse(request.session.get(SESSION_DASHBOARD).get).validate[Forms.Dashboard].get
+        val sessDash = Json.reads[Forms.Dashboard](Json.parse(request.session.get(SESSION_DASHBOARD).get)).get
         if (StringUtils.isNotBlank(formData.itemName)) {
           val updatedDashboard = sessDash.updateItems(sessDash.items + formData.itemName)
           Ok(views.html.createDashboardItems(
@@ -127,7 +127,7 @@ class Application @Inject() (
         BadRequest(views.html.createDashboardItems(dashboardItemsForm))
       },
       formData => {
-        val sessDash = Json.parse(request.session.get(SESSION_DASHBOARD).get).validate[Forms.Dashboard].get
+        val sessDash = Json.reads[Forms.Dashboard](Json.parse(request.session.get(SESSION_DASHBOARD).get)).get
         val updatedDashboard = sessDash.updateItems(sessDash.items - formData.itemName)
         Ok(views.html.createDashboardItems(
           dashboardItemsForm.fill(
@@ -154,7 +154,7 @@ class Application @Inject() (
         Future(BadRequest(views.html.createDashboardOwner(formWithErrors)))
       },
       ownerData => {
-        val sessDash = Json.parse(request.session.get(SESSION_DASHBOARD).get).validate[Forms.Dashboard].get
+        val sessDash = Json.reads[Forms.Dashboard](Json.parse(request.session.get(SESSION_DASHBOARD).get)).get
         (scodashActor ? CreateNewDashboard(
           sessDash.name,
           sessDash.description,
@@ -322,7 +322,7 @@ class Application @Inject() (
         logger.info(s"Terminating actor $userActor")
         (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JsObject]]].map {
           result => {
-            val dashboardFO = result.value.head.validate[DashboardFO].get
+            val dashboardFO = Json.reads[DashboardFO](result.value.head).get
             (scodashActor ? (Scodash.Command.FindDashboard(dashboardFO.id))).mapTo[ActorRef].map {
               dashboardActor =>
                 dashboardActor ! Dashboard.Command.Unwatch

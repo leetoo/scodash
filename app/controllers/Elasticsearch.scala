@@ -9,10 +9,8 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import com.typesafe.config.Config
-import org.apache.commons.lang3.StringUtils
 import org.json4s.JObject
 import play.api.Logger
-import play.api.libs.json.{Json, Writes}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,9 +33,10 @@ object ElasticsearchApi {
 
   case class DeleteResult(acknowledged:Boolean) extends EsResponse
 
+  implicit lazy val formats = DefaultFormats ++ JodaTimeSerializers.all
 }
 
-trait ElasticsearchSupport extends JsonSupport { me:AbstractBaseActor =>
+trait ElasticsearchSupport { me:AbstractBaseActor =>
 
   import ElasticsearchApi._
 
@@ -73,13 +72,13 @@ trait ElasticsearchSupport extends JsonSupport { me:AbstractBaseActor =>
       map(_.hits.hits.map(_._source))
   }
 
-  def updateIndex[T](id:String, request:T, writes:Writes[T] , version:Option[Long])(implicit ec:ExecutionContext):Future[IndexingResult] = {
+  def updateIndex(id:String, request:AnyRef, version:Option[Long])(implicit ec:ExecutionContext):Future[IndexingResult] = {
     val urlBase = s"$baseUrl/$id"
     val requestUrl = version match{
       case None => urlBase
       case Some(v) => s"$urlBase/_update?version=$v"
     }
-    val req = HttpRequest(uri = requestUrl, method = HttpMethods.PUT, entity = HttpEntity(Json.toJson[T](request)(writes).toString()).withContentType(ContentTypes.`application/json`))
+    val req = HttpRequest(uri = requestUrl, method = HttpMethods.PUT, entity = HttpEntity(write(request)).withContentType(ContentTypes.`application/json`))
     //req.setContentType("application/json", "UTF-8")
     //req.setBody(write(request))
     //req.setMethod("PUT")
