@@ -1,15 +1,32 @@
 package controllers.actors
 
+
 import akka.actor.{ActorRef, Props}
 import akka.util.Timeout
-import controllers._
+import controllers.{AbstractBaseActor, Dashboard, DashboardFO, ItemFO}
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import play.api.libs.json._
 
 import scala.concurrent.duration._
 
 case class UserFO(id: String)
 
-class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: DashboardAccessMode.Value) extends AbstractBaseActor with JsonSupport {
+class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: DashboardAccessMode.Value) extends AbstractBaseActor {
+
+  val dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+
+  implicit val jodaDateReads = Reads[DateTime](js =>
+    js.validate[String].map[DateTime](dtString =>
+      DateTime.parse(dtString, DateTimeFormat.forPattern(dateFormat))
+    )
+  )
+  implicit val jodaDateWrites: Writes[DateTime] = new Writes[DateTime] {
+    def writes(d: DateTime): JsValue = JsString(d.toString())
+  }
+  implicit private val ItemWrites = Json.writes[ItemFO]
+  implicit private val DashoboardWrites = Json.writes[DashboardFO]
+
 
   implicit val timeout: Timeout = 5.seconds
 

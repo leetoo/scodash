@@ -9,7 +9,10 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import com.typesafe.config.Config
-import org.json4s.JObject
+import org.apache.commons.lang3.StringUtils
+import org.json4s._
+import org.json4s.ext.JodaTimeSerializers
+import org.json4s.native.Serialization.{read, write}
 import play.api.Logger
 
 import scala.concurrent.duration._
