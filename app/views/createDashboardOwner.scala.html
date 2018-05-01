@@ -35,6 +35,11 @@
                     dashboardForm3("email"), '_label -> "Email", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Email"
                 )
 
+                <script type="text/javascript" language="JavaScript">
+                        var offset = new Date();
+                        document.write('<input type="hidden" id="tzOffset" name="tzOffset" value="' + offset.getTimezoneOffset() + '"/>');
+                </script>
+
                 <div class="form-group pull-right">
                     <a href="showDashboardItems" type="button" class="btn btn-default"><</a>
                     <button type="submit" class="btn btn-primary">Create dashboard&nbsp;></button>

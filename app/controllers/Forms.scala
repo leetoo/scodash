@@ -17,8 +17,8 @@ object Forms {
     def this() = this("","","")
   }
 
-  case class DashboardOwner(ownerName: String, ownerEmail: String) {
-    def this() = this("","")
+  case class DashboardOwner(ownerName: String, ownerEmail: String, tzOffset: String) {
+    def this() = this("","","")
   }
 
   case class Dashboard(name: String, description: String, items: Set[String], ownerName: String, ownerEmail: String) {

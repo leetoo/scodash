@@ -1,5 +1,7 @@
 package controllers
 
+import java.time.{ZoneId, ZoneOffset}
+
 import akka.NotUsed
 import akka.actor.{ActorRef, ActorSystem}
 import akka.event.Logging
@@ -14,6 +16,7 @@ import controllers.Forms.CreateDashboardItems
 import controllers.actors.Scodash.Command.CreateNewDashboard
 import controllers.actors.{DashboardAccessMode, Scodash}
 import org.apache.commons.lang3.StringUtils
+import org.joda.time.tz.DateTimeZoneBuilder
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.write
 import org.json4s.native._
@@ -138,7 +141,9 @@ class Application @Inject() (
   val dashboardOwnerForm = Form(
     mapping(
       "name" -> nonEmptyText,
-      "email" -> email
+      "email" -> email,
+      "tzOffset" -> nonEmptyText
+
     )(Forms.DashboardOwner.apply)(Forms.DashboardOwner.unapply)
   )
 
@@ -158,7 +163,10 @@ class Application @Inject() (
           sessDash.description,
           sessDash.items.zipWithIndex.map { case (name, id) => ItemFO(id, name) } ,
           ownerData.ownerName,
-          ownerData.ownerEmail)).mapTo[FullResult[DashboardFO]].map {
+          ownerData.ownerEmail,
+          DateTimeZone. ZoneId.ofOffset("GMT", ZoneOffset.ofHours(Integer.valueOf(ownerData.tzOffset)/60))
+
+          )).mapTo[FullResult[DashboardFO]].map {
           r => {
             dashboardViewBuilder ? DashboardCreated(r.value)
             Ok(views.html.createdDashboard(Forms.CreatedDashboard(r.value.name, r.value.writeHash, r.value.readonlyHash))).withNewSession

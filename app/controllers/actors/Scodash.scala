@@ -9,7 +9,7 @@ import controllers.PersistentEntity.GetState
 import controllers._
 import controllers.actors.Scodash.Command.{CreateDashboardUser, CreateNewDashboard, FindDashboard}
 import org.apache.commons.lang3.RandomStringUtils
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 
 import scala.concurrent.duration._
 
@@ -18,7 +18,7 @@ object Scodash {
     case class FindDashboard(id: String)
     case class FindDashboardByWriteHash(hash: String)
     case class FindDashboardByReadHash(hash: String)
-    case class CreateNewDashboard(name: String, description: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String)
+    case class CreateNewDashboard(name: String, description: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String, timeZone: DateTimeZone)
     case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String, mode: DashboardAccessMode.Value)
   }
 
@@ -39,12 +39,12 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       val dashboard = lookupOrCreateChild(id)
       forwardCommand(id, GetState)
 
-    case CreateNewDashboard(name, description, items, ownerName, ownerEmail) =>
+    case CreateNewDashboard(name, description, items, ownerName, ownerEmail, dateTimeZone) =>
       log.info("Creating new dashboard with name {}", name)
       val id = UUID.randomUUID().toString
       val readonlyHash = RandomStringUtils.randomAlphanumeric(8)
       val writeHash = RandomStringUtils.randomAlphanumeric(8)
-      val fo = DashboardFO(id, name, description, List() ++ items, ownerName, ownerEmail, readonlyHash, writeHash, DateTime.now(), DateTime.now())
+      val fo = DashboardFO(id, name, description, List() ++ items, ownerName, ownerEmail, readonlyHash, writeHash, DateTime.now(dateTimeZone), DateTime.now(dateTimeZone))
       val command = CreateDashboard(fo)
       forwardCommand(id, command)
 
