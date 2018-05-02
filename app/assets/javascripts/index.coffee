@@ -85,7 +85,7 @@ $ ->
           data: {itemId: item.id, hash: dashboard.writeHash}
           handler: (event) ->
             event.preventDefault()
-            ws.send(JSON.stringify({operation: 'decrement', itemId:  event.data.itemId, hash: event.data.hash}))
+            ws.send(JSON.stringify({operation: 'decrement', itemId:  event.data.itemId, hash: event.data.hash, tzOffset: new Date().getTimezoneOffset()}))
         buttonArea.append(minusBtn)
 
       buttonArea.append($("<button>").addClass("score-button").text(item.score))
@@ -96,7 +96,7 @@ $ ->
           data: {itemId: item.id, hash: dashboard.writeHash}
           handler: (event) ->
             event.preventDefault()
-            ws.send(JSON.stringify({operation: 'increment', itemId:  event.data.itemId, hash: event.data.hash}))
+            ws.send(JSON.stringify({operation: 'increment', itemId:  event.data.itemId, hash: event.data.hash, tzOffset: new Date().getTimezoneOffset() }))
 
         buttonArea.append(plusBtn)
 

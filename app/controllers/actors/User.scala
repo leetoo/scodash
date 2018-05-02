@@ -10,6 +10,8 @@ import play.api.libs.json._
 
 import scala.concurrent.duration._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 case class UserFO(id: String)
 
 class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: DashboardAccessMode.Value) extends AbstractBaseActor {
@@ -32,28 +34,40 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
 
   private var sorting: DashboardSorting.Value = DashboardSorting.AZ
 
+  private var dashboardToDeliver: JsValue = JsObject.empty
+
+  private val ticking =
+    context.system.scheduler.schedule(
+      20 seconds,
+      20 seconds,
+      outActor,
+      dashboardToDeliver
+    )
+
   override def receive = {
     case dashboard: DashboardFO =>
-      var dashUpdated = (mode match {
+      var dashboardUpdated = (mode match {
         case DashboardAccessMode.READONLY => dashboard.removeWriteHash
         case DashboardAccessMode.WRITE => dashboard.removeReadOnlyHash
       })
-      dashUpdated = sorting match {
-        case DashboardSorting.SCORE => dashUpdated.sortByScore
-        case DashboardSorting.AZ => dashUpdated.sortByAZ
+      dashboardUpdated = sorting match {
+        case DashboardSorting.SCORE => dashboardUpdated.sortByScore
+        case DashboardSorting.AZ => dashboardUpdated.sortByAZ
       }
-      outActor ! Json.toJson(dashUpdated)
+      dashboardToDeliver = Json.toJson(dashboardUpdated)
+      outActor ! dashboardToDeliver
     case jsObj: JsObject =>
       val hash = jsObj.value("hash").asInstanceOf[JsString].value
+      val tzOffset = jsObj.value("tzOffset").asInstanceOf[JsNumber].value
       jsObj.value("operation") match {
         case JsString("increment") =>
           val itemId = jsObj.value("itemId").toString()
           log.info("Increment item {} of dashboard {}", itemId, hash)
-          sendCmdToDashboard(hash, Dashboard.Command.IncrementItem(itemId, hash))
+          sendCmdToDashboard(hash, Dashboard.Command.IncrementItem(itemId, hash, tzOffset))
         case JsString("decrement") =>
           val itemId = jsObj.value("itemId").toString()
           log.info("Decrement item {} of dashboard {}", itemId, hash)
-          sendCmdToDashboard(hash, Dashboard.Command.DecrementItem(itemId, hash))
+          sendCmdToDashboard(hash, Dashboard.Command.DecrementItem(itemId, hash, tzOffset))
         case JsString("sort") =>
           val newSorting = jsObj.value("sorting").asInstanceOf[JsString].value.toUpperCase
           log.info("Sort dashboard {} by {}", hash, newSorting)
@@ -70,6 +84,11 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
 
   private def sendCmdToDashboard(hash: String, cmd: Any) = {
     dashboardActor ! cmd
+  }
+
+  override def postStop(): Unit = {
+    ticking.cancel()
+    super.postStop()
   }
 }
 

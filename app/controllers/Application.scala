@@ -16,6 +16,7 @@ import controllers.Forms.CreateDashboardItems
 import controllers.actors.Scodash.Command.CreateNewDashboard
 import controllers.actors.{DashboardAccessMode, Scodash}
 import org.apache.commons.lang3.StringUtils
+import org.joda.time.DateTimeZone
 import org.joda.time.tz.DateTimeZoneBuilder
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.write
@@ -164,8 +165,7 @@ class Application @Inject() (
           sessDash.items.zipWithIndex.map { case (name, id) => ItemFO(id, name) } ,
           ownerData.ownerName,
           ownerData.ownerEmail,
-          DateTimeZone. ZoneId.ofOffset("GMT", ZoneOffset.ofHours(Integer.valueOf(ownerData.tzOffset)/60))
-
+          DateTimeZone.forOffsetHours(Integer.valueOf(ownerData.tzOffset)/60)
           )).mapTo[FullResult[DashboardFO]].map {
           r => {
             dashboardViewBuilder ? DashboardCreated(r.value)

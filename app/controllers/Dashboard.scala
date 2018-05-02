@@ -3,7 +3,7 @@ package controllers
 import akka.actor.{ActorRef, Props}
 import controllers.Dashboard.Command._
 import controllers.Dashboard.Event.{DashboardCreated, DashboardUpdated}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.collection.mutable
 
@@ -22,10 +22,11 @@ case class DashboardFO(id: String, name: String, description: String, items: Lis
                        ownerName: String, ownerEmail: String, readonlyHash: String, writeHash: String,
                        created:DateTime, updated:DateTime, deleted: Boolean = false) extends EntityFieldsObject[String, DashboardFO] {
   override def assignId(id: String) = this.copy(id = id)
+
   override def markDeleted = this.copy(deleted = false)
   def removeReadOnlyHash = this.copy(readonlyHash = "")
   def removeWriteHash = this.copy(writeHash = "")
-  def updatedNow = this.copy(updated = DateTime.now())
+  def updatedNow(zone: DateTimeZone) = this.copy(updated = DateTime.now(zone))
   def sortByScore = this.copy(items = List() ++ (items.sortWith((it1, it2) => it1.score > it2.score)))
   def sortByAZ = this.copy(items = List() ++ (items.sortWith((it1, it2) => it1.name < it2.name)))
 }
@@ -54,18 +55,18 @@ class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) with Email
       watcher ! state
     case Unwatch(watcher) =>
       watchers -= watcher
-    case IncrementItem(id, hash) =>
+    case IncrementItem(id, hash, tzOffset) =>
       if (hash == state.writeHash) {
-        state = state.updatedNow
+        state = state.updatedNow(DateTimeZone.forOffsetHours(tzOffset.intValue()/60))
         state.items.find(item => item.id.toString == id).map { item =>
           item.increment()
           persist(DashboardUpdated(state))(handleEventAndRespond())
           watchers.foreach(w => w ! state)
         }
       }
-    case DecrementItem(id, hash) =>
+    case DecrementItem(id, hash, tzOffset) =>
       if (hash == state.writeHash) {
-        state = state.updatedNow
+        state = state.updatedNow(DateTimeZone.forOffsetHours(tzOffset.intValue()/60))
         state.items.find(item => item.id.toString == id).map { item =>
           item.decrement()
           persist(DashboardUpdated(state))(handleEventAndRespond())
@@ -99,8 +100,8 @@ object Dashboard {
     case class CreateDashboard(dashboard: DashboardFO)
     case class Watch(watcher: ActorRef)
     case class Unwatch(watcher: ActorRef)
-    case class IncrementItem(id: String, hash: String)
-    case class DecrementItem(id: String, hash: String)
+    case class IncrementItem(id: String, hash: String, tzOffset: BigDecimal)
+    case class DecrementItem(id: String, hash: String, tzOffset: BigDecimal)
     case class SortingChanged()
   }
 
