@@ -37,12 +37,7 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
   private var dashboardToDeliver: JsValue = JsObject.empty
 
   private val ticking =
-    context.system.scheduler.schedule(
-      20 seconds,
-      20 seconds,
-      outActor,
-      dashboardToDeliver
-    )
+    context.system.scheduler.schedule(20 seconds, 20 seconds)(outActor ! dashboardToDeliver)
 
   override def receive = {
     case dashboard: DashboardFO =>
