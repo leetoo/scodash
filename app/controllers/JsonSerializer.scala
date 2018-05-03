@@ -2,9 +2,8 @@ package controllers
 
 import akka.serialization.SerializerWithStringManifest
 import org.json4s._
-import org.json4s.native.Serialization
+import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.{read, write}
-import org.json4s.ext.EnumNameSerializer
 
 
 /**
@@ -12,7 +11,8 @@ import org.json4s.ext.EnumNameSerializer
   * it can properly recreate the object
   */
 class JsonSerializer extends SerializerWithStringManifest{
-  implicit val formats = Serialization.formats(NoTypeHints)
+
+  implicit lazy val formats = DefaultFormats ++ JodaTimeSerializers.all
 
   def toBinary(o:AnyRef):Array[Byte] = {
     val json = write(o)
