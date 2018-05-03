@@ -14,9 +14,11 @@ window.initRecent = () ->
         i = 0
         for dashboard in dashboards
           hash = dashboard.readonlyHash
+          suffix = "(readonly)"
           if !!dashboard.writeHash
             hash = dashboard.writeHash
-          anchor = $("<a>", {href: window.location.href + "dashboard/" + hash}).html(dashboard.name + " - " + dashboard.description)
+            suffix = ""
+          anchor = $("<a>", {href: window.location.href + "dashboard/" + hash}).html(dashboard.name + " - " + dashboard.description + " " + suffix)
           div = $("<div>").append(anchor)
           $("#recent-dashboards").append(div)
           $("#recent-dashboards-section").css "display", "block"
