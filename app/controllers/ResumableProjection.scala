@@ -26,7 +26,7 @@ class PostgresResumableProjection(identifier:String, system:ActorSystem) extends
   val projectionStorage = PostgresProjectionStorage(system)
 
   def storeLatestOffset(offset:Long):Future[Boolean] = {
-    projectionStorage.updateOffset(identifier, offset)
+    projectionStorage.updateOffset(identifier, offset + 1)
   }
 
   def fetchLatestOffset:Future[Option[Long]] = {
