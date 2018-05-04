@@ -8,9 +8,8 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import play.api.libs.json._
 
-import scala.concurrent.duration._
-
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 case class UserFO(id: String)
 
@@ -53,14 +52,15 @@ class User (id: String, outActor: ActorRef, dashboardActor: ActorRef, mode: Dash
       outActor ! dashboardToDeliver
     case jsObj: JsObject =>
       val hash = jsObj.value("hash").asInstanceOf[JsString].value
-      val tzOffset = jsObj.value("tzOffset").asInstanceOf[JsNumber].value
       jsObj.value("operation") match {
         case JsString("increment") =>
           val itemId = jsObj.value("itemId").toString()
+          val tzOffset = jsObj.value("tzOffset").asInstanceOf[JsNumber].value
           log.info("Increment item {} of dashboard {}", itemId, hash)
           sendCmdToDashboard(hash, Dashboard.Command.IncrementItem(itemId, hash, tzOffset))
         case JsString("decrement") =>
           val itemId = jsObj.value("itemId").toString()
+          val tzOffset = jsObj.value("tzOffset").asInstanceOf[JsNumber].value
           log.info("Decrement item {} of dashboard {}", itemId, hash)
           sendCmdToDashboard(hash, Dashboard.Command.DecrementItem(itemId, hash, tzOffset))
         case JsString("sort") =>
