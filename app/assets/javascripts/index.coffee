@@ -22,6 +22,7 @@ window.initRecent = () ->
           div = $("<div>").append(anchor)
           $("#recent-dashboards").append(div)
           $("#recent-dashboards-section").css "display", "block"
+          $("#monitor-preview-section").css "display", "none"
 
 
 
