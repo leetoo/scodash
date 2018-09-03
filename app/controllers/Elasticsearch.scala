@@ -77,7 +77,7 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
 
   def updateIndex(id:String, request:AnyRef, version:Option[Long])(implicit ec:ExecutionContext):Future[IndexingResult] = {
     val urlBase = s"$baseUrl/$id"
-    val requestUrl = version match{
+    val requestUrl = version match {
       case None => urlBase
       case Some(v) => s"$urlBase/_update?version=$v"
     }

@@ -6,6 +6,7 @@ GET         /dashboard/:hash            controllers.Application.dashboard(hash)
 GET         /dashboardData/:hash        controllers.Application.dashboardData(hash)
 GET         /dashboardsData/:hashes     controllers.Application.dashboardsData(hashes)
 GET         /ws/:hash                   controllers.Application.ws(hash)
+GET         /wss/:hash                  controllers.Application.wss(hash)
 GET         /showNewDashboard           controllers.Application.showNewDashboard
 POST        /processNewDashboard        controllers.Application.processNewDashboard
 GET         /showDashboardItems         controllers.Application.showDashboardItems
