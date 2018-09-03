@@ -96,8 +96,6 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
 
   def callElasticsearch[RT : Manifest](req:HttpRequest)(implicit ec:ExecutionContext):Future[RT] = {
 
-    //read("xx")
-
     val reqHeaders = req.withHeaders(List(authHeader))
     req.withEntity(req.entity withContentType(ContentTypes.`application/json`))
 
@@ -108,6 +106,8 @@ trait ElasticsearchSupport { me:AbstractBaseActor =>
       case response @ HttpResponse(StatusCodes.OK, headers, entity, _) =>
         processEntity(entity)
       case response @ HttpResponse(StatusCodes.Created, headers, entity, _) =>
+        processEntity(entity)
+      case response @ HttpResponse(StatusCodes.Accepted, headers, entity, _) =>
         processEntity(entity)
       case resp @ HttpResponse(code, _, _, _) =>
         Future.failed[RT](new IllegalStateException(s"Unexpected HTTP status ${code}"))
