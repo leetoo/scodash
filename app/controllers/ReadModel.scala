@@ -4,9 +4,9 @@ import java.util.Date
 
 import akka.persistence.jdbc.query
 import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
-import akka.persistence.query.{EventEnvelope, PersistenceQuery, Sequence}
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
+import akka.persistence.query.{EventEnvelope, PersistenceQuery}
 import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
@@ -101,7 +101,7 @@ trait ViewBuilder[RM <: ReadModelObject] extends AbstractBaseActor with Elastics
 
       val offsetDate = new Date(offset)
       log.info("Starting up view builder for entity {} with offset of {}", entityType, offset)
-      val eventsSource = journal.eventsByTag(entityType, offset)
+      val eventsSource = journal.eventsByTag(entityType, if (offset <= 0) 0 else offset -1 )
       eventsSource.
         via(eventsFlow).
         runWith(Sink.ignore)
