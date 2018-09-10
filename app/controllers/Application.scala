@@ -1,7 +1,5 @@
 package controllers
 
-import java.time.{ZoneId, ZoneOffset}
-
 import akka.NotUsed
 import akka.actor.{ActorRef, ActorSystem}
 import akka.event.Logging
@@ -17,7 +15,6 @@ import controllers.actors.Scodash.Command.CreateNewDashboard
 import controllers.actors.{DashboardAccessMode, Scodash}
 import org.apache.commons.lang3.StringUtils
 import org.joda.time.DateTimeZone
-import org.joda.time.tz.DateTimeZoneBuilder
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.native.Serialization.write
 import org.json4s.native._
@@ -149,7 +146,12 @@ class Application @Inject() (
   )
 
   def showDashboardOwner() = Action { implicit request =>
-    Ok(views.html.createDashboardOwner(dashboardOwnerForm))
+    val sessDash = JsonMethods.parse(request.session.get(SESSION_DASHBOARD).get).extract[Forms.Dashboard]
+    if (sessDash.items.size > 0) {
+      Ok(views.html.createDashboardOwner(dashboardOwnerForm))
+    } else {
+      Ok(views.html.createDashboardItems(dashboardItemsForm.withGlobalError("At least one item should be defined in dashboard.")))
+    }
   }
 
   def processDashboardOwner() = Action.async { implicit request =>
