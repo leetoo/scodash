@@ -22,14 +22,16 @@
         </div>
     </div>
 
-    @if(dashboardForm2.hasGlobalErrors) {
-        <div class="row red-message vertical-align">
-            <div class="col-md-12 text-center"><h2>Error</h2></div>
-        </div>
-    }
+
 
     <div class="padding-15 row">
         <div class="col-md-offset-4 col-md-4">
+
+            @if(dashboardForm2.hasGlobalErrors) {
+                <div class="row red-message vertical-align">
+                    <div class="col-md-12 text-center">@dashboardForm2.globalError.getOrElse("")</div>
+                </div>
+            }
 
             @repeat(dashboardForm2("items"), min=0) { item =>
                 <form action="@routes.Application.removeItem()" method="post" class="form-inline">
