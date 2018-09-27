@@ -7,18 +7,18 @@ import akka.util.Timeout
 import controllers.Dashboard.Command.CreateDashboard
 import controllers.PersistentEntity.GetState
 import controllers._
-import controllers.actors.Scodash.Command.{CreateDashboardUser, CreateNewDashboard, FindDashboard}
+import controllers.actors.Scodash.Command._
 import org.apache.commons.lang3.RandomStringUtils
 import org.joda.time.{DateTime, DateTimeZone}
 
-import scala.collection.immutable.HashMap
+import scala.collection.mutable
 import scala.concurrent.duration._
 
 object Scodash {
   object Command {
     case class FindDashboard(id: String)
     case class FindDashboardByWriteHash(hash: String)
-    case class FindDashboardByReadHash(hash: String)
+    case class FindDashboardByReadonlyHash(hash: String)
     case class CreateNewDashboard(name: String, description: String, items: Set[ItemFO] = Set(), ownerName: String, ownerEmail: String, timeZone: DateTimeZone)
     case class CreateDashboardUser(userId: String, webOutActor: ActorRef, dashboardId: String, mode: DashboardAccessMode.Value)
   }
@@ -33,14 +33,36 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
 
   implicit val timeout: Timeout = 5.seconds
 
-  val readOnlyIds: Map[String, String] = HashMap()
-  val writeIds: Map[String, String] = HashMap()
+  val readOnlyIds: mutable.Map[String, String] = mutable.Map()
+  val writeIds: mutable.Map[String, String] = mutable.Map()
 
   override def receive = {
     case FindDashboard(id) =>
       log.info("Finding dashboard {}", id)
       val dashboard = lookupOrCreateChild(id)
       forwardCommand(id, GetState)
+
+    case FindDashboardByReadonlyHash(hash) =>
+      log.info("Finding dashboard by read hash {}", hash)
+      val id = readOnlyIds(hash)
+      id match {
+        case id:String => {
+          val dashboard = lookupOrCreateChild(id)
+          forwardCommand(id, GetState)
+        }
+        case _ => sender ! None
+      }
+
+    case FindDashboardByWriteHash(hash) =>
+      log.info("Finding dashboard by write hash {}", hash)
+      val id = writeIds(hash)
+      id match {
+        case id:String => {
+          val dashboard = lookupOrCreateChild(id)
+          forwardCommand(id, GetState)
+        }
+        case _ => sender ! None
+      }
 
     case CreateNewDashboard(name, description, items, ownerName, ownerEmail, dateTimeZone) =>
 
@@ -50,8 +72,8 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
       val readonlyHash = RandomStringUtils.randomAlphanumeric(8)
       val writeHash = RandomStringUtils.randomAlphanumeric(8)
 
-      readOnlyIds + (hash, readonlyHash)
-      writeIds + (hash, writeHash)
+      readOnlyIds(readonlyHash) = id
+      writeIds(writeHash) = id
 
       val fo = DashboardFO(id, name, description, List() ++ items, ownerName, ownerEmail, readonlyHash, writeHash, DateTime.now(dateTimeZone), DateTime.now(dateTimeZone))
       val command = CreateDashboard(fo)

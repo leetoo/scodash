@@ -328,7 +328,7 @@ class Application @Inject() (
     val flowWatch: Flow[JsValue, JsValue, NotUsed] = flow.watchTermination() { (_, termination) =>
       termination.foreach { done =>
         logger.info(s"Terminating actor $userActor")
-        (dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
+        (dashboardViewActor ? Scodash.Command.FindDashboardByWriteHash(hash)).mapTo[FullResult[List[JObject]]].map {
           result => {
             val dashboardFO = result.value.head.extract[DashboardFO]
             (scodashActor ? (Scodash.Command.FindDashboard(dashboardFO.id))).mapTo[ActorRef].map {
@@ -367,9 +367,26 @@ class Application @Inject() (
   }
 
   def getDashboard(hash: String): Future[Option[(DashboardFO, DashboardAccessMode.Value)]] = {
-    val writeFut = dashboardViewActor ? DashboardView.Command.FindDashboardByWriteHash(hash)
-    val readFut = dashboardViewActor ? DashboardView.Command.FindDashboardByReadonlyHash(hash)
 
+    var writeFut = scodashActor ? Scodash.Command.FindDashboardByWriteHash(hash)
+    var readFut = scodashActor ? Scodash.Command.FindDashboardByReadonlyHash(hash)
+
+    var dashboard = resolveDashboard(writeFut, readFut)
+    dashboard.map { result =>
+      result.get match {
+        case (_,_) => return dashboard
+        case _ => {
+          writeFut = dashboardViewActor ? Scodash.Command.FindDashboardByWriteHash(hash)
+          readFut = dashboardViewActor ? Scodash.Command.FindDashboardByReadonlyHash(hash)
+
+          return resolveDashboard(writeFut, readFut)
+        }
+      }
+    }
+
+  }
+
+  private def resolveDashboard(writeFut: Future[Any], readFut: Future[Any]) = {
     for {
       writeDash <- writeFut
       readDash <- readFut
@@ -384,7 +401,7 @@ class Application @Inject() (
           None
       }
       writeDash match {
-        case writeRes:FullResult[List[JObject]] =>
+        case writeRes: FullResult[List[JObject]] =>
           writeRes.value match {
             case List(_) => Some(writeRes.value.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
             case _ => maybeReadDashboard
@@ -393,6 +410,5 @@ class Application @Inject() (
           maybeReadDashboard
       }
     }
-
   }
 }

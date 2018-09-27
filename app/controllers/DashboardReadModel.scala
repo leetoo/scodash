@@ -2,6 +2,7 @@ package controllers
 
 import akka.actor.Props
 import akka.persistence.query.EventEnvelope
+import controllers.actors.Scodash.Command.{FindDashboardByReadonlyHash, FindDashboardByWriteHash}
 import org.joda.time.DateTime
 
 trait DashboardReadModel{
@@ -45,21 +46,17 @@ class DashboardViewBuilder extends DashboardReadModel with ViewBuilder[Dashboard
 object DashboardView{
   final val Name = "dashboard-view"
   def props = Props[DashboardView]
-  object Command {
-    case class FindDashboardByReadonlyHash(readonlyHash:String)
-    case class FindDashboardByWriteHash(writeHash:String)
-  }
+
 }
 
 class DashboardView extends DashboardReadModel with AbstractBaseActor with ElasticsearchSupport{
-  import DashboardView._
   import context.dispatcher
 
   def receive = {
-    case Command.FindDashboardByWriteHash(writeHash) =>
+    case FindDashboardByWriteHash(writeHash) =>
       val results = queryElasticsearch(s"writeHash:$writeHash")
       pipeResponse(results)
-    case Command.FindDashboardByReadonlyHash(readonlyHash) =>
+    case FindDashboardByReadonlyHash(readonlyHash) =>
       val results = queryElasticsearch(s"readonlyHash:$readonlyHash")
       pipeResponse(results)
 
