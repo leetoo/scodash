@@ -372,40 +372,34 @@ class Application @Inject() (
     var readFut = scodashActor ? Scodash.Command.FindDashboardByReadonlyHash(hash)
 
     var dashboard = resolveDashboard(writeFut, readFut)
-    dashboard.map { result =>
-      result.get match {
-        case (_,_) => return dashboard
-        case _ => {
-          writeFut = dashboardViewActor ? Scodash.Command.FindDashboardByWriteHash(hash)
-          readFut = dashboardViewActor ? Scodash.Command.FindDashboardByReadonlyHash(hash)
-
-          return resolveDashboard(writeFut, readFut)
-        }
+    dashboard.map {
+      case Some((_,_)) => {
+        logger.info("Found {} dashboard in maps", hash)
+        return dashboard
+      }
+      case None => {
+        logger.info("Not found {} dashboard in maps - going to read model", hash)
+        writeFut = dashboardViewActor ? Scodash.Command.FindDashboardByWriteHash(hash)
+        readFut = dashboardViewActor ? Scodash.Command.FindDashboardByReadonlyHash(hash)
+        return resolveDashboard(writeFut, readFut)
       }
     }
-
   }
 
-  private def resolveDashboard(writeFut: Future[Any], readFut: Future[Any]) = {
+  private def resolveDashboard(writeFut: Future[Any], readFut: Future[Any]): Future[Option[(DashboardFO, DashboardAccessMode.Value)]] = {
     for {
       writeDash <- writeFut
       readDash <- readFut
     } yield {
       val maybeReadDashboard = readDash match {
-        case readRes: FullResult[List[JObject]] =>
-          readRes.value match {
-            case List(_) => Some(readRes.value.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
-            case _ => None
-          }
+        case readRes: DashboardFO =>
+          Some(readRes.removeWriteHash, DashboardAccessMode.READONLY)
         case _ =>
           None
       }
       writeDash match {
-        case writeRes: FullResult[List[JObject]] =>
-          writeRes.value match {
-            case List(_) => Some(writeRes.value.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
-            case _ => maybeReadDashboard
-          }
+        case writeRes: DashboardFO =>
+          Some(writeRes.removeReadOnlyHash, DashboardAccessMode.WRITE)
         case _ =>
           maybeReadDashboard
       }

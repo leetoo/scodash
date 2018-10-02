@@ -44,24 +44,22 @@ class Scodash extends Aggregate[DashboardFO, Dashboard] {
 
     case FindDashboardByReadonlyHash(hash) =>
       log.info("Finding dashboard by read hash {}", hash)
-      val id = readOnlyIds(hash)
-      id match {
-        case id:String => {
+      readOnlyIds.get(hash) match {
+        case Some(id) =>
+          log.info("Found in readOnly map {}", hash)
           val dashboard = lookupOrCreateChild(id)
           forwardCommand(id, GetState)
-        }
-        case _ => sender ! None
+        case None => sender ! None
       }
 
     case FindDashboardByWriteHash(hash) =>
       log.info("Finding dashboard by write hash {}", hash)
-      val id = writeIds(hash)
-      id match {
-        case id:String => {
+      writeIds.get(hash) match {
+        case Some(id) =>
+          log.info("Found in write map {}", hash)
           val dashboard = lookupOrCreateChild(id)
           forwardCommand(id, GetState)
-        }
-        case _ => sender ! None
+        case None => sender ! None
       }
 
     case CreateNewDashboard(name, description, items, ownerName, ownerEmail, dateTimeZone) =>
