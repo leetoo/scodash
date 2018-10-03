@@ -373,9 +373,11 @@ class Application @Inject() (
 
     var dashboard = resolveDashboard(writeFut, readFut)
     dashboard.map {
-      case Some((_,_)) => {
+      case Some((dashboard, mode)) => {
+        logger.info("{}", dashboard)
+        logger.info("{}", mode)
         logger.info("Found {} dashboard in maps", hash)
-        return dashboard
+        Some((dashboard, mode))
       }
       case None => {
         logger.info("Not found {} dashboard in maps - going to read model", hash)
@@ -392,15 +394,21 @@ class Application @Inject() (
       readDash <- readFut
     } yield {
       val maybeReadDashboard = readDash match {
+        case fullResult: FullResult[DashboardFO] =>
+          Some(fullResult.value, DashboardAccessMode.READONLY)
         case readRes: DashboardFO =>
           Some(readRes.removeWriteHash, DashboardAccessMode.READONLY)
-        case _ =>
+        case x:Any =>
+          logger.info("{}", x)
           None
       }
       writeDash match {
+        case fullResult: FullResult[DashboardFO] =>
+          Some(fullResult.value, DashboardAccessMode.WRITE)
         case writeRes: DashboardFO =>
           Some(writeRes.removeReadOnlyHash, DashboardAccessMode.WRITE)
-        case _ =>
+        case x:Any =>
+          logger.info("{}", x)
           maybeReadDashboard
       }
     }
