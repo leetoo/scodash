@@ -397,9 +397,9 @@ class Application @Inject() (
       val maybeReadDashboard = readDash match {
         case readRes: DashboardFO =>
           Some(readRes.removeWriteHash, DashboardAccessMode.READONLY)
-        case readRes: FullResult[DashboardFO] =>
+        case readRes: FullResult[List[DashboardFO]] =>
           readRes.value match {
-            case List(_) => Some(readRes.value.removeWriteHash, DashboardAccessMode.READONLY)
+            case List(_) => Some(readRes.value.head.removeWriteHash, DashboardAccessMode.READONLY)
             case _ => None
           }
         case readRes: FullResult[List[JObject]] =>
@@ -414,9 +414,9 @@ class Application @Inject() (
       writeDash match {
         case writeRes: DashboardFO =>
           Some(writeRes.removeReadOnlyHash, DashboardAccessMode.WRITE)
-        case writeRes: FullResult[DashboardFO] =>
+        case writeRes: FullResult[List[DashboardFO]] =>
           writeRes.value match {
-            case List(_) => Some(writeRes.value.removeReadOnlyHash, DashboardAccessMode.WRITE)
+            case List(_) => Some(writeRes.value.head.removeReadOnlyHash, DashboardAccessMode.WRITE)
             case _ => maybeReadDashboard}
         case writeRes: FullResult[List[JObject]] =>
           writeRes.value match {
