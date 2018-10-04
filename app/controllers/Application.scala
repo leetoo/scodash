@@ -395,25 +395,34 @@ class Application @Inject() (
       readDash <- readFut
     } yield {
       val maybeReadDashboard = readDash match {
+        case readRes: DashboardFO =>
+          Some(readRes.removeWriteHash, DashboardAccessMode.READONLY)
+        case readRes: FullResult[DashboardFO] =>
+          readRes.value match {
+            case List(_) => Some(readRes.value.removeWriteHash, DashboardAccessMode.READONLY)
+            case _ => None
+          }
         case readRes: FullResult[List[JObject]] =>
           readRes.value match {
             case List(_) => Some(readRes.value.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
             case _ => None
           }
-        case readRes: DashboardFO =>
-          Some(readRes.removeWriteHash, DashboardAccessMode.READONLY)
         case x:Any =>
           logger.info("{}", x)
           None
       }
       writeDash match {
+        case writeRes: DashboardFO =>
+          Some(writeRes.removeReadOnlyHash, DashboardAccessMode.WRITE)
+        case writeRes: FullResult[DashboardFO] =>
+          writeRes.value match {
+            case List(_) => Some(writeRes.value.removeReadOnlyHash, DashboardAccessMode.WRITE)
+            case _ => maybeReadDashboard}
         case writeRes: FullResult[List[JObject]] =>
           writeRes.value match {
             case List(_) => Some(writeRes.value.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
             case _ => maybeReadDashboard
           }
-        case writeRes: DashboardFO =>
-          Some(writeRes.removeReadOnlyHash, DashboardAccessMode.WRITE)
         case x:Any =>
           logger.info("{}", x)
           maybeReadDashboard
