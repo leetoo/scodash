@@ -26,8 +26,8 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.JsValue
 import play.api.mvc._
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 class Application @Inject() (
                               cc: MessagesControllerComponents,
@@ -383,7 +383,8 @@ class Application @Inject() (
         logger.info("Not found {} dashboard in maps - going to read model", hash)
         writeFut = dashboardViewActor ? Scodash.Command.FindDashboardByWriteHash(hash)
         readFut = dashboardViewActor ? Scodash.Command.FindDashboardByReadonlyHash(hash)
-        return resolveDashboard(writeFut, readFut)
+        val x = Await.result(resolveDashboard(writeFut, readFut), 10 seconds)
+        x
       }
     }
   }
@@ -394,8 +395,11 @@ class Application @Inject() (
       readDash <- readFut
     } yield {
       val maybeReadDashboard = readDash match {
-        case fullResult: FullResult[DashboardFO] =>
-          Some(fullResult.value, DashboardAccessMode.READONLY)
+        case readRes: FullResult[List[JObject]] =>
+          readRes.value match {
+            case List(_) => Some(readRes.value.head.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
+            case _ => None
+          }
         case readRes: DashboardFO =>
           Some(readRes.removeWriteHash, DashboardAccessMode.READONLY)
         case x:Any =>
@@ -403,8 +407,11 @@ class Application @Inject() (
           None
       }
       writeDash match {
-        case fullResult: FullResult[DashboardFO] =>
-          Some(fullResult.value, DashboardAccessMode.WRITE)
+        case writeRes: FullResult[List[JObject]] =>
+          writeRes.value match {
+            case List(_) => Some(writeRes.value.head.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
+            case _ => maybeReadDashboard
+          }
         case writeRes: DashboardFO =>
           Some(writeRes.removeReadOnlyHash, DashboardAccessMode.WRITE)
         case x:Any =>
