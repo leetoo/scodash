@@ -29,7 +29,7 @@
 
             @if(dashboardForm2.hasGlobalErrors) {
                 <div class="row red-message vertical-align">
-                    <div class="col-md-12 text-center">@dashboardForm2.globalError.getOrElse("")</div>
+                    <div class="col-md-12 text-center">@dashboardForm2.globalError.get.message</div>
                 </div>
             }
 
