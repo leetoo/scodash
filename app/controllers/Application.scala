@@ -414,10 +414,11 @@ class Application @Inject() (
               item match {
                 case dashboard: DashboardFO => Some(dashboard.removeReadOnlyHash, DashboardAccessMode.WRITE)
                 case jsObject: JObject => Some(jsObject.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
+                case _ => maybeReadDashboard
               }
-            case _ => None
+            case _ => maybeReadDashboard
           }
-        case _ => None
+        case _ => maybeReadDashboard
       }
     }
   }
