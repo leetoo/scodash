@@ -4,7 +4,7 @@
 * Generate input according twitter bootsrap rules *
 **************************************************@
 <div class="form-group @if(elements.hasErrors) {error}">
-    <label for="@elements.id">@elements.label</label>
+    <label for="@elements.id">@elements.label</label>&nbsp;<span class="label-comment">@elements.args.get('_label_comment)</span>
     @elements.input
     <span class="help-inline">@(if(elements.hasErrors) {elements.errors.apply(0)})</span>
 </div>

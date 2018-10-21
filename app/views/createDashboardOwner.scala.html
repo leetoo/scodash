@@ -5,6 +5,7 @@
 
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
 
+
 @mainWizard("ScoDash - new dashboard") {
 
     <div class="padding-15 row vertical-align">
@@ -32,9 +33,13 @@
                     dashboardForm3("name"), '_label -> "Name", 'class -> "form-control", 'placeholder -> "Name"
                 )
                 @helper.inputText(
-                    dashboardForm3("email"), '_label -> "Email", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Email"
+                    dashboardForm3("email"),
+                    '_label -> "Email",
+                    'class -> "form-control",
+                    'rows -> 3,
+                    'placeholder -> "Email",
+                    '_label_comment -> "(you will receive links to your dashboard there)"
                 )
-
                 <script type="text/javascript" language="JavaScript">
                         var offset = new Date();
                         document.write('<input type="hidden" id="tzOffset" name="tzOffset" value="' + offset.getTimezoneOffset() + '"/>');
