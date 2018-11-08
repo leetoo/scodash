@@ -2,9 +2,11 @@ window.currentDashboardType = 'COMMA'
 
 window.initRecent = () ->
   $("#recent-dashboards-section").css "display", "none"
+  $("#monitor-preview-section").css "display", "none"
   hashes = localStorage.getItem("hashes");
   if hashes == null
     hashesArr = []
+    $("#monitor-preview-section").css "display", "block"
   else
     hashesArr = JSON.parse(hashes)
     $.ajax '/dashboardsData/' + hashesArr,
@@ -21,8 +23,13 @@ window.initRecent = () ->
           anchor = $("<a>", {href: window.location.href + "dashboard/" + hash}).html(dashboard.name + " - " + dashboard.description + " " + suffix)
           div = $("<div>").append(anchor)
           $("#recent-dashboards").append(div)
+        if dashboards.length > 0
           $("#recent-dashboards-section").css "display", "block"
           $("#monitor-preview-section").css "display", "none"
+        else
+          $("#recent-dashboards-section").css "display", "none"
+          $("#monitor-preview-section").css "display", "block"
+
 
 
 
