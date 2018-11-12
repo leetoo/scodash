@@ -371,7 +371,7 @@ class Application @Inject() (
     var writeFut = scodashActor ? Scodash.Command.FindDashboardByWriteHash(hash)
     var readFut = scodashActor ? Scodash.Command.FindDashboardByReadonlyHash(hash)
 
-    var dashboard = resolveDashboard(writeFut, readFut)
+    var dashboard = resolveOneDashboard(writeFut, readFut)
     dashboard.map {
       case Some((dashboard, mode)) => {
         logger.info("Found {} dashboard in maps", hash)
@@ -381,45 +381,42 @@ class Application @Inject() (
         logger.info("Not found {} dashboard in maps - going to read model", hash)
         writeFut = dashboardViewActor ? Scodash.Command.FindDashboardByWriteHash(hash)
         readFut = dashboardViewActor ? Scodash.Command.FindDashboardByReadonlyHash(hash)
-        Await.result(resolveDashboard(writeFut, readFut), 10 seconds)
+        Await.result(resolveOneDashboard(writeFut, readFut), 10 seconds)
       }
     }
   }
 
-  private def resolveDashboard(writeFut: Future[Any], readFut: Future[Any]): Future[Option[(DashboardFO, DashboardAccessMode.Value)]] = {
+  private def resolveDashboard(dash: Any, accessMode: DashboardAccessMode.Value): Option[(DashboardFO, DashboardAccessMode.Value)] = {
+    dash match {
+      case dash: DashboardFO =>
+        Some(dash.removeWriteHash, accessMode)
+      case dash: FullResult[_] =>
+        dash.value match {
+          case List(item) =>
+            item match {
+              case item: DashboardFO => Some(item.applyAccessMode(accessMode), accessMode)
+              case jsObject: JObject => Some(jsObject.extract[DashboardFO].applyAccessMode(accessMode), accessMode)
+            }
+          case value: DashboardFO =>
+            Some(value.applyAccessMode(accessMode), accessMode)
+          case _ => None
+        }
+      case _ => None
+    }
+  }
+
+  private def resolveOneDashboard(writeFut: Future[Any], readFut: Future[Any]): Future[Option[(DashboardFO, DashboardAccessMode.Value)]] = {
     for {
       writeDash <- writeFut
       readDash <- readFut
     } yield {
-      val maybeReadDashboard = readDash match {
-        case readRes: DashboardFO =>
-          Some(readRes.removeWriteHash, DashboardAccessMode.READONLY)
-        case readRes: FullResult[_] =>
-          readRes.value match {
-            case List(item) =>
-              item match {
-                case item: DashboardFO => Some(item.removeWriteHash, DashboardAccessMode.READONLY)
-                case jsObject: JObject => Some(jsObject.extract[DashboardFO].removeWriteHash, DashboardAccessMode.READONLY)
-              }
-            case _ => None
-          }
-        case _ => None
-      }
-      writeDash match {
-        case writeRes: DashboardFO =>
-          Some(writeRes.removeReadOnlyHash, DashboardAccessMode.WRITE)
-        case writeRes: FullResult[_] =>
-          writeRes.value match {
-            case List(item) =>
-              item match {
-                case dashboard: DashboardFO => Some(dashboard.removeReadOnlyHash, DashboardAccessMode.WRITE)
-                case jsObject: JObject => Some(jsObject.extract[DashboardFO].removeReadOnlyHash, DashboardAccessMode.WRITE)
-                case _ => maybeReadDashboard
-              }
-            case _ => maybeReadDashboard
-          }
-        case _ => maybeReadDashboard
+      val writeDashResolved = resolveDashboard(writeDash, DashboardAccessMode.WRITE)
+      val readDashResolved = resolveDashboard(readDash, DashboardAccessMode.READONLY)
+      writeDashResolved match {
+        case Some(dash) => writeDashResolved
+        case _ => readDashResolved
       }
     }
   }
+
 }

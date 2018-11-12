@@ -3,6 +3,7 @@ package controllers
 import akka.actor.{ActorRef, Props}
 import controllers.Dashboard.Command._
 import controllers.Dashboard.Event.{DashboardCreated, DashboardUpdated}
+import controllers.actors.DashboardAccessMode
 import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.collection.mutable
@@ -29,6 +30,12 @@ case class DashboardFO(id: String, name: String, description: String, items: Lis
   def updatedNow(zone: DateTimeZone) = this.copy(updated = DateTime.now(zone))
   def sortByScore = this.copy(items = List() ++ (items.sortWith((it1, it2) => it1.score > it2.score)))
   def sortByAZ = this.copy(items = List() ++ (items.sortWith((it1, it2) => it1.name < it2.name)))
+  def applyAccessMode(mode: DashboardAccessMode.Value) = {
+    mode match {
+      case DashboardAccessMode.READONLY => this.removeWriteHash
+      case DashboardAccessMode.WRITE => this.removeReadOnlyHash
+    }
+  }
 }
 
 class Dashboard(id: String) extends PersistentEntity[DashboardFO](id) with EmailSupport {
