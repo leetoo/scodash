@@ -28,7 +28,7 @@
         <div class="col-md-offset-4 col-md-4">
             @helper.form(action = routes.Application.processNewDashboard, 'class -> "form-horizontal") {
                 @helper.inputText(
-                    dashboardForm1("name"), '_label -> "Dashboard Name", 'class -> "form-control", 'placeholder -> "Dashboard name"
+                    dashboardForm1("name"), '_label -> "Dashboard Name", 'class -> "form-control", 'placeholder -> "Dashboard name", 'autofocus -> true
                 )
                 @helper.textarea(
                     dashboardForm1("description"), '_label -> "Description", 'class -> "form-control", 'rows -> 3, 'placeholder -> "Dashboard description"
