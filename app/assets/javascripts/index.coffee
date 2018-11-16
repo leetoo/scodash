@@ -85,7 +85,7 @@ $ ->
     $("#commas").empty()
     for item in dashboard.items
       itemRow = $("<div>").addClass("item row dashboard-comma-row")
-      itemRow.append($("<div>").addClass("col-md-2 vertical-center").text(item.name))
+      itemRow.append($("<div>").addClass("col-md-2 vertical-center").attr("style", "word-break:break-word").text(item.name))
 
       buttonArea = $("<div>").addClass("col-md-2 buttons-area vertical-center")
 
@@ -134,8 +134,8 @@ $ ->
     $("#chart-canvas").remove()
     canvas = $("<canvas>")
       .attr("id", "chart-canvas")
-      .attr("width", 250)
-      .attr("height", 250)
+#      .attr("width", 500)
+#      .attr("height", 500)
     $("#chart").append(canvas)
 
     scoreArray = []
@@ -153,13 +153,13 @@ $ ->
           data: scoreArray,
           backgroundColor: colorArray
         }],
-        labels: nameArray
+#        labels: nameArray
       },
       options: {
         animation: {
           duration: 0
         },
-        responsive: false,
+        responsive: true,
         legend: {
           position: "bottom"
         }
