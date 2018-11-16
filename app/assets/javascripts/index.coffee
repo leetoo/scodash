@@ -153,7 +153,7 @@ $ ->
           data: scoreArray,
           backgroundColor: colorArray
         }],
-#        labels: nameArray
+        labels: nameArray
       },
       options: {
         animation: {
